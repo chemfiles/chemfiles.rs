@@ -91,8 +91,8 @@ extern "C" {
     pub fn chrp_topology_free(topology: *mut CHRP_TOPOLOGY) -> CHRP_STATUS;
 
     pub fn chrp_atom(name: *const libc::c_char) -> *mut CHRP_ATOM;
-    pub fn chrp_atom_from_frame(frame: *mut CHRP_FRAME, idx: libc::size_t) -> *mut CHRP_ATOM;
-    pub fn chrp_atom_from_topology(topology: *mut CHRP_TOPOLOGY, idx: libc::size_t) -> *mut CHRP_ATOM;
+    pub fn chrp_atom_from_frame(frame: *const CHRP_FRAME, idx: libc::size_t) -> *mut CHRP_ATOM;
+    pub fn chrp_atom_from_topology(topology: *const CHRP_TOPOLOGY, idx: libc::size_t) -> *mut CHRP_ATOM;
     pub fn chrp_atom_mass(atom: *const CHRP_ATOM, mass: *mut libc::c_float) -> CHRP_STATUS;
     pub fn chrp_atom_set_mass(atom: *mut CHRP_ATOM, mass: libc::c_float) -> CHRP_STATUS;
     pub fn chrp_atom_charge(atom: *const CHRP_ATOM, charge: *mut libc::c_float) -> CHRP_STATUS;

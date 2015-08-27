@@ -32,10 +32,10 @@ impl Topology {
         Ok(Topology{handle: handle})
     }
 
-    pub fn atom(&mut self, index: u64) -> Result<Atom, Error> {
+    pub fn atom(&self, index: u64) -> Result<Atom, Error> {
         let mut handle : *const CHRP_ATOM;
         unsafe {
-            handle = chrp_atom_from_topology(self.handle as *mut CHRP_TOPOLOGY, index);
+            handle = chrp_atom_from_topology(self.handle, index);
         }
         if handle.is_null() {
             return Err(Error::ChemharpCppError{message: Error::last_error()})
