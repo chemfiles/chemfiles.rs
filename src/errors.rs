@@ -42,8 +42,8 @@ pub enum Error {
     FormatError,
 }
 
-impl From<libc::c_int> for Error {
-    fn from(status: libc::c_int) -> Error {
+impl From<CHRP_STATUS> for Error {
+    fn from(status: CHRP_STATUS) -> Error {
         match status {
             1 => Error::CppStdError{message: Error::last_error()},
             2 => Error::ChemharpCppError{message: Error::last_error()},
@@ -55,8 +55,8 @@ impl From<libc::c_int> for Error {
     }
 }
 
-impl From<Error> for libc::c_int {
-    fn from(error: Error) -> libc::c_int {
+impl From<Error> for CHRP_STATUS {
+    fn from(error: Error) -> CHRP_STATUS {
         match error {
             Error::CppStdError{..} => 1,
             Error::ChemharpCppError{..} => 2,
@@ -75,7 +75,7 @@ impl Error {
             Error::CppStdError{message} | Error::ChemharpCppError{message} => message,
             _ => {
                 unsafe {
-                    from_c_str(chrp_strerror(libc::c_int::from(error)))
+                    from_c_str(chrp_strerror(CHRP_STATUS::from(error)))
                 }
             }
         }
@@ -90,7 +90,7 @@ impl Error {
 }
 
 /// Check return value of a C function, and get the error if needed.
-pub fn check(status: libc::c_int) -> Result<(), Error> {
+pub fn check(status: CHRP_STATUS) -> Result<(), Error> {
     if status != 0 {
         return Err(Error::from(status));
     }
