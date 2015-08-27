@@ -121,7 +121,7 @@ impl Atom {
 
     /// Get the underlying C pointer. This function is unsafe because no
     /// lifetime guarantee is made on the pointer.
-    pub unsafe fn to_ptr(&self) -> *const CHRP_ATOM {
+    pub unsafe fn as_ptr(&self) -> *const CHRP_ATOM {
         self.handle
     }
 }

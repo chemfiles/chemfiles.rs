@@ -153,6 +153,18 @@ impl UnitCell {
         }
         Ok(res)
     }
+
+    /// Create an `UnitCell` from a C pointer. This function is unsafe because
+    /// no validity check is made on the pointer.
+    pub unsafe fn from_ptr(ptr: *const CHRP_CELL) -> UnitCell {
+        UnitCell{handle: ptr}
+    }
+
+    /// Get the underlying C pointer. This function is unsafe because no
+    /// lifetime guarantee is made on the pointer.
+    pub unsafe fn as_ptr(&self) -> *const CHRP_CELL {
+        self.handle
+    }
 }
 
 fn bool_to_u8(val: bool) -> u8 {

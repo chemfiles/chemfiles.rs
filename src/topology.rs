@@ -59,7 +59,7 @@ impl Topology {
         unsafe {
             try!(check(chrp_topology_append(
                 self.handle as *mut CHRP_TOPOLOGY,
-                atom.to_ptr()
+                atom.as_ptr()
             )));
         }
         return Ok(());
@@ -183,6 +183,18 @@ impl Topology {
             try!(check(chrp_topology_remove_bond(self.handle as *mut CHRP_TOPOLOGY, i, j)));
         }
         Ok(())
+    }
+
+    /// Create a `Topology` from a C pointer. This function is unsafe because no
+    /// validity check is made on the pointer.
+    pub unsafe fn from_ptr(ptr: *const CHRP_TOPOLOGY) -> Topology {
+        Topology{handle: ptr}
+    }
+
+    /// Get the underlying C pointer. This function is unsafe because no
+    /// lifetime guarantee is made on the pointer.
+    pub unsafe fn as_ptr(&self) -> *const CHRP_TOPOLOGY {
+        self.handle
     }
 }
 
