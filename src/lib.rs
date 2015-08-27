@@ -15,6 +15,7 @@ mod tests;
 
 mod errors;
 pub use errors::Error;
+pub use errors::LogLevel;
 
 pub mod atom;
 pub use atom::Atom;

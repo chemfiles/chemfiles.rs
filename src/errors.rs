@@ -9,7 +9,7 @@
 
 extern crate libc;
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::str;
 
 use ::ffi::*;
@@ -97,6 +97,76 @@ pub fn check(status: CHRP_STATUS) -> Result<(), Error> {
     return Ok(());
 }
 
+/******************************************************************************/
+
+/// Available log levels
+pub enum LogLevel {
+    /// Log nothing
+    NONE,
+    /// Only log errors
+    ERROR,
+    /// Log errors and warnings
+    WARNING,
+    /// Log errors, warnings and informations
+    INFO,
+    /// Log everything (errors, warnings, informations and debug informations)
+    DEBUG
+}
+
+impl From<CHRP_LOG_LEVEL> for LogLevel {
+    fn from(level: CHRP_LOG_LEVEL) -> LogLevel {
+        match level {
+            NONE => LogLevel::NONE,
+            ERROR => LogLevel::ERROR,
+            WARNING => LogLevel::WARNING,
+            INFO => LogLevel::INFO,
+            DEBUG => LogLevel::DEBUG,
+            _ => unreachable!()
+        }
+    }
+}
+
+impl From<LogLevel> for CHRP_LOG_LEVEL {
+    fn from(level: LogLevel) -> CHRP_LOG_LEVEL {
+        match level {
+            LogLevel::NONE => NONE,
+            LogLevel::ERROR => ERROR,
+            LogLevel::WARNING => WARNING,
+            LogLevel::INFO => INFO,
+            LogLevel::DEBUG => DEBUG,
+        }
+    }
+}
+
+pub struct Logging;
+
+impl Logging {
+    /// Set the logging level to `level`
+    pub fn set_level(level: LogLevel) -> Result<(), Error> {
+        unsafe {
+            try!(check(chrp_loglevel(CHRP_LOG_LEVEL::from(level))));
+        }
+        Ok(())
+    }
+
+    /// Write logs to the file at `path`, creating it if needed.
+    pub fn log_to_file<'a, S>(path: S) -> Result<(), Error> where S: Into<&'a str> {
+        let buffer = CString::new(path.into()).ok().expect("Got invalid C string from Rust!");
+        unsafe {
+            try!(check(chrp_logfile(buffer.as_ptr())));
+        }
+        Ok(())
+    }
+
+    /// Write logs to the standard error stream. This is the default.
+    pub fn log_to_stderr() -> Result<(), Error> {
+        unsafe {
+            try!(check(chrp_log_stderr()));
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -107,5 +177,18 @@ mod test {
 
         assert_eq!(error.message(), "Memory error.");
         assert_eq!(Error::last_error(), "");
+    }
+
+    #[test]
+    fn logging() {
+        use std::fs::metadata;
+
+        Logging::log_to_file("test.log").unwrap();
+        // Check that file exists
+        assert!(metadata("test.log").is_ok());
+
+        // Just calling the function and ensuring that the return code is OK.
+        assert!(Logging::log_to_stderr().is_ok());
+        assert!(Logging::set_level(LogLevel::ERROR).is_ok());
     }
 }
