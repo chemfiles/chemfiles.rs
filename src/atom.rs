@@ -23,8 +23,9 @@ pub struct Atom {
 impl Atom {
     pub fn new<'a, S>(name: S) -> Result<Atom, Error> where S: Into<&'a str>{
         let mut handle : *const CHRP_ATOM;
+        let buffer = CString::new(name.into()).ok().expect("Got invalid C string from Rust!");
         unsafe {
-            handle = chrp_atom(name.into().as_ptr() as *const libc::c_char);
+            handle = chrp_atom(buffer.as_ptr());
         }
         if handle.is_null() {
             return Err(Error::ChemharpCppError{message: Error::last_error()})
