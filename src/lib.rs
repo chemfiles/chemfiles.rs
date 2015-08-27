@@ -13,6 +13,8 @@ mod ffi;
 #[macro_use]
 mod tests;
 
+mod string;
+
 mod errors;
 pub use errors::Error;
 pub use errors::LogLevel;

@@ -10,11 +10,10 @@
 extern crate libc;
 
 use std::ops::Drop;
-use std::ffi::CString;
 
 use ::ffi::*;
 use ::errors::{check, Error};
-use ::errors::from_c_str;
+use ::string;
 
 pub struct Atom {
     handle: *const CHRP_ATOM
@@ -23,9 +22,9 @@ pub struct Atom {
 impl Atom {
     pub fn new<'a, S>(name: S) -> Result<Atom, Error> where S: Into<&'a str>{
         let mut handle : *const CHRP_ATOM;
-        let buffer = CString::new(name.into()).ok().expect("Got invalid C string from Rust!");
+        let buffer = string::to_c(name.into());
         unsafe {
-            handle = chrp_atom(buffer.as_ptr());
+            handle = chrp_atom(buffer);
         }
         if handle.is_null() {
             return Err(Error::ChemharpCppError{message: Error::last_error()})
@@ -68,13 +67,13 @@ impl Atom {
         unsafe {
             try!(check(chrp_atom_name(self.handle, &mut buffer[0], buffer.len() as u64)));
         }
-        return Ok(from_c_str(&buffer[0]));
+        return Ok(string::from_c(&buffer[0]));
     }
 
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<(), Error> where S: Into<&'a str>{
-        let buffer = CString::new(name.into()).ok().expect("Got invalid C string from Rust!");
+        let buffer = string::to_c(name.into());
         unsafe {
-            try!(check(chrp_atom_set_name(self.handle as *mut CHRP_ATOM, buffer.as_ptr())));
+            try!(check(chrp_atom_set_name(self.handle as *mut CHRP_ATOM, buffer)));
         }
         return Ok(());
     }
@@ -84,7 +83,7 @@ impl Atom {
         unsafe {
             try!(check(chrp_atom_full_name(self.handle, &mut buffer[0], buffer.len() as u64)));
         }
-        return Ok(from_c_str(&buffer[0]));
+        return Ok(string::from_c(&buffer[0]));
     }
 
     pub fn vdw_radius(&self) -> Result<f64, Error> {

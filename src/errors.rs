@@ -9,23 +9,8 @@
 
 extern crate libc;
 
-use std::ffi::{CStr, CString};
-use std::str;
-
 use ::ffi::*;
-
-/// Create a Rust string from a C string.
-pub fn from_c_str(buffer: *const i8) -> String {
-    let mut res = String::new();
-    unsafe {
-        let c_string = CStr::from_ptr(buffer);
-        let rust_str = str::from_utf8(c_string.to_bytes())
-                            .ok()
-                            .expect("Got invalid UTF8 string from C!");
-        res.push_str(rust_str);
-    }
-    return res;
-}
+use ::string;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Possible causes of error in Chemharp
@@ -75,7 +60,7 @@ impl Error {
             Error::CppStdError{message} | Error::ChemharpCppError{message} => message,
             _ => {
                 unsafe {
-                    from_c_str(chrp_strerror(CHRP_STATUS::from(error)))
+                    string::from_c(chrp_strerror(CHRP_STATUS::from(error)))
                 }
             }
         }
@@ -84,7 +69,7 @@ impl Error {
     /// Get the last error message.
     pub fn last_error() -> String {
         unsafe {
-            from_c_str(chrp_last_error())
+            string::from_c(chrp_last_error())
         }
     }
 }
@@ -151,9 +136,9 @@ impl Logging {
 
     /// Write logs to the file at `path`, creating it if needed.
     pub fn log_to_file<'a, S>(path: S) -> Result<(), Error> where S: Into<&'a str> {
-        let buffer = CString::new(path.into()).ok().expect("Got invalid C string from Rust!");
+        let buffer = string::to_c(path.into());
         unsafe {
-            try!(check(chrp_logfile(buffer.as_ptr())));
+            try!(check(chrp_logfile(buffer)));
         }
         Ok(())
     }
