@@ -181,29 +181,29 @@ mod test {
     fn lengths() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
 
-        assert_eq!(cell.lengths().unwrap(), (2.0, 3.0, 4.0));
+        assert_eq!(cell.lengths(), Ok((2.0, 3.0, 4.0)));
 
         assert!(cell.set_lengths(10.0, 12.0, 11.0).is_ok());
-        assert_eq!(cell.lengths().unwrap(), (10.0, 12.0, 11.0));
+        assert_eq!(cell.lengths(), Ok((10.0, 12.0, 11.0)));
     }
 
     #[test]
     fn angles() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
 
-        assert_eq!(cell.angles().unwrap(), (90.0, 90.0, 90.0));
+        assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
 
         assert!(cell.set_cell_type(CellType::Triclinic).is_ok());
         assert!(cell.set_angles(80.0, 89.0, 100.0).is_ok());
 
-        assert_eq!(cell.angles().unwrap(), (80.0, 89.0, 100.0));
+        assert_eq!(cell.angles(), Ok((80.0, 89.0, 100.0)));
     }
 
     #[test]
     fn volume() {
         let cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
 
-        assert_eq!(cell.volume().unwrap(), 2.0 * 3.0 * 4.0);
+        assert_eq!(cell.volume(), Ok(2.0 * 3.0 * 4.0));
     }
 
     #[test]
@@ -224,19 +224,19 @@ mod test {
     fn cell_type() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
 
-        assert_eq!(cell.cell_type().unwrap(), CellType::Orthorombic);
+        assert_eq!(cell.cell_type(), Ok(CellType::Orthorombic));
 
         assert!(cell.set_cell_type(CellType::Infinite).is_ok());
-        assert_eq!(cell.cell_type().unwrap(), CellType::Infinite);
+        assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
     }
 
     #[test]
     fn periodicity() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
 
-        assert_eq!(cell.periodicity().unwrap(), (true, true, true));
+        assert_eq!(cell.periodicity(), Ok((true, true, true)));
 
         assert!(cell.set_periodicity(false, true, false).is_ok());
-        assert_eq!(cell.periodicity().unwrap(), (false, true, false));
+        assert_eq!(cell.periodicity(), Ok((false, true, false)));
     }
 }

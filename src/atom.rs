@@ -145,28 +145,28 @@ mod test {
         let mut at = Atom::new("He").unwrap();
         assert_approx_eq!(at.mass().unwrap(), 4.002602, 1e-6);
 
-        at.set_mass(15.0f32).unwrap();
-        assert_eq!(at.mass().unwrap(), 15.0);
+        assert!(at.set_mass(15.0f32).is_ok());
+        assert_eq!(at.mass(), Ok(15.0));
     }
 
     #[test]
     fn charge() {
         let mut at = Atom::new("He").unwrap();
-        assert_eq!(at.charge().unwrap(), 0.0);
+        assert_eq!(at.charge(), Ok(0.0));
 
-        at.set_charge(-1.5f32).unwrap();
-        assert_eq!(at.charge().unwrap(), -1.5);
+        assert!(at.set_charge(-1.5f32).is_ok());
+        assert_eq!(at.charge(), Ok(-1.5));
     }
 
     #[test]
     fn name() {
         let mut at = Atom::new("He").unwrap();
-        assert_eq!(at.name().unwrap(), "He");
-        assert_eq!(at.full_name().unwrap(), "Helium");
+        assert_eq!(at.name(), Ok(String::from("He")));
+        assert_eq!(at.full_name(), Ok(String::from("Helium")));
 
-        at.set_name("Zn").unwrap();
-        assert_eq!(at.name().unwrap(), "Zn");
-        assert_eq!(at.full_name().unwrap(), "Zinc");
+        assert!(at.set_name("Zn").is_ok());
+        assert_eq!(at.name(), Ok(String::from("Zn")));
+        assert_eq!(at.full_name(), Ok(String::from("Zinc")));
     }
 
     #[test]
@@ -179,6 +179,6 @@ mod test {
     #[test]
     fn atomic_number() {
         let at = Atom::new("He").unwrap();
-        assert_eq!(at.atomic_number().unwrap(), 2);
+        assert_eq!(at.atomic_number(), Ok(2));
     }
 }
