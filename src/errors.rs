@@ -27,7 +27,7 @@ pub fn from_c_str(buffer: *const i8) -> String {
     return res;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 /// Possible causes of error in Chemharp
 pub enum Error {
     /// Exception in the C++ standard library

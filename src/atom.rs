@@ -34,7 +34,6 @@ impl Atom {
     }
 
     // pub fn chrp_atom_from_frame(frame: *mut CHRP_FRAME, idx: libc::size_t) -> *mut CHRP_ATOM;
-    // pub fn chrp_atom_from_topology(topology: *mut CHRP_TOPOLOGY, idx: libc::size_t) -> *mut CHRP_ATOM;
 
     pub fn mass(&self) -> Result<f32, Error> {
         let mut mass: f32 = 0.0;
@@ -112,6 +111,18 @@ impl Atom {
             try!(check(chrp_atom_atomic_number(self.handle, &mut number)));
         }
         return Ok(number);
+    }
+
+    /// Create an `Atom` from a C pointer. This function is unsafe because no
+    /// validity check is made on the pointer.
+    pub unsafe fn from_ptr(ptr: *const CHRP_ATOM) -> Atom {
+        Atom{handle: ptr}
+    }
+
+    /// Get the underlying C pointer. This function is unsafe because no
+    /// lifetime guarantee is made on the pointer.
+    pub unsafe fn to_ptr(&self) -> *const CHRP_ATOM {
+        self.handle
     }
 }
 

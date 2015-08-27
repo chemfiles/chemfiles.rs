@@ -17,8 +17,11 @@ mod errors;
 pub use errors::Error;
 pub use errors::LogLevel;
 
-pub mod atom;
+mod atom;
 pub use atom::Atom;
 
-pub mod cell;
+mod cell;
 pub use cell::UnitCell;
+
+mod topology;
+pub use topology::Topology;
