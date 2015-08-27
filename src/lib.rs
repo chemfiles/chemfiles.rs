@@ -25,3 +25,6 @@ pub use cell::UnitCell;
 
 mod topology;
 pub use topology::Topology;
+
+mod frame;
+pub use frame::Frame;

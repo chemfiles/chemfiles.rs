@@ -33,8 +33,6 @@ impl Atom {
         Ok(Atom{handle: handle})
     }
 
-    // pub fn chrp_atom_from_frame(frame: *mut CHRP_FRAME, idx: libc::size_t) -> *mut CHRP_ATOM;
-
     pub fn mass(&self) -> Result<f32, Error> {
         let mut mass: f32 = 0.0;
         unsafe {

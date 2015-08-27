@@ -14,7 +14,8 @@ use std::u64;
 
 use ::ffi::*;
 use ::errors::{check, Error};
-use ::atom::Atom;
+
+use super::Atom;
 
 pub struct Topology {
     handle: *const CHRP_TOPOLOGY
@@ -44,8 +45,6 @@ impl Topology {
             Ok(Atom::from_ptr(handle))
         }
     }
-
-    // pub fn chrp_topology_from_frame(frame: *mut CHRP_FRAME) -> *mut CHRP_TOPOLOGY;
 
     pub fn len(&self) -> Result<usize, Error> {
         let mut natoms = 0;

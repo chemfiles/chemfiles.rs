@@ -71,8 +71,6 @@ impl UnitCell {
         Ok(UnitCell{handle: handle})
     }
 
-    // pub fn chrp_cell_from_frame(frame: *mut CHRP_FRAME) -> *mut CHRP_CELL;
-
     pub fn lengths(&self) -> Result<(f64, f64, f64), Error> {
         let (mut a, mut b, mut c) = (0.0, 0.0, 0.0);
         unsafe {
