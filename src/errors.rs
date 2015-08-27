@@ -181,11 +181,13 @@ mod test {
 
     #[test]
     fn logging() {
-        use std::fs::metadata;
+        use std::fs;
+        let filename = "test.log";
 
-        Logging::log_to_file("test.log").unwrap();
+        Logging::log_to_file(filename).unwrap();
         // Check that file exists
-        assert!(metadata("test.log").is_ok());
+        assert!(fs::metadata(filename).is_ok());
+        fs::remove_file(filename).unwrap();
 
         // Just calling the function and ensuring that the return code is OK.
         assert!(Logging::log_to_stderr().is_ok());
