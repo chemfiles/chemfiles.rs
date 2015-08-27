@@ -19,3 +19,6 @@ pub use errors::LogLevel;
 
 pub mod atom;
 pub use atom::Atom;
+
+pub mod cell;
+pub use cell::UnitCell;

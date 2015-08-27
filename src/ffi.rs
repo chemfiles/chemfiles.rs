@@ -69,6 +69,7 @@ extern "C" {
     pub fn chrp_cell_set_type(cell: *mut CHRP_CELL, _type: CHRP_CELL_TYPE) -> CHRP_STATUS;
     pub fn chrp_cell_periodicity(cell: *const CHRP_CELL, x: *mut u8, y: *mut u8, z: *mut u8) -> CHRP_STATUS;
     pub fn chrp_cell_set_periodicity(cell: *mut CHRP_CELL, x: u8, y: u8, z: u8) -> CHRP_STATUS;
+    pub fn chrp_cell_volume(cell: *const CHRP_CELL, V: *mut libc::c_double) -> CHRP_STATUS;
     pub fn chrp_cell_free(cell: *mut CHRP_CELL) -> CHRP_STATUS;
 
     pub fn chrp_topology() -> *mut CHRP_TOPOLOGY;
