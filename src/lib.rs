@@ -10,5 +10,11 @@
 #[allow(dead_code, non_camel_case_types)]
 mod ffi;
 
+#[macro_use]
+mod tests;
+
 mod errors;
 pub use errors::Error;
+
+pub mod atom;
+pub use atom::Atom;
