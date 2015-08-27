@@ -30,3 +30,6 @@ pub use topology::Topology;
 
 mod frame;
 pub use frame::Frame;
+
+mod trajectory;
+pub use trajectory::Trajectory;
