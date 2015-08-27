@@ -1,6 +1,6 @@
 [package]
 name = "chemharp"
-version = "0.1.0"
+version = "0.3.0"
 authors = ["Luthaf <luthaf@luthaf.fr>"]
 documentation = "https://chemharp.readthedocs.org/"
 repository = "https://github.com/Luthaf/Chemharp.rs"
