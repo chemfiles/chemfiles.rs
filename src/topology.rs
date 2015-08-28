@@ -46,10 +46,10 @@ impl Topology {
         }
     }
 
-    pub fn len(&self) -> Result<usize, Error> {
+    pub fn natoms(&self) -> Result<usize, Error> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chrp_topology_size(self.handle, &mut natoms)));
+            try!(check(chrp_topology_atoms_count(self.handle, &mut natoms)));
         }
         return Ok(natoms as usize);
     }
@@ -216,7 +216,7 @@ mod test {
     fn topology() {
         let mut top = Topology::new().unwrap();
 
-        assert_eq!(top.len(), Ok(0));
+        assert_eq!(top.natoms(), Ok(0));
 
         let h = Atom::new("H").unwrap();
         let o = Atom::new("O").unwrap();
@@ -226,7 +226,7 @@ mod test {
         assert!(top.push(&o).is_ok());
         assert!(top.push(&h).is_ok());
 
-        assert_eq!(top.len(), Ok(4));
+        assert_eq!(top.natoms(), Ok(4));
 
         assert_eq!(top.bonds_count(), Ok(0));
         assert_eq!(top.angles_count(), Ok(0));
@@ -260,6 +260,6 @@ mod test {
         assert_eq!(top.dihedrals_count().unwrap(), 0);
 
         assert!(top.remove(3).is_ok());
-        assert_eq!(top.len(), Ok(3));
+        assert_eq!(top.natoms(), Ok(3));
     }
 }

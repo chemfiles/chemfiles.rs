@@ -146,7 +146,7 @@ mod test {
         let mut frame = Frame::new(0).unwrap();
         assert!(file.read(&mut frame).is_ok());
 
-        assert_eq!(frame.len(), Ok(297));
+        assert_eq!(frame.natoms(), Ok(297));
         let positions = frame.positions().unwrap();
         assert_eq!(positions[0], [0.417219, 8.303366, 11.737172]);
         assert_eq!(positions[124], [5.099554, -0.045104, 14.153846]);
@@ -164,12 +164,12 @@ mod test {
         assert_eq!(positions[124], [5.13242, 0.079862, 14.194161]);
 
         let topology = frame.topology().unwrap();
-        assert_eq!(topology.len(), Ok(297));
+        assert_eq!(topology.natoms(), Ok(297));
         assert_eq!(topology.bonds_count(), Ok(0));
 
         assert!(frame.guess_topology(true).is_ok());
         let topology = frame.topology().unwrap();
-        assert_eq!(topology.len(), Ok(297));
+        assert_eq!(topology.natoms(), Ok(297));
         assert_eq!(topology.bonds_count(), Ok(181));
         assert_eq!(topology.angles_count(), Ok(87));
 

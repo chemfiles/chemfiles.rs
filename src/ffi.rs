@@ -44,7 +44,7 @@ extern "C" {
     pub fn chrp_trajectory_close(file: *mut CHRP_TRAJECTORY) -> CHRP_STATUS;
 
     pub fn chrp_frame(natoms: libc::size_t) -> *mut CHRP_FRAME;
-    pub fn chrp_frame_size(frame: *const CHRP_FRAME, natoms: *mut libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_atoms_count(frame: *const CHRP_FRAME, natoms: *mut libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_positions(frame: *const CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_set_positions(frame: *mut CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_velocities(frame: *const CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
@@ -74,7 +74,7 @@ extern "C" {
 
     pub fn chrp_topology() -> *mut CHRP_TOPOLOGY;
     pub fn chrp_topology_from_frame(frame: *mut CHRP_FRAME) -> *mut CHRP_TOPOLOGY;
-    pub fn chrp_topology_size(topology: *const CHRP_TOPOLOGY, natoms: *mut libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_topology_atoms_count(topology: *const CHRP_TOPOLOGY, natoms: *mut libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_append(topology: *mut CHRP_TOPOLOGY, atom: *const CHRP_ATOM) -> CHRP_STATUS;
     pub fn chrp_topology_remove(topology: *mut CHRP_TOPOLOGY, i: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_isbond(topology: *const CHRP_TOPOLOGY, i: libc::size_t, j: libc::size_t, result: *mut u8) -> CHRP_STATUS;

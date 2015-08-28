@@ -44,16 +44,16 @@ impl Frame {
         }
     }
 
-    pub fn len(&self) -> Result<usize, Error> {
+    pub fn natoms(&self) -> Result<usize, Error> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chrp_frame_size(self.handle, &mut natoms)));
+            try!(check(chrp_frame_atoms_count(self.handle, &mut natoms)));
         }
         return Ok(natoms as usize);
     }
 
     pub fn positions(&self) -> Result<Vec<[f32; 3]>, Error> {
-        let natoms = try!(self.len());
+        let natoms = try!(self.natoms());
         // TODO: use unstable Vec::resize here
         let mut res = Vec::with_capacity(natoms);
         for _ in 0..natoms {
@@ -81,7 +81,7 @@ impl Frame {
     }
 
     pub fn velocities(&self) -> Result<Vec<[f32; 3]>, Error> {
-        let natoms = try!(self.len());
+        let natoms = try!(self.natoms());
         // TODO: use unstable Vec::resize here
         let mut res = Vec::with_capacity(natoms);
         for _ in 0..natoms {
@@ -222,10 +222,10 @@ mod test {
     #[test]
     fn size() {
         let frame = Frame::new(0).unwrap();
-        assert_eq!(frame.len(), Ok(0));
+        assert_eq!(frame.natoms(), Ok(0));
 
         let frame = Frame::new(4).unwrap();
-        assert_eq!(frame.len(), Ok(4));
+        assert_eq!(frame.natoms(), Ok(4));
     }
 
     #[test]
