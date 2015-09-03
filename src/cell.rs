@@ -20,11 +20,11 @@ pub struct UnitCell {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CellType {
     /// Orthorombic cell
-    Orthorombic,
+    Orthorombic = ORTHOROMBIC as isize,
     /// Triclinic cell
-    Triclinic,
+    Triclinic = TRICLINIC as isize,
     /// Infinite cell
-    Infinite
+    Infinite = INFINITE as isize
 }
 
 impl From<CHRP_CELL_TYPE> for CellType {
@@ -34,16 +34,6 @@ impl From<CHRP_CELL_TYPE> for CellType {
             TRICLINIC => CellType::Triclinic,
             INFINITE => CellType::Infinite,
             _ => unreachable!()
-        }
-    }
-}
-
-impl From<CellType> for CHRP_CELL_TYPE {
-    fn from(celltype: CellType) -> CHRP_CELL_TYPE {
-        match celltype {
-            CellType::Orthorombic => ORTHOROMBIC,
-            CellType::Triclinic => TRICLINIC,
-            CellType::Infinite => INFINITE
         }
     }
 }
@@ -119,7 +109,7 @@ impl UnitCell {
 
     pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_cell_set_type(self.handle as *mut CHRP_CELL, CHRP_CELL_TYPE::from(cell_type))));
+            try!(check(chrp_cell_set_type(self.handle as *mut CHRP_CELL, cell_type as CHRP_CELL_TYPE)));
         }
         Ok(())
     }

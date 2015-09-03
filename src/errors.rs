@@ -86,16 +86,16 @@ pub fn check(status: CHRP_STATUS) -> Result<(), Error> {
 
 /// Available log levels
 pub enum LogLevel {
-    /// Log nothing
-    NONE,
+    /// Do not log anything
+    NONE = NONE as isize,
     /// Only log errors
-    ERROR,
+    ERROR = ERROR as isize,
     /// Log errors and warnings
-    WARNING,
+    WARNING = WARNING as isize,
     /// Log errors, warnings and informations
-    INFO,
+    INFO = INFO as isize,
     /// Log everything (errors, warnings, informations and debug informations)
-    DEBUG
+    DEBUG = DEBUG as isize,
 }
 
 impl From<CHRP_LOG_LEVEL> for LogLevel {
@@ -111,25 +111,13 @@ impl From<CHRP_LOG_LEVEL> for LogLevel {
     }
 }
 
-impl From<LogLevel> for CHRP_LOG_LEVEL {
-    fn from(level: LogLevel) -> CHRP_LOG_LEVEL {
-        match level {
-            LogLevel::NONE => NONE,
-            LogLevel::ERROR => ERROR,
-            LogLevel::WARNING => WARNING,
-            LogLevel::INFO => INFO,
-            LogLevel::DEBUG => DEBUG,
-        }
-    }
-}
-
 pub struct Logging;
 
 impl Logging {
     /// Set the logging level to `level`
     pub fn set_level(level: LogLevel) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_loglevel(CHRP_LOG_LEVEL::from(level))));
+            try!(check(chrp_loglevel(level as CHRP_LOG_LEVEL)));
         }
         Ok(())
     }
