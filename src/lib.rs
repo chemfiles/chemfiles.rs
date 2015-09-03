@@ -17,7 +17,8 @@ mod string;
 
 mod errors;
 pub use errors::Error;
-pub use errors::LogLevel;
+
+pub mod logging;
 
 mod atom;
 pub use atom::Atom;
