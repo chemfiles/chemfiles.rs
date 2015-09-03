@@ -29,7 +29,8 @@ pub type CHRP_STATUS = libc::c_int;
 extern "C" {
     pub fn chrp_strerror(status: libc::c_int) -> *const libc::c_char;
     pub fn chrp_last_error() -> *const libc::c_char;
-    pub fn chrp_loglevel(level: CHRP_LOG_LEVEL) -> CHRP_STATUS;
+    pub fn chrp_loglevel(level: *mut CHRP_LOG_LEVEL) -> CHRP_STATUS;
+    pub fn chrp_set_loglevel(level: CHRP_LOG_LEVEL) -> CHRP_STATUS;
     pub fn chrp_logfile(file: *const libc::c_char) -> CHRP_STATUS;
     pub fn chrp_log_stderr() -> CHRP_STATUS;
 

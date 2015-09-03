@@ -85,6 +85,7 @@ pub fn check(status: CHRP_STATUS) -> Result<(), Error> {
 /******************************************************************************/
 
 /// Available log levels
+#[derive(Clone, Debug, PartialEq)]
 pub enum LogLevel {
     /// Do not log anything
     NONE = NONE as isize,
@@ -114,10 +115,20 @@ impl From<CHRP_LOG_LEVEL> for LogLevel {
 pub struct Logging;
 
 impl Logging {
+    /// Get current logging level
+    pub fn level() -> Result<LogLevel, Error> {
+        let mut level = 0;
+        unsafe {
+            try!(check(chrp_loglevel(&mut level)));
+        }
+        Ok(LogLevel::from(level))
+    }
+
+
     /// Set the logging level to `level`
     pub fn set_level(level: LogLevel) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_loglevel(level as CHRP_LOG_LEVEL)));
+            try!(check(chrp_set_loglevel(level as CHRP_LOG_LEVEL)));
         }
         Ok(())
     }
@@ -164,6 +175,12 @@ mod test {
 
         // Just calling the function and ensuring that the return code is OK.
         assert!(Logging::log_to_stderr().is_ok());
+
+        let level = Logging::level().unwrap();
+        assert_eq!(level, LogLevel::WARNING);
         assert!(Logging::set_level(LogLevel::ERROR).is_ok());
+
+        let level = Logging::level().unwrap();
+        assert_eq!(level, LogLevel::ERROR);
     }
 }
