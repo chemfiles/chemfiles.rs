@@ -8,7 +8,7 @@ readme = "README.md"
 license = "MPL-2.0"
 
 [lib]
-name = "cymbalum"
+name = "chemharp"
 doctest = false
 
 [dependencies]
