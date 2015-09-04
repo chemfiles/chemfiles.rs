@@ -15,11 +15,15 @@ use ::ffi::*;
 use ::errors::{check, Error};
 use ::string;
 
+/// An Atom is a particle in the current Frame. It can be used to store and
+/// retrieve informations about a particle, such as mass, name, atomic number,
+/// *etc.*
 pub struct Atom {
     handle: *const CHRP_ATOM
 }
 
 impl Atom {
+    /// Create a new `Atom` from a `name`.
     pub fn new<'a, S>(name: S) -> Result<Atom, Error> where S: Into<&'a str>{
         let mut handle : *const CHRP_ATOM;
         let buffer = string::to_c(name.into());
@@ -32,6 +36,7 @@ impl Atom {
         Ok(Atom{handle: handle})
     }
 
+    /// Get the `Atom` mass, in atomic mass units
     pub fn mass(&self) -> Result<f32, Error> {
         let mut mass: f32 = 0.0;
         unsafe {
@@ -40,6 +45,7 @@ impl Atom {
         return Ok(mass);
     }
 
+    /// Set the `Atom` mass, in atomic mass units
     pub fn set_mass(&mut self, mass: f32) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_atom_set_mass(self.handle as *mut CHRP_ATOM, mass)));
@@ -47,6 +53,7 @@ impl Atom {
         return Ok(());
     }
 
+    /// Get the `Atom` charge, in number of the electron charge *e*
     pub fn charge(&self) -> Result<f32, Error> {
         let mut charge: f32 = 0.0;
         unsafe {
@@ -55,6 +62,7 @@ impl Atom {
         return Ok(charge);
     }
 
+    /// Set the `Atom` charge, in number of the electron charge *e*
     pub fn set_charge(&mut self, charge: f32) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_atom_set_charge(self.handle as *mut CHRP_ATOM, charge)));
@@ -62,6 +70,7 @@ impl Atom {
         return Ok(());
     }
 
+    /// Get the `Atom` name
     pub fn name(&self) -> Result<String, Error> {
         let mut buffer = vec![0; 10];
         unsafe {
@@ -70,6 +79,7 @@ impl Atom {
         return Ok(string::from_c(&buffer[0]));
     }
 
+    /// Set the `Atom` name
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<(), Error> where S: Into<&'a str>{
         let buffer = string::to_c(name.into());
         unsafe {
@@ -78,6 +88,9 @@ impl Atom {
         return Ok(());
     }
 
+    /// Try to get the full name of the `Atom`. The full name of "He" is
+    /// "Helium", and so on. If the name can not be found, returns the empty
+    /// string.
     pub fn full_name(&mut self) -> Result<String, Error> {
         let mut buffer = vec![0; 10];
         unsafe {
@@ -86,6 +99,8 @@ impl Atom {
         return Ok(string::from_c(&buffer[0]));
     }
 
+    /// Try to get the Van der Waals radius of the `Atom`. If the radius can not
+    /// be found, returns -1.
     pub fn vdw_radius(&self) -> Result<f64, Error> {
         let mut radius: f64 = 0.0;
         unsafe {
@@ -94,6 +109,8 @@ impl Atom {
         return Ok(radius);
     }
 
+    /// Try to get the covalent radius of the `Atom`. If the radius can not be
+    /// found, returns -1.
     pub fn covalent_radius(&self) -> Result<f64, Error> {
         let mut radius: f64 = 0.0;
         unsafe {
@@ -102,6 +119,8 @@ impl Atom {
         return Ok(radius);
     }
 
+    /// Try to get the atomic number of the `Atom`. If the number can not be
+    /// found, returns -1.
     pub fn atomic_number(&self) -> Result<i32, Error> {
         let mut number: i32 = 0;
         unsafe {

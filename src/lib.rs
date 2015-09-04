@@ -7,6 +7,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 
+//! Chemharp is a multi-language library written in modern C++ for reading and
+//! writing from and to molecular trajectory files. These files are created by
+//! your favorite theoretical chemistry program, and contains informations about
+//! atomic or residues names and positions. Some format also have additional
+//! informations, such as velocities, forces, energy, …
+//!
+//! This crate expose the C API of chemharp to Rust, and make all the
+//! functionalities accessibles. For more informations on the C++ library,
+//! please see its [documentation](http://chemharp.rtfd.org). Specifically, the
+//! following pages are worth reading:
+//!
+//! - The [overview](http://chemharp.rtfd.org/en/latest/overview.html) of the
+//!   classes organisation;
+//! - The [supported formats](http://chemharp.rtfd.org/en/latest/formats.html);
+//!
+//!
+//! As all the function call the underlying C library, they all can fail and
+//! thus all return a `Result<_, Error>` value.
+
 #[allow(dead_code, non_camel_case_types)]
 mod ffi;
 
@@ -25,6 +44,7 @@ pub use atom::Atom;
 
 mod cell;
 pub use cell::UnitCell;
+pub use cell::CellType;
 
 mod topology;
 pub use topology::Topology;

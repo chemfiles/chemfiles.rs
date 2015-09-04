@@ -12,18 +12,14 @@ use std::ops::Drop;
 use ::ffi::*;
 use ::errors::{check, Error};
 
-pub struct UnitCell {
-    handle: *const CHRP_CELL
-}
-
-/// Available cell types
+/// Available unit cell types
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CellType {
-    /// Orthorombic cell
+    /// Orthorombic cell, with the three angles equals to 90°
     Orthorombic = ORTHOROMBIC as isize,
-    /// Triclinic cell
+    /// Triclinic cell, with any values for the angles.
     Triclinic = TRICLINIC as isize,
-    /// Infinite cell
+    /// Infinite cell, to use when there is no cell.
     Infinite = INFINITE as isize
 }
 
@@ -38,7 +34,26 @@ impl From<CHRP_CELL_TYPE> for CellType {
     }
 }
 
+/// An `UnitCell` represent the box containing the atoms in the system, and its
+/// periodicity.
+///
+/// A unit cell is fully represented by three lenghts (a, b, c); and three
+/// angles (alpha, beta, gamma). The angles are stored in degrees, and the
+/// lenghts in Angstroms. A cell also has a matricial representation, by
+/// projecting the three base vector into an orthonormal base. We choose to
+/// represent such matrix as an upper triangular matrix:
+///
+///             | a_x   b_x   c_x |
+///             |  0    b_y   c_y |
+///             |  0     0    c_z |
+///
+/// An unit cell also have a cell type, represented by the `CellType` enum.
+pub struct UnitCell {
+    handle: *const CHRP_CELL
+}
+
 impl UnitCell {
+    /// Create an `Orthorombic` `UnitCell` from the three lenghts
     pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell, Error> {
         let mut handle : *const CHRP_CELL;
         unsafe {
@@ -50,6 +65,7 @@ impl UnitCell {
         Ok(UnitCell{handle: handle})
     }
 
+    /// Create an `Triclinic` `UnitCell` from the three lenghts and three angles
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell, Error> {
         let mut handle : *const CHRP_CELL;
         unsafe {
@@ -61,6 +77,7 @@ impl UnitCell {
         Ok(UnitCell{handle: handle})
     }
 
+    /// Get the three lenghts of an `UnitCell`, in Angstroms.
     pub fn lengths(&self) -> Result<(f64, f64, f64), Error> {
         let (mut a, mut b, mut c) = (0.0, 0.0, 0.0);
         unsafe {
@@ -69,6 +86,7 @@ impl UnitCell {
         Ok((a, b, c))
     }
 
+    /// Set the three lenghts of an `UnitCell`, in Angstroms.
     pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_cell_set_lengths(self.handle as *mut CHRP_CELL, a, b, c)));
@@ -76,6 +94,7 @@ impl UnitCell {
         Ok(())
     }
 
+    /// Get the three angles of an `UnitCell`, in degrees.
     pub fn angles(&self) -> Result<(f64, f64, f64), Error> {
         let (mut alpha, mut beta, mut gamma) = (0.0, 0.0, 0.0);
         unsafe {
@@ -84,6 +103,8 @@ impl UnitCell {
         Ok((alpha, beta, gamma))
     }
 
+    /// Set the three angles of an `UnitCell`, in degrees. This is only possible
+    /// with `Triclinic` cells.
     pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_cell_set_angles(self.handle as *mut CHRP_CELL, alpha, beta, gamma)));
@@ -91,6 +112,7 @@ impl UnitCell {
         Ok(())
     }
 
+    /// Get the unit cell matricial representation.
     pub fn matrix(&self) -> Result<[[f64; 3]; 3], Error> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
@@ -99,6 +121,7 @@ impl UnitCell {
         Ok(res)
     }
 
+    /// Get the type of the unit cell
     pub fn cell_type(&self) -> Result<CellType, Error> {
         let mut res = 0;
         unsafe {
@@ -107,6 +130,7 @@ impl UnitCell {
         Ok(CellType::from(res))
     }
 
+    /// Set the type of the unit cell
     pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_cell_set_type(self.handle as *mut CHRP_CELL, cell_type as CHRP_CELL_TYPE)));
@@ -114,6 +138,7 @@ impl UnitCell {
         Ok(())
     }
 
+    /// Get the cell periodic boundary conditions along the three axis
     pub fn periodicity(&self) -> Result<(bool, bool, bool), Error> {
         let (mut x, mut y, mut z) = (0, 0, 0);
         unsafe {
@@ -122,6 +147,7 @@ impl UnitCell {
         Ok((x != 0, y != 0, z != 0))
     }
 
+    /// Set the cell periodic boundary conditions along the three axis
     pub fn set_periodicity(&mut self, x: bool, y: bool, z: bool) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_cell_set_periodicity(
@@ -134,6 +160,7 @@ impl UnitCell {
         Ok(())
     }
 
+    /// Get the volume of the unit cell
     pub fn volume(&self) -> Result<f64, Error> {
         let mut res = 0.0;
         unsafe {

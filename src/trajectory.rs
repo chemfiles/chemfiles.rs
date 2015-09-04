@@ -15,11 +15,14 @@ use ::string;
 
 use super::{UnitCell, Topology, Frame};
 
+/// A Trajectory is a chemistry file on the hard drive. It is the main entry
+/// point of Chemharp.
 pub struct Trajectory {
     handle: *mut CHRP_TRAJECTORY
 }
 
 impl Trajectory {
+    /// Open a trajectory file in read mode.
     pub fn open<'a, S>(filename: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
         let mut handle: *mut CHRP_TRAJECTORY;
         let filename = string::to_c(filename.into());
@@ -33,6 +36,7 @@ impl Trajectory {
         Ok(Trajectory{handle: handle})
     }
 
+    /// Open a trajectory file in write mode.
     pub fn create<'a, S>(filename: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
         let mut handle: *mut CHRP_TRAJECTORY;
         let filename = string::to_c(filename.into());
@@ -46,6 +50,7 @@ impl Trajectory {
         Ok(Trajectory{handle: handle})
     }
 
+    /// Read the next step of the trajectory into a frame
     pub fn read(&mut self, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_trajectory_read(
@@ -55,6 +60,7 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Read a specific step of the trajectory in a frame
     pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_trajectory_read_step(
@@ -65,6 +71,7 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Write a frame to the trajectory.
     pub fn write(&mut self, frame: &Frame) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_trajectory_write(self.handle, frame.as_ptr())))
@@ -72,6 +79,9 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Set the topology associated with a trajectory. This topology will be
+    /// used when reading and writing the files, replacing any topology in the
+    /// frames or files.
     pub fn set_topology(&mut self, topology: Topology) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_trajectory_set_topology(self.handle, topology.as_ptr())))
@@ -79,6 +89,8 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Set the topology associated with a trajectory by reading the first frame
+    /// of `filename`; and extracting the topology of this frame.
     pub fn set_topology_file<'a, S>(&mut self, filename: S) -> Result<(), Error> where S: Into<&'a str> {
         let buffer = string::to_c(filename.into());
         unsafe {
@@ -87,6 +99,9 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Set the unit cell associated with a trajectory. This cell will be used
+    /// when reading and writing the files, replacing any unit cell in the
+    /// frames or files.
     pub fn set_cell(&mut self, cell: UnitCell) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_trajectory_set_cell(self.handle, cell.as_ptr())))
@@ -94,6 +109,7 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Get the number of steps (the number of frames) in a trajectory.
     pub fn nsteps(&mut self) -> Result<u64, Error> {
         let mut res = 0;
         unsafe {

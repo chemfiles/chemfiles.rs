@@ -17,11 +17,17 @@ use ::errors::{check, Error};
 
 use super::Atom;
 
+/// A `Topology` contains the definition of all the particles in the system, and
+/// the liaisons between the particles (bonds, angles, dihedrals, ...).
+///
+/// Only the atoms and the bonds are stored, the angles and the dihedrals are
+/// computed automaticaly.
 pub struct Topology {
     handle: *const CHRP_TOPOLOGY
 }
 
 impl Topology {
+    /// Create a new empty topology
     pub fn new() -> Result<Topology, Error> {
         let mut handle : *const CHRP_TOPOLOGY;
         unsafe {
@@ -33,6 +39,7 @@ impl Topology {
         Ok(Topology{handle: handle})
     }
 
+    /// Get a specific `Atom` from a topology, given its `index` in the topology
     pub fn atom(&self, index: u64) -> Result<Atom, Error> {
         let mut handle : *const CHRP_ATOM;
         unsafe {
@@ -46,6 +53,7 @@ impl Topology {
         }
     }
 
+    /// Get the current number of atoms in the topology.
     pub fn natoms(&self) -> Result<usize, Error> {
         let mut natoms = 0;
         unsafe {
@@ -54,6 +62,7 @@ impl Topology {
         return Ok(natoms as usize);
     }
 
+    /// Add an `Atom` at the end of a topology
     pub fn push(&mut self, atom: &Atom) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_topology_append(
@@ -64,6 +73,8 @@ impl Topology {
         return Ok(());
     }
 
+    /// Remove an `Atom` from a topology by index. This modify all the other
+    /// atoms indexes.
     pub fn remove(&mut self, index: u64) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_topology_remove(self.handle as *mut CHRP_TOPOLOGY, index)));
@@ -71,6 +82,7 @@ impl Topology {
         return Ok(());
     }
 
+    /// Tell if the atoms at indexes `i` and `j` are bonded together
     pub fn is_bond(&self, i: u64, j: u64) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
@@ -79,6 +91,7 @@ impl Topology {
         return Ok(res != 0);
     }
 
+    /// Tell if the atoms at indexes `i`, `j` and `k` constitues an angle
     pub fn is_angle(&self, i: u64, j: u64, k: u64) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
@@ -87,6 +100,8 @@ impl Topology {
         return Ok(res != 0);
     }
 
+    /// Tell if the atoms at indexes `i`, `j`, `k` and `m` constitues a dihedral
+    /// angle
     pub fn is_dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
@@ -95,6 +110,7 @@ impl Topology {
         return Ok(res != 0);
     }
 
+    /// Get the number of bonds in the system
     pub fn bonds_count(&self) -> Result<usize, Error> {
         let mut res = 0;
         unsafe {
@@ -103,6 +119,7 @@ impl Topology {
         return Ok(res as usize);
     }
 
+    /// Get the number of angles in the system
     pub fn angles_count(&self) -> Result<usize, Error> {
         let mut res = 0;
         unsafe {
@@ -111,6 +128,7 @@ impl Topology {
         return Ok(res as usize);
     }
 
+    /// Get the number of dihedral angles in the system
     pub fn dihedrals_count(&self) -> Result<usize, Error> {
         let mut res = 0;
         unsafe {
@@ -119,6 +137,7 @@ impl Topology {
         return Ok(res as usize);
     }
 
+    /// Get the list of bonds in the system
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>, Error> {
         let nbonds = try!(self.bonds_count());
         // TODO: use unstable Vec::resize here
@@ -136,6 +155,7 @@ impl Topology {
         return Ok(res);
     }
 
+    /// Get the list of angles in the system
     pub fn angles(&self) -> Result<Vec<[u64; 3]>, Error> {
         let nangles = try!(self.angles_count());
         // TODO: use unstable Vec::resize here
@@ -153,6 +173,7 @@ impl Topology {
         return Ok(res);
     }
 
+    /// Get the list of dihedral angles in the system
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>, Error> {
         let ndihedrals = try!(self.dihedrals_count());
         // TODO: use unstable Vec::resize here
@@ -170,6 +191,7 @@ impl Topology {
         return Ok(res);
     }
 
+    /// Add a bond between the atoms at indexes `i` and `j` in the system
     pub fn add_bond(&mut self, i: u64, j: u64) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_topology_add_bond(self.handle as *mut CHRP_TOPOLOGY, i, j)));
@@ -177,6 +199,8 @@ impl Topology {
         Ok(())
     }
 
+    /// Remove any existing bond between the atoms at indexes `i` and `j` in
+    /// the system
     pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_topology_remove_bond(self.handle as *mut CHRP_TOPOLOGY, i, j)));

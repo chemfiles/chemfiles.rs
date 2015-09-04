@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 
+//! Logging utilities
+
 extern crate libc;
 
 use ::ffi::*;

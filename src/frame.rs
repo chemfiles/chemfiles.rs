@@ -15,11 +15,15 @@ use ::errors::{check, Error};
 
 use super::{Atom, Topology, UnitCell};
 
+/// A `Frame` holds data from one step of a simulation: the current `Topology`,
+/// the positions, and maybe the velocities of the particles in the system.
 pub struct Frame {
     handle: *const CHRP_FRAME
 }
 
 impl Frame {
+    /// Create an empty frame with initial capacity of `natoms`. It will be
+    /// resized by the library as needed.
     pub fn new(natoms: u64) -> Result<Frame, Error> {
         let mut handle : *const CHRP_FRAME;
         unsafe {
@@ -31,6 +35,7 @@ impl Frame {
         Ok(Frame{handle: handle})
     }
 
+    /// Get a specific `Atom` from a frame, given its `index` in the frame
     pub fn atom(&self, index: u64) -> Result<Atom, Error> {
         let mut handle : *const CHRP_ATOM;
         unsafe {
@@ -44,6 +49,7 @@ impl Frame {
         }
     }
 
+    /// Get the current number of atoms in the `Frame`.
     pub fn natoms(&self) -> Result<usize, Error> {
         let mut natoms = 0;
         unsafe {
@@ -52,6 +58,7 @@ impl Frame {
         return Ok(natoms as usize);
     }
 
+    /// Get the positions from the `Frame`.
     pub fn positions(&self) -> Result<Vec<[f32; 3]>, Error> {
         let natoms = try!(self.natoms());
         // TODO: use unstable Vec::resize here
@@ -69,6 +76,7 @@ impl Frame {
         return Ok(res);
     }
 
+    /// Set the positions in the `Frame`.
     pub fn set_positions(&mut self, positions: Vec<[f32; 3]>) -> Result<(), Error> {
         let mut positions = positions;
         unsafe {
@@ -80,6 +88,7 @@ impl Frame {
         Ok(())
     }
 
+    /// Get the velocities from the `Frame`.
     pub fn velocities(&self) -> Result<Vec<[f32; 3]>, Error> {
         let natoms = try!(self.natoms());
         // TODO: use unstable Vec::resize here
@@ -97,6 +106,7 @@ impl Frame {
         return Ok(res);
     }
 
+    /// Set the velocities in the `Frame`.
     pub fn set_velocities(&mut self, velocities: Vec<[f32; 3]>) -> Result<(), Error> {
         let mut velocities = velocities;
         unsafe {
@@ -108,6 +118,7 @@ impl Frame {
         Ok(())
     }
 
+    /// Check if the `Frame` has velocity information.
     pub fn has_velocities(&self) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
@@ -116,6 +127,7 @@ impl Frame {
         return Ok(res != 0);
     }
 
+    /// Get the `UnitCell` from the `Frame`
     pub fn cell(&self) -> Result<UnitCell, Error> {
         let mut handle : *const CHRP_CELL;
         unsafe {
@@ -129,6 +141,7 @@ impl Frame {
         }
     }
 
+    /// Set the `UnitCell` of the `Frame`
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_frame_set_cell(
@@ -139,6 +152,7 @@ impl Frame {
         return Ok(());
     }
 
+    /// Get the `Topology` from the `Frame`
     pub fn topology(&self) -> Result<Topology, Error> {
         let mut handle : *const CHRP_TOPOLOGY;
         unsafe {
@@ -152,6 +166,7 @@ impl Frame {
         }
     }
 
+    /// Set the `Topology` of the `Frame`
     pub fn set_topology(&mut self, topology: &Topology) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_frame_set_topology(
@@ -162,6 +177,7 @@ impl Frame {
         return Ok(());
     }
 
+    /// Get the `Frame` step, i.e. the frame number in the trajectory
     pub fn step(&self) -> Result<u64, Error> {
         let mut res = 0;
         unsafe {
@@ -170,6 +186,7 @@ impl Frame {
         return Ok(res);
     }
 
+    /// Set the `Frame` step
     pub fn set_step(&mut self, step: u64) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_frame_set_step(self.handle as *mut CHRP_FRAME, step)));
@@ -177,6 +194,9 @@ impl Frame {
         return Ok(());
     }
 
+    /// Try to guess the bonds, angles and dihedrals in the system. If `bonds`
+    /// is true, guess everything; else only guess the angles and dihedrals from
+    /// the topology bond list.
     pub fn guess_topology(&self, bonds: bool) -> Result<(), Error> {
         unsafe {
             try!(check(chrp_frame_guess_topology(self.handle as *mut CHRP_FRAME, bool_to_u8(bonds))));
