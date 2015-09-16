@@ -65,7 +65,7 @@ pub fn set_level(level: LogLevel) -> Result<(), Error> {
 pub fn log_to_file<'a, S>(path: S) -> Result<(), Error> where S: Into<&'a str> {
     let buffer = string::to_c(path.into());
     unsafe {
-        try!(check(chrp_logfile(buffer)));
+        try!(check(chrp_logfile(buffer.as_ptr())));
     }
     Ok(())
 }

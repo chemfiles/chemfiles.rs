@@ -34,7 +34,8 @@ extern "C" {
     pub fn chrp_logfile(file: *const libc::c_char) -> CHRP_STATUS;
     pub fn chrp_log_stderr() -> CHRP_STATUS;
 
-    pub fn chrp_open(filename: *const libc::c_char, mode: *const libc::c_char) -> *mut CHRP_TRAJECTORY;
+    pub fn chrp_trajectory_open(filename: *const libc::c_char, mode: *const libc::c_char) -> *mut CHRP_TRAJECTORY;
+    pub fn chrp_trajectory_with_format(filename: *const libc::c_char, mode: *const libc::c_char, format: *const libc::c_char) -> *mut CHRP_TRAJECTORY;
     pub fn chrp_trajectory_read(file: *mut CHRP_TRAJECTORY, frame: *mut CHRP_FRAME) -> CHRP_STATUS;
     pub fn chrp_trajectory_read_step(file: *mut CHRP_TRAJECTORY, step: libc::size_t, frame: *mut CHRP_FRAME) -> CHRP_STATUS;
     pub fn chrp_trajectory_write(file: *mut CHRP_TRAJECTORY, frame: *const CHRP_FRAME) -> CHRP_STATUS;

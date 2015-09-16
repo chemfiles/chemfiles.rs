@@ -28,7 +28,7 @@ impl Atom {
         let mut handle : *const CHRP_ATOM;
         let buffer = string::to_c(name.into());
         unsafe {
-            handle = chrp_atom(buffer);
+            handle = chrp_atom(buffer.as_ptr());
         }
         if handle.is_null() {
             return Err(Error::ChemharpCppError{message: Error::last_error()})
@@ -83,7 +83,7 @@ impl Atom {
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<(), Error> where S: Into<&'a str>{
         let buffer = string::to_c(name.into());
         unsafe {
-            try!(check(chrp_atom_set_name(self.handle as *mut CHRP_ATOM, buffer)));
+            try!(check(chrp_atom_set_name(self.handle as *mut CHRP_ATOM, buffer.as_ptr())));
         }
         return Ok(());
     }

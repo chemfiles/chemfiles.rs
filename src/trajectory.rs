@@ -28,7 +28,7 @@ impl Trajectory {
         let filename = string::to_c(filename.into());
         let mode = string::to_c("r");
         unsafe {
-            handle = chrp_open(filename, mode);
+            handle = chrp_trajectory_open(filename.as_ptr(), mode.as_ptr());
         }
         if handle.is_null() {
             return Err(Error::ChemharpCppError{message: Error::last_error()})
@@ -42,7 +42,37 @@ impl Trajectory {
         let filename = string::to_c(filename.into());
         let mode = string::to_c("w");
         unsafe {
-            handle = chrp_open(filename, mode);
+            handle = chrp_trajectory_open(filename.as_ptr(), mode.as_ptr());
+        }
+        if handle.is_null() {
+            return Err(Error::ChemharpCppError{message: Error::last_error()})
+        }
+        Ok(Trajectory{handle: handle})
+    }
+
+    /// Open a trajectory file in read mode using a specific `format`.
+    pub fn open_with_format<'a, S>(filename: S, format: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
+        let mut handle: *mut CHRP_TRAJECTORY;
+        let filename = string::to_c(filename.into());
+        let format = string::to_c(format.into());
+        let mode = string::to_c("r");
+        unsafe {
+            handle = chrp_trajectory_with_format(filename.as_ptr(), mode.as_ptr(), format.as_ptr());
+        }
+        if handle.is_null() {
+            return Err(Error::ChemharpCppError{message: Error::last_error()})
+        }
+        Ok(Trajectory{handle: handle})
+    }
+
+    /// Open a trajectory file in write mode.
+    pub fn create_with_format<'a, S>(filename: S, format: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
+        let mut handle: *mut CHRP_TRAJECTORY;
+        let filename = string::to_c(filename.into());
+        let mode = string::to_c("w");
+        let format = string::to_c(format.into());
+        unsafe {
+            handle = chrp_trajectory_with_format(filename.as_ptr(), mode.as_ptr(), format.as_ptr());
         }
         if handle.is_null() {
             return Err(Error::ChemharpCppError{message: Error::last_error()})
@@ -94,7 +124,7 @@ impl Trajectory {
     pub fn set_topology_file<'a, S>(&mut self, filename: S) -> Result<(), Error> where S: Into<&'a str> {
         let buffer = string::to_c(filename.into());
         unsafe {
-            try!(check(chrp_trajectory_set_topology_file(self.handle, buffer)))
+            try!(check(chrp_trajectory_set_topology_file(self.handle, buffer.as_ptr())))
         }
         Ok(())
     }
@@ -203,6 +233,11 @@ mod test {
         assert!(file.set_topology_file(filename.to_str().unwrap()).is_ok());
         assert!(file.read(&mut frame).is_ok());
         assert_eq!(frame.atom(100).unwrap().name(), Ok(String::from("Rd")));
+
+        let filename = root.join("data").join("helium.xyz.but.not.really");
+        let mut file = Trajectory::open_with_format(filename.to_str().unwrap(), "XYZ").unwrap();
+        assert!(file.read(&mut frame).is_ok());
+        assert_eq!(frame.natoms(), Ok(125));
     }
 
     #[test]

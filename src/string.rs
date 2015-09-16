@@ -29,7 +29,6 @@ pub fn from_c(buffer: *const i8) -> String {
 
 
 /// Create a C string from a Rust string.
-pub fn to_c<'a>(string: &'a str) -> *const i8 {
-    let c_string = CString::new(string).ok().expect("Got invalid C string from Rust!");
-    return c_string.as_ptr();
+pub fn to_c<'a>(string: &'a str) -> CString {
+    CString::new(string).ok().expect("Got invalid C string from Rust!")
 }
