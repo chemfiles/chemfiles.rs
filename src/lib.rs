@@ -41,6 +41,7 @@ pub mod logging;
 
 mod atom;
 pub use atom::Atom;
+pub use atom::AtomType;
 
 mod cell;
 pub use cell::UnitCell;

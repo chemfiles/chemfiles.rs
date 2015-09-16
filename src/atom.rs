@@ -15,6 +15,32 @@ use ::ffi::*;
 use ::errors::{check, Error};
 use ::string;
 
+/// Available types of atoms
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum AtomType {
+    /// Element from the periodic table of elements
+    Element = ELEMENT as isize,
+    /// Corse-grained atom are composed of more than one element: CH3 groups,
+    /// amino-acids are corse-grained atoms.
+    CorseGrain = CORSE_GRAIN as isize,
+    /// Dummy site, with no physical reality
+    Dummy = DUMMY as isize,
+    /// Undefined atom type
+    Undefined = UNDEFINED as isize,
+}
+
+impl From<CHRP_ATOM_TYPE> for AtomType {
+    fn from(atomtype: CHRP_ATOM_TYPE) -> AtomType {
+        match atomtype {
+            ELEMENT => AtomType::Element,
+            CORSE_GRAIN => AtomType::CorseGrain,
+            DUMMY => AtomType::Dummy,
+            UNDEFINED => AtomType::Undefined,
+            _ => unreachable!()
+        }
+    }
+}
+
 /// An Atom is a particle in the current Frame. It can be used to store and
 /// retrieve informations about a particle, such as mass, name, atomic number,
 /// *etc.*
@@ -129,6 +155,23 @@ impl Atom {
         return Ok(number);
     }
 
+    /// Get the type of the atom
+    pub fn atom_type(&self) -> Result<AtomType, Error> {
+        let mut res = 0;
+        unsafe {
+            try!(check(chrp_atom_type(self.handle, &mut res)));
+        }
+        Ok(AtomType::from(res))
+    }
+
+    /// Set the type of the atom
+    pub fn set_atom_type(&mut self, atom_type: AtomType) -> Result<(), Error> {
+        unsafe {
+            try!(check(chrp_atom_set_type(self.handle as *mut CHRP_ATOM, atom_type as CHRP_ATOM_TYPE)));
+        }
+        Ok(())
+    }
+
     /// Create an `Atom` from a C pointer. This function is unsafe because no
     /// validity check is made on the pointer.
     pub unsafe fn from_ptr(ptr: *const CHRP_ATOM) -> Atom {
@@ -196,5 +239,14 @@ mod test {
     fn atomic_number() {
         let at = Atom::new("He").unwrap();
         assert_eq!(at.atomic_number(), Ok(2));
+    }
+
+    #[test]
+    fn atom_type() {
+        let mut at = Atom::new("He").unwrap();
+        assert_eq!(at.atom_type(), Ok(AtomType::Element));
+
+        assert!(at.set_atom_type(AtomType::CorseGrain).is_ok());
+        assert_eq!(at.atom_type(), Ok(AtomType::CorseGrain));
     }
 }

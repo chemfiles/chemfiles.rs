@@ -23,6 +23,12 @@ pub const ORTHOROMBIC: libc::c_uint = 0;
 pub const TRICLINIC: libc::c_uint = 1;
 pub const INFINITE: libc::c_uint = 2;
 
+pub type CHRP_ATOM_TYPE = libc::c_uint;
+pub const ELEMENT: libc::c_uint = 0;
+pub const CORSE_GRAIN: libc::c_uint = 1;
+pub const DUMMY: libc::c_uint = 2;
+pub const UNDEFINED: libc::c_uint = 3;
+
 pub type CHRP_STATUS = libc::c_int;
 
 #[link(name = "chemharp")]
@@ -105,5 +111,7 @@ extern "C" {
     pub fn chrp_atom_vdw_radius(atom: *const CHRP_ATOM, radius: *mut libc::c_double) -> CHRP_STATUS;
     pub fn chrp_atom_covalent_radius(atom: *const CHRP_ATOM, radius: *mut libc::c_double) -> CHRP_STATUS;
     pub fn chrp_atom_atomic_number(atom: *const CHRP_ATOM, number: *mut libc::c_int) -> CHRP_STATUS;
+    pub fn chrp_atom_type(cell: *const CHRP_ATOM, _type: *mut CHRP_ATOM_TYPE) -> CHRP_STATUS;
+    pub fn chrp_atom_set_type(cell: *mut CHRP_ATOM, _type: CHRP_ATOM_TYPE) -> CHRP_STATUS;
     pub fn chrp_atom_free(atom: *mut CHRP_ATOM) -> CHRP_STATUS;
 }
