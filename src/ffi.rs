@@ -1,15 +1,10 @@
 extern crate libc;
 
-#[repr(C)]
-pub struct CHRP_TRAJECTORY;
-#[repr(C)]
-pub struct CHRP_FRAME;
-#[repr(C)]
-pub struct CHRP_ATOM;
-#[repr(C)]
-pub struct CHRP_CELL;
-#[repr(C)]
-pub struct CHRP_TOPOLOGY;
+pub enum CHRP_TRAJECTORY{}
+pub enum CHRP_FRAME{}
+pub enum CHRP_ATOM{}
+pub enum CHRP_CELL{}
+pub enum CHRP_TOPOLOGY{}
 
 pub type CHRP_LOG_LEVEL = libc::c_uint;
 pub const NONE: libc::c_uint = 0;

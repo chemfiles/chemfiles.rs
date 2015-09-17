@@ -24,7 +24,7 @@ pub struct Trajectory {
 impl Trajectory {
     /// Open a trajectory file in read mode.
     pub fn open<'a, S>(filename: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
-        let mut handle: *mut CHRP_TRAJECTORY;
+        let handle: *mut CHRP_TRAJECTORY;
         let filename = string::to_c(filename.into());
         let mode = string::to_c("r");
         unsafe {
@@ -38,7 +38,7 @@ impl Trajectory {
 
     /// Open a trajectory file in write mode.
     pub fn create<'a, S>(filename: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
-        let mut handle: *mut CHRP_TRAJECTORY;
+        let handle: *mut CHRP_TRAJECTORY;
         let filename = string::to_c(filename.into());
         let mode = string::to_c("w");
         unsafe {
@@ -52,7 +52,7 @@ impl Trajectory {
 
     /// Open a trajectory file in read mode using a specific `format`.
     pub fn open_with_format<'a, S>(filename: S, format: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
-        let mut handle: *mut CHRP_TRAJECTORY;
+        let handle: *mut CHRP_TRAJECTORY;
         let filename = string::to_c(filename.into());
         let format = string::to_c(format.into());
         let mode = string::to_c("r");
@@ -67,7 +67,7 @@ impl Trajectory {
 
     /// Open a trajectory file in write mode.
     pub fn create_with_format<'a, S>(filename: S, format: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
-        let mut handle: *mut CHRP_TRAJECTORY;
+        let handle: *mut CHRP_TRAJECTORY;
         let filename = string::to_c(filename.into());
         let mode = string::to_c("w");
         let format = string::to_c(format.into());
@@ -289,7 +289,7 @@ mod test {
                                 "X 4 5 6",
                                 "X 4 5 6",
                                 "X 4 5 6",
-                                "X 4 5 6"].connect("\n");
+                                "X 4 5 6"].join("\n");
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();

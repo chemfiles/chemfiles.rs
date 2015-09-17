@@ -51,7 +51,7 @@ pub struct Atom {
 impl Atom {
     /// Create a new `Atom` from a `name`.
     pub fn new<'a, S>(name: S) -> Result<Atom, Error> where S: Into<&'a str>{
-        let mut handle : *const CHRP_ATOM;
+        let handle : *const CHRP_ATOM;
         let buffer = string::to_c(name.into());
         unsafe {
             handle = chrp_atom(buffer.as_ptr());

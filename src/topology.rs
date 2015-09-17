@@ -29,7 +29,7 @@ pub struct Topology {
 impl Topology {
     /// Create a new empty topology
     pub fn new() -> Result<Topology, Error> {
-        let mut handle : *const CHRP_TOPOLOGY;
+        let handle : *const CHRP_TOPOLOGY;
         unsafe {
             handle = chrp_topology();
         }
@@ -41,7 +41,7 @@ impl Topology {
 
     /// Get a specific `Atom` from a topology, given its `index` in the topology
     pub fn atom(&self, index: u64) -> Result<Atom, Error> {
-        let mut handle : *const CHRP_ATOM;
+        let handle : *const CHRP_ATOM;
         unsafe {
             handle = chrp_atom_from_topology(self.handle, index);
         }

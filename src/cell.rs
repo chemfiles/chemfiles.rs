@@ -55,7 +55,7 @@ pub struct UnitCell {
 impl UnitCell {
     /// Create an `Orthorombic` `UnitCell` from the three lenghts
     pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell, Error> {
-        let mut handle : *const CHRP_CELL;
+        let handle : *const CHRP_CELL;
         unsafe {
             handle = chrp_cell(a, b, c);
         }
@@ -67,7 +67,7 @@ impl UnitCell {
 
     /// Create an `Triclinic` `UnitCell` from the three lenghts and three angles
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell, Error> {
-        let mut handle : *const CHRP_CELL;
+        let handle : *const CHRP_CELL;
         unsafe {
             handle = chrp_cell_triclinic(a, b, c, alpha, beta, gamma);
         }

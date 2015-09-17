@@ -25,7 +25,7 @@ impl Frame {
     /// Create an empty frame with initial capacity of `natoms`. It will be
     /// resized by the library as needed.
     pub fn new(natoms: u64) -> Result<Frame, Error> {
-        let mut handle : *const CHRP_FRAME;
+        let handle : *const CHRP_FRAME;
         unsafe {
             handle = chrp_frame(natoms);
         }
@@ -37,7 +37,7 @@ impl Frame {
 
     /// Get a specific `Atom` from a frame, given its `index` in the frame
     pub fn atom(&self, index: u64) -> Result<Atom, Error> {
-        let mut handle : *const CHRP_ATOM;
+        let handle : *const CHRP_ATOM;
         unsafe {
             handle = chrp_atom_from_frame(self.handle as *mut CHRP_FRAME, index);
         }
@@ -129,7 +129,7 @@ impl Frame {
 
     /// Get the `UnitCell` from the `Frame`
     pub fn cell(&self) -> Result<UnitCell, Error> {
-        let mut handle : *const CHRP_CELL;
+        let handle : *const CHRP_CELL;
         unsafe {
             handle = chrp_cell_from_frame(self.handle as *mut CHRP_FRAME);
         }
@@ -154,7 +154,7 @@ impl Frame {
 
     /// Get the `Topology` from the `Frame`
     pub fn topology(&self) -> Result<Topology, Error> {
-        let mut handle : *const CHRP_TOPOLOGY;
+        let handle : *const CHRP_TOPOLOGY;
         unsafe {
             handle = chrp_topology_from_frame(self.handle as *mut CHRP_FRAME);
         }
