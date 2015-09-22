@@ -1,0 +1,43 @@
+language: rust
+sudo: required
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.9
+os:
+  - linux
+  - osx
+rust:
+    - stable
+    - beta
+install:
+    - |
+      if [ ${TRAVIS_OS_NAME} == "linux" ]
+      then
+          sudo add-apt-repository --yes ppa:yjwong/cmake
+          sudo apt-get update
+          sudo apt-cache search cmake
+          sudo apt-get remove --yes cmake
+          sudo apt-get install --yes cmake
+          pip install 'travis-cargo' --user
+          export PATH=$HOME/.local/bin:$PATH
+          export CC=gcc-4.9
+          export CXX=g++-4.9
+      fi
+    - |
+      if [ ${TRAVIS_OS_NAME} == "osx" ]
+      then
+          sudo pip install 'travis-cargo'
+      fi
+script:
+    - travis-cargo build
+    - travis-cargo test
+    - travis-cargo bench
+    - travis-cargo --only stable doc
+after_success:
+    - travis-cargo --only stable doc-upload
+env:
+  global:
+    secure: DlziexmlR66bR+pIXN/qUlMfnANY6sRSP6ZDKmLKyzLQghCShoL6TF5s+GEN7uB39U4IT9/706MrvCUPD7azobrJTX/mQsKraSPwlQ3uBlPtiVy6sLSK51jfBsucuiFibMiwv9FGv0DB687qnpDW1Wo2x1UkdcxsILlpThxCNlHWuQCficgI/LAegXoyvxfNfrcEeXhAQhPuUILMEODfbPuLwwynclQHN+JiMIhjVfU/rVffdJPflvxMBz0M9YaJKHgYvffDxIRVcZRYjzzMMyhbrFlLbTWOqfie2jppKqqZ7LhnT+ycqXPGowif5mt5yNWIEI7xYL4k11LgsVLbCg2x3OGUTjqhV39QKl49/rClH1K63I8CqF3KjOZXJ1iMhbkUoZ5OlyTA7OT7K0JN/+ha7bmoQuE6OkJ6cVhJH0IchJtprius9z+z6uVIlF5weotZ0uiAJjDggRqz5PEvVIIwaVmEnhVj0NfOIxd73ct31HnJkT7Ye5jOSmA+8NOuXyNQOXQZPhi4KQmpBIpe7ett5XMGJZXv8Guk3kEygJr2hEldB9KxXWuEoQ2wPTtfVvAXsW1CIxso+FqvMuehLMJjgJUJRuPyvPFYKfF/wLPc7p2csLlJj2S6NXp4DdZt7i2dAZDCDFp3pkhdvULBmGrGQZC6wCDYijNQ0mJiimw=
