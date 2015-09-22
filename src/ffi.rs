@@ -26,7 +26,7 @@ pub const UNDEFINED: libc::c_uint = 3;
 
 pub type CHRP_STATUS = libc::c_int;
 
-#[link(name = "chemharp")]
+#[link(name="chemharp", kind="static")]
 extern "C" {
     pub fn chrp_strerror(status: libc::c_int) -> *const libc::c_char;
     pub fn chrp_last_error() -> *const libc::c_char;

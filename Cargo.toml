@@ -6,10 +6,14 @@ documentation = "https://chemharp.readthedocs.org/"
 repository = "https://github.com/Luthaf/Chemharp.rs"
 readme = "README.md"
 license = "MPL-2.0"
+build = "build.rs"
 
 [lib]
 name = "chemharp"
 doctest = false
 
 [dependencies]
-libc = "0.1.8"
+libc = "*"
+
+[build-dependencies]
+cmake = "*"
