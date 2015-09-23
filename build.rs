@@ -1,30 +1,28 @@
 extern crate cmake;
+use std::io::prelude::*;
+use std::fs::File;
 
 fn main() {
-    let target = std::env::var("TARGET").unwrap();
-    let darwin = target.contains("darwin");
-    let windows = target.contains("windows");
-    let msvc = target.contains("msvc");
-    let linux = target.contains("linux");
-    let gnu = target.contains("gnu");
-    let bsd = target.contains("bsd");
+    // Building the chemharp C++ library
+    let dst = cmake::build("external").join("build");
+    println!("cargo:rustc-link-search=native={}/lib", dst.display());
 
-    // Getting code to link with C++ runtime
-    if darwin {
-        println!("cargo:rustc-link-lib=c++");
-    } else if windows && msvc {
-        // TODO
-    } else if windows && !msvc {
-        println!("cargo:rustc-link-lib=libc++");
-    } else if linux && gnu {
-        println!("cargo:rustc-link-lib=libc++");
-    } else if linux && bsd {
-        println!("cargo:rustc-link-lib=c++");
-    } else {
-        panic!("Unknown C++ runtime name! Please edit build.rs, and submit your changes!")
+    // Getting the list of needed C++ libraries
+    let mut dirs_file = File::open(dst.join("cxx_link_dirs.cmake")).unwrap();
+    let mut content = String::new();
+    dirs_file.read_to_string(&mut content).unwrap();
+    for dir in content.lines() {
+        println!("cargo:rustc-link-search=native={}", dir);
     }
 
-    // Building the chemharp C++ library
-    let dst = cmake::build("external");
-    println!("cargo:rustc-link-search=native={}/build/lib", dst.display());
+    let mut libs_file = File::open(dst.join("cxx_link_libs.cmake")).unwrap();
+    let mut content = String::new();
+    libs_file.read_to_string(&mut content).unwrap();
+    for lib in content.lines() {
+        // Workaround a libclang_rt.osx.a not found error. This library is not
+        // necessary for Chemharp, so let's just ignore it.
+        if !lib.contains("libclang_rt.osx.a") {
+            println!("cargo:rustc-link-lib={}", lib);
+        }
+    }
 }

@@ -22,5 +22,16 @@ ExternalProject_add(chemharp
                 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=${CMAKE_FIND_ROOT_PATH_MODE_PROGRAM}
 )
 
-file(GLOB libraries ${PROJECT_BINARY_DIR}/lib/*)
-install(FILES ${libraries} DESTINATION ${CMAKE_INSTALL_PREFIX})
+file(GLOB libraries ${PROJECT_BINARY_DIR}/lib/*.${CMAKE_STATIC_LIBRARY_SUFFIX})
+install(FILES ${libraries} DESTINATION lib)
+
+
+file(REMOVE ${PROJECT_BINARY_DIR}/cxx_link_libs.cmake)
+file(REMOVE ${PROJECT_BINARY_DIR}/cxx_link_dirs.cmake)
+
+foreach(lib ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES})
+    file(APPEND ${PROJECT_BINARY_DIR}/cxx_link_libs.cmake "${lib}\n")
+endforeach()
+foreach(dir ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+    file(APPEND ${PROJECT_BINARY_DIR}/cxx_link_dirs.cmake "${dir}\n")
+endforeach()
