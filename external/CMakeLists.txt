@@ -6,6 +6,7 @@ ExternalProject_add(chemharp
     URL file://${CMAKE_CURRENT_SOURCE_DIR}/chemharp-125dc9.tar.gz
     URL_MD5 d20812c60baf0a72cf103fe21ffe2f4c
     CMAKE_ARGS  -DBUILD_SHARED_LIBS=OFF
+                -DCMAKE_POSITION_INDEPENDENT_CODE=ON
                 -DBUILD_FRONTEND=OFF
                 -DCMAKE_BUILD_TYPE=release
                 # Setting compilers
