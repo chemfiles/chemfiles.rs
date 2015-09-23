@@ -65,7 +65,7 @@ impl Frame {
         unsafe {
             try!(check(chrp_frame_positions(
                 self.handle,
-                res[0].as_mut_ptr() as *mut libc::c_void,
+                res.as_mut_ptr() as *mut libc::c_void,
                 natoms as u64
             )));
         }
@@ -91,7 +91,7 @@ impl Frame {
         unsafe {
             try!(check(chrp_frame_velocities(
                 self.handle,
-                res[0].as_mut_ptr() as *mut libc::c_void,
+                res.as_mut_ptr() as *mut libc::c_void,
                 natoms as u64
             )));
         }
