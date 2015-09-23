@@ -61,11 +61,7 @@ impl Frame {
     /// Get the positions from the `Frame`.
     pub fn positions(&self) -> Result<Vec<[f32; 3]>, Error> {
         let natoms = try!(self.natoms());
-        // TODO: use unstable Vec::resize here
-        let mut res = Vec::with_capacity(natoms);
-        for _ in 0..natoms {
-            res.push([0.0; 3]);
-        }
+        let mut res = vec![[0.0; 3]; natoms];
         unsafe {
             try!(check(chrp_frame_positions(
                 self.handle,
@@ -91,11 +87,7 @@ impl Frame {
     /// Get the velocities from the `Frame`.
     pub fn velocities(&self) -> Result<Vec<[f32; 3]>, Error> {
         let natoms = try!(self.natoms());
-        // TODO: use unstable Vec::resize here
-        let mut res = Vec::with_capacity(natoms);
-        for _ in 0..natoms {
-            res.push([0.0; 3]);
-        }
+        let mut res = vec![[0.0; 3]; natoms];
         unsafe {
             try!(check(chrp_frame_velocities(
                 self.handle,

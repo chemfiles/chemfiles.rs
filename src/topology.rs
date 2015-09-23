@@ -140,11 +140,7 @@ impl Topology {
     /// Get the list of bonds in the system
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>, Error> {
         let nbonds = try!(self.bonds_count());
-        // TODO: use unstable Vec::resize here
-        let mut res = Vec::with_capacity(nbonds);
-        for _ in 0..nbonds {
-            res.push([u64::MAX; 2]);
-        }
+        let mut res = vec![[u64::MAX; 2]; nbonds];
         unsafe {
             try!(check(chrp_topology_bonds(
                 self.handle,
@@ -158,11 +154,7 @@ impl Topology {
     /// Get the list of angles in the system
     pub fn angles(&self) -> Result<Vec<[u64; 3]>, Error> {
         let nangles = try!(self.angles_count());
-        // TODO: use unstable Vec::resize here
-        let mut res = Vec::with_capacity(nangles);
-        for _ in 0..nangles {
-            res.push([u64::MAX; 3]);
-        }
+        let mut res = vec![[u64::MAX; 3]; nangles];
         unsafe {
             try!(check(chrp_topology_angles(
                 self.handle,
@@ -176,11 +168,7 @@ impl Topology {
     /// Get the list of dihedral angles in the system
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>, Error> {
         let ndihedrals = try!(self.dihedrals_count());
-        // TODO: use unstable Vec::resize here
-        let mut res = Vec::with_capacity(ndihedrals);
-        for _ in 0..ndihedrals {
-            res.push([u64::MAX; 4]);
-        }
+        let mut res = vec![[u64::MAX; 4]; ndihedrals];
         unsafe {
             try!(check(chrp_topology_dihedrals(
                 self.handle,
