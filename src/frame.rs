@@ -65,7 +65,7 @@ impl Frame {
         unsafe {
             try!(check(chrp_frame_positions(
                 self.handle,
-                res.as_mut_ptr() as *mut libc::c_void,
+                (*res.as_mut_ptr()).as_mut_ptr(),
                 natoms as u64
             )));
         }
@@ -77,7 +77,7 @@ impl Frame {
         unsafe {
             try!(check(chrp_frame_set_positions(
                 self.handle as *mut CHRP_FRAME,
-                positions.as_ptr() as *const libc::c_void,
+                (*positions.as_ptr()).as_ptr(),
                 positions.len() as u64)));
         }
         Ok(())
@@ -90,7 +90,7 @@ impl Frame {
         unsafe {
             try!(check(chrp_frame_velocities(
                 self.handle,
-                res.as_mut_ptr() as *mut libc::c_void,
+                (*res.as_mut_ptr()).as_mut_ptr(),
                 natoms as u64
             )));
         }
@@ -102,7 +102,7 @@ impl Frame {
         unsafe {
             try!(check(chrp_frame_set_velocities(
                 self.handle as *mut CHRP_FRAME,
-                velocities.as_ptr() as *const libc::c_void,
+                (*velocities.as_ptr()).as_ptr(),
                 velocities.len() as u64)));
         }
         Ok(())

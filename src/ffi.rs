@@ -48,10 +48,10 @@ extern "C" {
 
     pub fn chrp_frame(natoms: libc::size_t) -> *mut CHRP_FRAME;
     pub fn chrp_frame_atoms_count(frame: *const CHRP_FRAME, natoms: *mut libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_frame_positions(frame: *const CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_frame_set_positions(frame: *mut CHRP_FRAME, data: *const libc::c_void, size: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_frame_velocities(frame: *const CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_frame_set_velocities(frame: *mut CHRP_FRAME, data: *const libc::c_void, size: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_positions(frame: *const CHRP_FRAME, data: *mut libc::c_float, size: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_set_positions(frame: *mut CHRP_FRAME, data: *const libc::c_float, size: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_velocities(frame: *const CHRP_FRAME, data: *mut libc::c_float, size: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_set_velocities(frame: *mut CHRP_FRAME, data: *const libc::c_float, size: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_has_velocities(frame: *const CHRP_FRAME, has_vel: *mut u8) -> CHRP_STATUS;
     pub fn chrp_frame_set_cell(frame: *mut CHRP_FRAME, cell: *const CHRP_CELL) -> CHRP_STATUS;
     pub fn chrp_frame_set_topology(frame: *mut CHRP_FRAME, topology: *const CHRP_TOPOLOGY) -> CHRP_STATUS;
@@ -86,9 +86,9 @@ extern "C" {
     pub fn chrp_topology_bonds_count(topology: *const CHRP_TOPOLOGY, nbonds: *mut libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_angles_count(topology: *const CHRP_TOPOLOGY, nangles: *mut libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_dihedrals_count(topology: *const CHRP_TOPOLOGY, ndihedrals: *mut libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_topology_bonds(topology: *const CHRP_TOPOLOGY, data: *mut libc::c_void, nbonds: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_topology_angles(topology: *const CHRP_TOPOLOGY, data: *mut libc::c_void, nangles: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_topology_dihedrals(topology: *const CHRP_TOPOLOGY, data: *mut libc::c_void, ndihedrals: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_topology_bonds(topology: *const CHRP_TOPOLOGY, data: *mut libc::size_t, nbonds: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_topology_angles(topology: *const CHRP_TOPOLOGY, data: *mut libc::size_t, nangles: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_topology_dihedrals(topology: *const CHRP_TOPOLOGY, data: *mut libc::size_t, ndihedrals: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_add_bond(topology: *mut CHRP_TOPOLOGY, i: libc::size_t, j: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_remove_bond(topology: *mut CHRP_TOPOLOGY, i: libc::size_t, j: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_topology_free(topology: *mut CHRP_TOPOLOGY) -> CHRP_STATUS;

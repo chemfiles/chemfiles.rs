@@ -144,7 +144,7 @@ impl Topology {
         unsafe {
             try!(check(chrp_topology_bonds(
                 self.handle,
-                res.as_mut_ptr() as *mut libc::c_void,
+                (*res.as_mut_ptr()).as_mut_ptr(),
                 nbonds as u64
             )));
         }
@@ -158,7 +158,7 @@ impl Topology {
         unsafe {
             try!(check(chrp_topology_angles(
                 self.handle,
-                res.as_mut_ptr() as *mut libc::c_void,
+                (*res.as_mut_ptr()).as_mut_ptr(),
                 nangles as u64
             )));
         }
@@ -172,7 +172,7 @@ impl Topology {
         unsafe {
             try!(check(chrp_topology_dihedrals(
                 self.handle,
-                res.as_mut_ptr() as *mut libc::c_void,
+                (*res.as_mut_ptr()).as_mut_ptr(),
                 ndihedrals as u64
             )));
         }
