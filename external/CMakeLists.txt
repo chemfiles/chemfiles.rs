@@ -7,7 +7,7 @@ ExternalProject_add(chemharp
     CMAKE_ARGS  -DBUILD_SHARED_LIBS=OFF
                 -DCMAKE_POSITION_INDEPENDENT_CODE=ON
                 -DBUILD_FRONTEND=OFF
-                -DCMAKE_BUILD_TYPE=release
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                 # Setting compilers
                 -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                 -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
