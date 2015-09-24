@@ -65,6 +65,20 @@ impl UnitCell {
         Ok(UnitCell{handle: handle})
     }
 
+    /// Create an `Infinite` `UnitCell`
+    pub fn infinite() -> Result<UnitCell, Error> {
+        let handle : *const CHRP_CELL;
+        unsafe {
+            handle = chrp_cell(0.0, 0.0, 0.0);
+        }
+        if handle.is_null() {
+            return Err(Error::ChemharpCppError{message: Error::last_error()})
+        }
+        let mut cell = UnitCell{handle: handle};
+        try!(cell.set_cell_type(CellType::Infinite));
+        Ok(cell)
+    }
+
     /// Create an `Triclinic` `UnitCell` from the three lenghts and three angles
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell, Error> {
         let handle : *const CHRP_CELL;
@@ -254,6 +268,9 @@ mod test {
         assert_eq!(cell.cell_type(), Ok(CellType::Orthorombic));
 
         assert!(cell.set_cell_type(CellType::Infinite).is_ok());
+        assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
+
+        let cell = UnitCell::infinite().unwrap();
         assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
     }
 
