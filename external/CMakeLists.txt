@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.12)
 include(ExternalProject)
 ExternalProject_add(chemharp
     PREFIX chemarp
-    URL file://${CMAKE_CURRENT_SOURCE_DIR}/chemharp-41647c5.tar.gz
+    URL file://${CMAKE_CURRENT_SOURCE_DIR}/chemharp-7bff033.tar.gz
     CMAKE_ARGS  -DBUILD_SHARED_LIBS=OFF
                 -DCMAKE_POSITION_INDEPENDENT_CODE=ON
                 -DBUILD_FRONTEND=OFF
