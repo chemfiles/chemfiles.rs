@@ -49,9 +49,9 @@ extern "C" {
     pub fn chrp_frame(natoms: libc::size_t) -> *mut CHRP_FRAME;
     pub fn chrp_frame_atoms_count(frame: *const CHRP_FRAME, natoms: *mut libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_positions(frame: *const CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_frame_set_positions(frame: *mut CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_set_positions(frame: *mut CHRP_FRAME, data: *const libc::c_void, size: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_velocities(frame: *const CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
-    pub fn chrp_frame_set_velocities(frame: *mut CHRP_FRAME, data: *mut libc::c_void, size: libc::size_t) -> CHRP_STATUS;
+    pub fn chrp_frame_set_velocities(frame: *mut CHRP_FRAME, data: *const libc::c_void, size: libc::size_t) -> CHRP_STATUS;
     pub fn chrp_frame_has_velocities(frame: *const CHRP_FRAME, has_vel: *mut u8) -> CHRP_STATUS;
     pub fn chrp_frame_set_cell(frame: *mut CHRP_FRAME, cell: *const CHRP_CELL) -> CHRP_STATUS;
     pub fn chrp_frame_set_topology(frame: *mut CHRP_FRAME, topology: *const CHRP_TOPOLOGY) -> CHRP_STATUS;

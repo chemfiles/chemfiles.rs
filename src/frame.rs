@@ -74,11 +74,10 @@ impl Frame {
 
     /// Set the positions in the `Frame`.
     pub fn set_positions(&mut self, positions: Vec<[f32; 3]>) -> Result<(), Error> {
-        let mut positions = positions;
         unsafe {
             try!(check(chrp_frame_set_positions(
                 self.handle as *mut CHRP_FRAME,
-                positions.as_mut_ptr() as *mut libc::c_void,
+                positions.as_ptr() as *const libc::c_void,
                 positions.len() as u64)));
         }
         Ok(())
@@ -100,11 +99,10 @@ impl Frame {
 
     /// Set the velocities in the `Frame`.
     pub fn set_velocities(&mut self, velocities: Vec<[f32; 3]>) -> Result<(), Error> {
-        let mut velocities = velocities;
         unsafe {
             try!(check(chrp_frame_set_velocities(
                 self.handle as *mut CHRP_FRAME,
-                velocities.as_mut_ptr() as *mut libc::c_void,
+                velocities.as_ptr() as *const libc::c_void,
                 velocities.len() as u64)));
         }
         Ok(())
