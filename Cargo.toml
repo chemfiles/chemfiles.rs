@@ -1,15 +1,15 @@
 [package]
-name = "chemharp"
-version = "0.3.0"
+name = "chemfiles"
+version = "0.4.0-dev"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
-documentation = "https://chemharp.readthedocs.org/"
-repository = "https://github.com/Luthaf/Chemharp.rs"
+documentation = "https://chemfiles.readthedocs.org/"
+repository = "https://github.com/chemfiles/chemfiles.rs"
 readme = "README.md"
 license = "MPL-2.0"
 
 [lib]
-name = "chemharp"
+name = "chemfiles"
 doctest = false
 
 [dependencies]
-chemharp-sys = {path = "chemharp-sys"}
+chemfiles-sys = {path = "chemfiles-sys"}

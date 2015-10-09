@@ -1,13 +1,12 @@
-/*
- * Chemharp, an efficient IO library for chemistry file formats
+/* Chemfiles, an efficient IO library for chemistry file formats
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemharp_sys;
-use self::chemharp_sys::*;
+extern crate chemfiles_sys;
+use self::chemfiles_sys::*;
 
 use std::ops::Drop;
 
@@ -18,31 +17,31 @@ use super::{Atom, Topology, UnitCell};
 /// A `Frame` holds data from one step of a simulation: the current `Topology`,
 /// the positions, and maybe the velocities of the particles in the system.
 pub struct Frame {
-    handle: *const CHRP_FRAME
+    handle: *const CHFL_FRAME
 }
 
 impl Frame {
     /// Create an empty frame with initial capacity of `natoms`. It will be
     /// resized by the library as needed.
     pub fn new(natoms: u64) -> Result<Frame, Error> {
-        let handle : *const CHRP_FRAME;
+        let handle : *const CHFL_FRAME;
         unsafe {
-            handle = chrp_frame(natoms);
+            handle = chfl_frame(natoms);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         Ok(Frame{handle: handle})
     }
 
     /// Get a specific `Atom` from a frame, given its `index` in the frame
     pub fn atom(&self, index: u64) -> Result<Atom, Error> {
-        let handle : *const CHRP_ATOM;
+        let handle : *const CHFL_ATOM;
         unsafe {
-            handle = chrp_atom_from_frame(self.handle as *mut CHRP_FRAME, index);
+            handle = chfl_atom_from_frame(self.handle as *mut CHFL_FRAME, index);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         unsafe {
             Ok(Atom::from_ptr(handle))
@@ -53,7 +52,7 @@ impl Frame {
     pub fn natoms(&self) -> Result<usize, Error> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chrp_frame_atoms_count(self.handle, &mut natoms)));
+            try!(check(chfl_frame_atoms_count(self.handle, &mut natoms)));
         }
         return Ok(natoms as usize);
     }
@@ -63,7 +62,7 @@ impl Frame {
         let natoms = try!(self.natoms());
         let mut res = vec![[0.0; 3]; natoms];
         unsafe {
-            try!(check(chrp_frame_positions(
+            try!(check(chfl_frame_positions(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
                 natoms as u64
@@ -75,8 +74,8 @@ impl Frame {
     /// Set the positions in the `Frame`.
     pub fn set_positions(&mut self, positions: Vec<[f32; 3]>) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_frame_set_positions(
-                self.handle as *mut CHRP_FRAME,
+            try!(check(chfl_frame_set_positions(
+                self.handle as *mut CHFL_FRAME,
                 (*positions.as_ptr()).as_ptr(),
                 positions.len() as u64)));
         }
@@ -88,7 +87,7 @@ impl Frame {
         let natoms = try!(self.natoms());
         let mut res = vec![[0.0; 3]; natoms];
         unsafe {
-            try!(check(chrp_frame_velocities(
+            try!(check(chfl_frame_velocities(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
                 natoms as u64
@@ -100,8 +99,8 @@ impl Frame {
     /// Set the velocities in the `Frame`.
     pub fn set_velocities(&mut self, velocities: Vec<[f32; 3]>) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_frame_set_velocities(
-                self.handle as *mut CHRP_FRAME,
+            try!(check(chfl_frame_set_velocities(
+                self.handle as *mut CHFL_FRAME,
                 (*velocities.as_ptr()).as_ptr(),
                 velocities.len() as u64)));
         }
@@ -112,19 +111,19 @@ impl Frame {
     pub fn has_velocities(&self) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
-            try!(check(chrp_frame_has_velocities(self.handle, &mut res)));
+            try!(check(chfl_frame_has_velocities(self.handle, &mut res)));
         }
         return Ok(res != 0);
     }
 
     /// Get the `UnitCell` from the `Frame`
     pub fn cell(&self) -> Result<UnitCell, Error> {
-        let handle : *const CHRP_CELL;
+        let handle : *const CHFL_CELL;
         unsafe {
-            handle = chrp_cell_from_frame(self.handle as *mut CHRP_FRAME);
+            handle = chfl_cell_from_frame(self.handle as *mut CHFL_FRAME);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         unsafe {
             Ok(UnitCell::from_ptr(handle))
@@ -134,8 +133,8 @@ impl Frame {
     /// Set the `UnitCell` of the `Frame`
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_frame_set_cell(
-                self.handle as *mut CHRP_FRAME,
+            try!(check(chfl_frame_set_cell(
+                self.handle as *mut CHFL_FRAME,
                 cell.as_ptr()
             )));
         }
@@ -144,12 +143,12 @@ impl Frame {
 
     /// Get the `Topology` from the `Frame`
     pub fn topology(&self) -> Result<Topology, Error> {
-        let handle : *const CHRP_TOPOLOGY;
+        let handle : *const CHFL_TOPOLOGY;
         unsafe {
-            handle = chrp_topology_from_frame(self.handle as *mut CHRP_FRAME);
+            handle = chfl_topology_from_frame(self.handle as *mut CHFL_FRAME);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         unsafe {
             Ok(Topology::from_ptr(handle))
@@ -159,8 +158,8 @@ impl Frame {
     /// Set the `Topology` of the `Frame`
     pub fn set_topology(&mut self, topology: &Topology) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_frame_set_topology(
-                self.handle as *mut CHRP_FRAME,
+            try!(check(chfl_frame_set_topology(
+                self.handle as *mut CHFL_FRAME,
                 topology.as_ptr()
             )));
         }
@@ -171,7 +170,7 @@ impl Frame {
     pub fn step(&self) -> Result<u64, Error> {
         let mut res = 0;
         unsafe {
-            try!(check(chrp_frame_step(self.handle, &mut res)));
+            try!(check(chfl_frame_step(self.handle, &mut res)));
         }
         return Ok(res);
     }
@@ -179,7 +178,7 @@ impl Frame {
     /// Set the `Frame` step
     pub fn set_step(&mut self, step: u64) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_frame_set_step(self.handle as *mut CHRP_FRAME, step)));
+            try!(check(chfl_frame_set_step(self.handle as *mut CHFL_FRAME, step)));
         }
         return Ok(());
     }
@@ -189,20 +188,20 @@ impl Frame {
     /// the topology bond list.
     pub fn guess_topology(&self, bonds: bool) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_frame_guess_topology(self.handle as *mut CHRP_FRAME, bool_to_u8(bonds))));
+            try!(check(chfl_frame_guess_topology(self.handle as *mut CHFL_FRAME, bool_to_u8(bonds))));
         }
         return Ok(());
     }
 
     /// Create a `Frame` from a C pointer. This function is unsafe because
     /// no validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHRP_FRAME) -> Frame {
+    pub unsafe fn from_ptr(ptr: *const CHFL_FRAME) -> Frame {
         Frame{handle: ptr}
     }
 
     /// Get the underlying C pointer. This function is unsafe because no
     /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHRP_FRAME {
+    pub unsafe fn as_ptr(&self) -> *const CHFL_FRAME {
         self.handle
     }
 }
@@ -218,7 +217,7 @@ impl Drop for Frame {
     fn drop(&mut self) {
         unsafe {
             check(
-                chrp_frame_free(self.handle as *mut CHRP_FRAME)
+                chfl_frame_free(self.handle as *mut CHFL_FRAME)
             ).ok().expect("Error while freeing memory!");
         }
     }

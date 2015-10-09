@@ -1,13 +1,12 @@
-/*
- * Chemharp, an efficient IO library for chemistry file formats
+/* Chemfiles, an efficient IO library for chemistry file formats
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemharp_sys;
-use self::chemharp_sys::*;
+extern crate chemfiles_sys;
+use self::chemfiles_sys::*;
 
 use std::ops::Drop;
 
@@ -24,8 +23,8 @@ pub enum CellType {
     Infinite = INFINITE as isize
 }
 
-impl From<CHRP_CELL_TYPE> for CellType {
-    fn from(celltype: CHRP_CELL_TYPE) -> CellType {
+impl From<CHFL_CELL_TYPE> for CellType {
+    fn from(celltype: CHFL_CELL_TYPE) -> CellType {
         match celltype {
             ORTHOROMBIC => CellType::Orthorombic,
             TRICLINIC => CellType::Triclinic,
@@ -50,30 +49,30 @@ impl From<CHRP_CELL_TYPE> for CellType {
 ///
 /// An unit cell also have a cell type, represented by the `CellType` enum.
 pub struct UnitCell {
-    handle: *const CHRP_CELL
+    handle: *const CHFL_CELL
 }
 
 impl UnitCell {
     /// Create an `Orthorombic` `UnitCell` from the three lenghts
     pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell, Error> {
-        let handle : *const CHRP_CELL;
+        let handle : *const CHFL_CELL;
         unsafe {
-            handle = chrp_cell(a, b, c);
+            handle = chfl_cell(a, b, c);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         Ok(UnitCell{handle: handle})
     }
 
     /// Create an `Infinite` `UnitCell`
     pub fn infinite() -> Result<UnitCell, Error> {
-        let handle : *const CHRP_CELL;
+        let handle : *const CHFL_CELL;
         unsafe {
-            handle = chrp_cell(0.0, 0.0, 0.0);
+            handle = chfl_cell(0.0, 0.0, 0.0);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         let mut cell = UnitCell{handle: handle};
         try!(cell.set_cell_type(CellType::Infinite));
@@ -82,12 +81,12 @@ impl UnitCell {
 
     /// Create an `Triclinic` `UnitCell` from the three lenghts and three angles
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell, Error> {
-        let handle : *const CHRP_CELL;
+        let handle : *const CHFL_CELL;
         unsafe {
-            handle = chrp_cell_triclinic(a, b, c, alpha, beta, gamma);
+            handle = chfl_cell_triclinic(a, b, c, alpha, beta, gamma);
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         Ok(UnitCell{handle: handle})
     }
@@ -96,7 +95,7 @@ impl UnitCell {
     pub fn lengths(&self) -> Result<(f64, f64, f64), Error> {
         let (mut a, mut b, mut c) = (0.0, 0.0, 0.0);
         unsafe {
-            try!(check(chrp_cell_lengths(self.handle, &mut a, &mut b, &mut c)));
+            try!(check(chfl_cell_lengths(self.handle, &mut a, &mut b, &mut c)));
         }
         Ok((a, b, c))
     }
@@ -104,7 +103,7 @@ impl UnitCell {
     /// Set the three lenghts of an `UnitCell`, in Angstroms.
     pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_cell_set_lengths(self.handle as *mut CHRP_CELL, a, b, c)));
+            try!(check(chfl_cell_set_lengths(self.handle as *mut CHFL_CELL, a, b, c)));
         }
         Ok(())
     }
@@ -113,7 +112,7 @@ impl UnitCell {
     pub fn angles(&self) -> Result<(f64, f64, f64), Error> {
         let (mut alpha, mut beta, mut gamma) = (0.0, 0.0, 0.0);
         unsafe {
-            try!(check(chrp_cell_angles(self.handle, &mut alpha, &mut beta, &mut gamma)));
+            try!(check(chfl_cell_angles(self.handle, &mut alpha, &mut beta, &mut gamma)));
         }
         Ok((alpha, beta, gamma))
     }
@@ -122,7 +121,7 @@ impl UnitCell {
     /// with `Triclinic` cells.
     pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_cell_set_angles(self.handle as *mut CHRP_CELL, alpha, beta, gamma)));
+            try!(check(chfl_cell_set_angles(self.handle as *mut CHFL_CELL, alpha, beta, gamma)));
         }
         Ok(())
     }
@@ -131,7 +130,7 @@ impl UnitCell {
     pub fn matrix(&self) -> Result<[[f64; 3]; 3], Error> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
-            try!(check(chrp_cell_matrix(self.handle, &mut res[0])));
+            try!(check(chfl_cell_matrix(self.handle, &mut res[0])));
         }
         Ok(res)
     }
@@ -140,7 +139,7 @@ impl UnitCell {
     pub fn cell_type(&self) -> Result<CellType, Error> {
         let mut res = 0;
         unsafe {
-            try!(check(chrp_cell_type(self.handle, &mut res)));
+            try!(check(chfl_cell_type(self.handle, &mut res)));
         }
         Ok(CellType::from(res))
     }
@@ -148,7 +147,7 @@ impl UnitCell {
     /// Set the type of the unit cell
     pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_cell_set_type(self.handle as *mut CHRP_CELL, cell_type as CHRP_CELL_TYPE)));
+            try!(check(chfl_cell_set_type(self.handle as *mut CHFL_CELL, cell_type as CHFL_CELL_TYPE)));
         }
         Ok(())
     }
@@ -157,7 +156,7 @@ impl UnitCell {
     pub fn periodicity(&self) -> Result<(bool, bool, bool), Error> {
         let (mut x, mut y, mut z) = (0, 0, 0);
         unsafe {
-            try!(check(chrp_cell_periodicity(self.handle, &mut x, &mut y, &mut z)));
+            try!(check(chfl_cell_periodicity(self.handle, &mut x, &mut y, &mut z)));
         }
         Ok((x != 0, y != 0, z != 0))
     }
@@ -165,8 +164,8 @@ impl UnitCell {
     /// Set the cell periodic boundary conditions along the three axis
     pub fn set_periodicity(&mut self, x: bool, y: bool, z: bool) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_cell_set_periodicity(
-                self.handle as *mut CHRP_CELL,
+            try!(check(chfl_cell_set_periodicity(
+                self.handle as *mut CHFL_CELL,
                 bool_to_u8(x),
                 bool_to_u8(y),
                 bool_to_u8(z)
@@ -179,20 +178,20 @@ impl UnitCell {
     pub fn volume(&self) -> Result<f64, Error> {
         let mut res = 0.0;
         unsafe {
-            try!(check(chrp_cell_volume(self.handle, &mut res)));
+            try!(check(chfl_cell_volume(self.handle, &mut res)));
         }
         Ok(res)
     }
 
     /// Create an `UnitCell` from a C pointer. This function is unsafe because
     /// no validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHRP_CELL) -> UnitCell {
+    pub unsafe fn from_ptr(ptr: *const CHFL_CELL) -> UnitCell {
         UnitCell{handle: ptr}
     }
 
     /// Get the underlying C pointer. This function is unsafe because no
     /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHRP_CELL {
+    pub unsafe fn as_ptr(&self) -> *const CHFL_CELL {
         self.handle
     }
 }
@@ -208,7 +207,7 @@ impl Drop for UnitCell {
     fn drop(&mut self) {
         unsafe {
             check(
-                chrp_cell_free(self.handle as *mut CHRP_CELL)
+                chfl_cell_free(self.handle as *mut CHFL_CELL)
             ).ok().expect("Error while freeing memory!");
         }
     }

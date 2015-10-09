@@ -1,15 +1,15 @@
 [package]
-name = "chemharp-sys"
+name = "chemfiles-sys"
 version = "0.4.0-dev"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
-links = "chemharp"
+links = "chemfiles"
 build = "build.rs"
-repository = "https://github.com/Luthaf/Chemharp.rs"
+repository = "https://github.com/chemfiles/chemfiles.rs"
 license = "MPL-2.0"
-description = "Native bindings to the chemharp library"
+description = "Native bindings to the chemfiles library"
 
 [lib]
-name = "chemharp_sys"
+name = "chemfiles_sys"
 path = "lib.rs"
 
 [dependencies]

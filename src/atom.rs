@@ -1,13 +1,12 @@
-/*
- * Chemharp, an efficient IO library for chemistry file formats
+/* Chemfiles, an efficient IO library for chemistry file formats
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemharp_sys;
-use self::chemharp_sys::*;
+extern crate chemfiles_sys;
+use self::chemfiles_sys::*;
 
 use std::ops::Drop;
 
@@ -28,8 +27,8 @@ pub enum AtomType {
     Undefined = UNDEFINED as isize,
 }
 
-impl From<CHRP_ATOM_TYPE> for AtomType {
-    fn from(atomtype: CHRP_ATOM_TYPE) -> AtomType {
+impl From<CHFL_ATOM_TYPE> for AtomType {
+    fn from(atomtype: CHFL_ATOM_TYPE) -> AtomType {
         match atomtype {
             ELEMENT => AtomType::Element,
             CORSE_GRAIN => AtomType::CorseGrain,
@@ -44,19 +43,19 @@ impl From<CHRP_ATOM_TYPE> for AtomType {
 /// retrieve informations about a particle, such as mass, name, atomic number,
 /// *etc.*
 pub struct Atom {
-    handle: *const CHRP_ATOM
+    handle: *const CHFL_ATOM
 }
 
 impl Atom {
     /// Create a new `Atom` from a `name`.
     pub fn new<'a, S>(name: S) -> Result<Atom, Error> where S: Into<&'a str>{
-        let handle : *const CHRP_ATOM;
+        let handle : *const CHFL_ATOM;
         let buffer = string::to_c(name.into());
         unsafe {
-            handle = chrp_atom(buffer.as_ptr());
+            handle = chfl_atom(buffer.as_ptr());
         }
         if handle.is_null() {
-            return Err(Error::ChemharpCppError{message: Error::last_error()})
+            return Err(Error::ChemfilesCppError{message: Error::last_error()})
         }
         Ok(Atom{handle: handle})
     }
@@ -65,7 +64,7 @@ impl Atom {
     pub fn mass(&self) -> Result<f32, Error> {
         let mut mass: f32 = 0.0;
         unsafe {
-            try!(check(chrp_atom_mass(self.handle, &mut mass)));
+            try!(check(chfl_atom_mass(self.handle, &mut mass)));
         }
         return Ok(mass);
     }
@@ -73,7 +72,7 @@ impl Atom {
     /// Set the `Atom` mass, in atomic mass units
     pub fn set_mass(&mut self, mass: f32) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_atom_set_mass(self.handle as *mut CHRP_ATOM, mass)));
+            try!(check(chfl_atom_set_mass(self.handle as *mut CHFL_ATOM, mass)));
         }
         return Ok(());
     }
@@ -82,7 +81,7 @@ impl Atom {
     pub fn charge(&self) -> Result<f32, Error> {
         let mut charge: f32 = 0.0;
         unsafe {
-            try!(check(chrp_atom_charge(self.handle, &mut charge)));
+            try!(check(chfl_atom_charge(self.handle, &mut charge)));
         }
         return Ok(charge);
     }
@@ -90,7 +89,7 @@ impl Atom {
     /// Set the `Atom` charge, in number of the electron charge *e*
     pub fn set_charge(&mut self, charge: f32) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_atom_set_charge(self.handle as *mut CHRP_ATOM, charge)));
+            try!(check(chfl_atom_set_charge(self.handle as *mut CHFL_ATOM, charge)));
         }
         return Ok(());
     }
@@ -99,7 +98,7 @@ impl Atom {
     pub fn name(&self) -> Result<String, Error> {
         let mut buffer = vec![0; 10];
         unsafe {
-            try!(check(chrp_atom_name(self.handle, &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_name(self.handle, &mut buffer[0], buffer.len() as u64)));
         }
         return Ok(string::from_c(&buffer[0]));
     }
@@ -108,7 +107,7 @@ impl Atom {
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<(), Error> where S: Into<&'a str>{
         let buffer = string::to_c(name.into());
         unsafe {
-            try!(check(chrp_atom_set_name(self.handle as *mut CHRP_ATOM, buffer.as_ptr())));
+            try!(check(chfl_atom_set_name(self.handle as *mut CHFL_ATOM, buffer.as_ptr())));
         }
         return Ok(());
     }
@@ -119,7 +118,7 @@ impl Atom {
     pub fn full_name(&mut self) -> Result<String, Error> {
         let mut buffer = vec![0; 10];
         unsafe {
-            try!(check(chrp_atom_full_name(self.handle, &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_full_name(self.handle, &mut buffer[0], buffer.len() as u64)));
         }
         return Ok(string::from_c(&buffer[0]));
     }
@@ -129,7 +128,7 @@ impl Atom {
     pub fn vdw_radius(&self) -> Result<f64, Error> {
         let mut radius: f64 = 0.0;
         unsafe {
-            try!(check(chrp_atom_vdw_radius(self.handle, &mut radius)));
+            try!(check(chfl_atom_vdw_radius(self.handle, &mut radius)));
         }
         return Ok(radius);
     }
@@ -139,7 +138,7 @@ impl Atom {
     pub fn covalent_radius(&self) -> Result<f64, Error> {
         let mut radius: f64 = 0.0;
         unsafe {
-            try!(check(chrp_atom_covalent_radius(self.handle, &mut radius)));
+            try!(check(chfl_atom_covalent_radius(self.handle, &mut radius)));
         }
         return Ok(radius);
     }
@@ -149,7 +148,7 @@ impl Atom {
     pub fn atomic_number(&self) -> Result<i32, Error> {
         let mut number: i32 = 0;
         unsafe {
-            try!(check(chrp_atom_atomic_number(self.handle, &mut number)));
+            try!(check(chfl_atom_atomic_number(self.handle, &mut number)));
         }
         return Ok(number);
     }
@@ -158,7 +157,7 @@ impl Atom {
     pub fn atom_type(&self) -> Result<AtomType, Error> {
         let mut res = 0;
         unsafe {
-            try!(check(chrp_atom_type(self.handle, &mut res)));
+            try!(check(chfl_atom_type(self.handle, &mut res)));
         }
         Ok(AtomType::from(res))
     }
@@ -166,20 +165,20 @@ impl Atom {
     /// Set the type of the atom
     pub fn set_atom_type(&mut self, atom_type: AtomType) -> Result<(), Error> {
         unsafe {
-            try!(check(chrp_atom_set_type(self.handle as *mut CHRP_ATOM, atom_type as CHRP_ATOM_TYPE)));
+            try!(check(chfl_atom_set_type(self.handle as *mut CHFL_ATOM, atom_type as CHFL_ATOM_TYPE)));
         }
         Ok(())
     }
 
     /// Create an `Atom` from a C pointer. This function is unsafe because no
     /// validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHRP_ATOM) -> Atom {
+    pub unsafe fn from_ptr(ptr: *const CHFL_ATOM) -> Atom {
         Atom{handle: ptr}
     }
 
     /// Get the underlying C pointer. This function is unsafe because no
     /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHRP_ATOM {
+    pub unsafe fn as_ptr(&self) -> *const CHFL_ATOM {
         self.handle
     }
 }
@@ -188,7 +187,7 @@ impl Drop for Atom {
     fn drop(&mut self) {
         unsafe {
             check(
-                chrp_atom_free(self.handle as *mut CHRP_ATOM)
+                chfl_atom_free(self.handle as *mut CHFL_ATOM)
             ).ok().expect("Error while freeing memory!");
         }
     }

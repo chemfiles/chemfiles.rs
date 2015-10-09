@@ -1,5 +1,4 @@
-/*
- * Chemharp, an efficient IO library for chemistry file formats
+/* Chemfiles, an efficient IO library for chemistry file formats
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,8 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 //! Logging utilities
-extern crate chemharp_sys;
-use self::chemharp_sys::*;
+extern crate chemfiles_sys;
+use self::chemfiles_sys::*;
 
 use string;
 use errors::{Error, check};
@@ -28,8 +27,8 @@ pub enum LogLevel {
     DEBUG = DEBUG as isize,
 }
 
-impl From<CHRP_LOG_LEVEL> for LogLevel {
-    fn from(level: CHRP_LOG_LEVEL) -> LogLevel {
+impl From<CHFL_LOG_LEVEL> for LogLevel {
+    fn from(level: CHFL_LOG_LEVEL) -> LogLevel {
         match level {
             NONE => LogLevel::NONE,
             ERROR => LogLevel::ERROR,
@@ -45,7 +44,7 @@ impl From<CHRP_LOG_LEVEL> for LogLevel {
 pub fn level() -> Result<LogLevel, Error> {
     let mut level = 0;
     unsafe {
-        try!(check(chrp_loglevel(&mut level)));
+        try!(check(chfl_loglevel(&mut level)));
     }
     Ok(LogLevel::from(level))
 }
@@ -54,7 +53,7 @@ pub fn level() -> Result<LogLevel, Error> {
 /// Set the logging level to `level`
 pub fn set_level(level: LogLevel) -> Result<(), Error> {
     unsafe {
-        try!(check(chrp_set_loglevel(level as CHRP_LOG_LEVEL)));
+        try!(check(chfl_set_loglevel(level as CHFL_LOG_LEVEL)));
     }
     Ok(())
 }
@@ -63,7 +62,7 @@ pub fn set_level(level: LogLevel) -> Result<(), Error> {
 pub fn log_to_file<'a, S>(path: S) -> Result<(), Error> where S: Into<&'a str> {
     let buffer = string::to_c(path.into());
     unsafe {
-        try!(check(chrp_logfile(buffer.as_ptr())));
+        try!(check(chfl_logfile(buffer.as_ptr())));
     }
     Ok(())
 }
@@ -71,7 +70,7 @@ pub fn log_to_file<'a, S>(path: S) -> Result<(), Error> where S: Into<&'a str> {
 /// Write logs to the standard error stream. This is the default.
 pub fn log_to_stderr() -> Result<(), Error> {
     unsafe {
-        try!(check(chrp_log_stderr()));
+        try!(check(chfl_log_stderr()));
     }
     Ok(())
 }

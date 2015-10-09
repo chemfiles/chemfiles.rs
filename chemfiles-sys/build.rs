@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::fs::File;
 
 fn main() {
-    // Building the chemharp C++ library
+    // Building the chemfiles C++ library
     let dst = cmake::build(".").join("build");
     println!("cargo:rustc-link-search=native={}/lib", dst.display());
 
@@ -20,7 +20,7 @@ fn main() {
     libs_file.read_to_string(&mut content).unwrap();
     for lib in content.lines() {
         // Workaround a libclang_rt.osx.a not found error. This library is not
-        // necessary for Chemharp, so let's just ignore it.
+        // necessary for chemfiles, so let's just ignore it.
         if !lib.contains("libclang_rt.osx.a") {
             println!("cargo:rustc-link-lib={}", lib);
         }

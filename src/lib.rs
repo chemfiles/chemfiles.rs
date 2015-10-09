@@ -1,5 +1,4 @@
-/*
- * Chemharp, an efficient IO library for chemistry file formats
+/* Chemfiles, an efficient IO library for chemistry file formats
  * Copyright (C) 2015 Guillaume Fraux
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,20 +6,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 
-//! Chemharp is a multi-language library written in modern C++ for reading and
+//! Chemfiles is a multi-language library written in modern C++ for reading and
 //! writing from and to molecular trajectory files. These files are created by
 //! your favorite theoretical chemistry program, and contains informations about
 //! atomic or residues names and positions. Some format also have additional
 //! informations, such as velocities, forces, energy, …
 //!
-//! This crate expose the C API of chemharp to Rust, and make all the
+//! This crate expose the C API of chemfiles to Rust, and make all the
 //! functionalities accessibles. For more informations on the C++ library,
-//! please see its [documentation](http://chemharp.rtfd.org). Specifically, the
+//! please see its [documentation](http://chemfiles.rtfd.org). Specifically, the
 //! following pages are worth reading:
 //!
-//! - The [overview](http://chemharp.rtfd.org/en/latest/overview.html) of the
+//! - The [overview](http://chemfiles.rtfd.org/en/latest/overview.html) of the
 //!   classes organisation;
-//! - The [supported formats](http://chemharp.rtfd.org/en/latest/formats.html);
+//! - The [supported formats](http://chemfiles.rtfd.org/en/latest/formats.html);
 //!
 //!
 //! As all the function call the underlying C library, they all can fail and

@@ -1,26 +1,25 @@
-# Chemharp.rs
+# chemfiles.rs
 
-Rust binding for the [Chemharp](https://github.com/Luthaf/Chemharp) library.
+Rust binding for the [chemfiles](https://github.com/chemfiles/chemfiles) library.
 
 ## Installation
 
-First, build and install Chemharp. Then, it is as easy as:
+First, build and install chemfiles. Then, it is as easy as:
 
 ```
-git clone https://github.com/Luthaf/Chemharp.rs
-cd Chemharp.rs
+git clone https://github.com/chemfiles/chemfiles.rs
+cd chemfiles.rs
 cargo build
 ```
 
 ## Usage example
 
-Here is a simple usage example for the `chemharp` crate. Please see the `examples` folder
+Here is a simple usage example for the `chemfiles` crate. Please see the `examples` folder
 for other examples.
 
 ```rust
-extern crate chemharp;
-
-use chemharp::Trajectory;
+extern crate chemfiles;
+use chemfiles::Trajectory;
 
 fn main() {
     let mut trajectory = Trajectory::new("filename.xyz").unwrap();
@@ -40,4 +39,4 @@ See the `examples` folder for other examples.
 
 ## Bug reports, feature requests
 
-Please report any bug you find and any feature you may want as a [github issue](https://github.com/Luthaf/Chemharp.rs/issues/new).
+Please report any bug you find and any feature you may want as a [github issue](https://github.com/chemfiles/chemfiles.rs/issues/new).

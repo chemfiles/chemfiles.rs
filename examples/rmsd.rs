@@ -1,8 +1,8 @@
-/* File rmsd.rs, example for the Chemharp library
+/* File rmsd.rs, example for the chemfiles library
  * Any copyright is dedicated to the Public Domain.
  * http://creativecommons.org/publicdomain/zero/1.0/ */
-extern crate chemharp;
-use chemharp::*;
+extern crate chemfiles;
+use chemfiles::*;
 
 fn main() {
     let mut traj = Trajectory::open("filename.nc").unwrap();
