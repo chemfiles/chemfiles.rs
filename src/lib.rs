@@ -25,10 +25,6 @@
 //!
 //! As all the function call the underlying C library, they all can fail and
 //! thus all return a `Result<_, Error>` value.
-
-#[allow(dead_code, non_camel_case_types)]
-mod ffi;
-
 #[macro_use]
 mod tests;
 

@@ -6,11 +6,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
+extern crate chemharp_sys;
+use self::chemharp_sys::*;
 
-extern crate libc;
-
-use ::ffi::*;
-use ::string;
+use string;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Possible causes of error in Chemharp

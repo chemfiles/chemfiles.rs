@@ -6,11 +6,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate libc;
+extern crate chemharp_sys;
+use self::chemharp_sys::*;
 
 use std::ops::Drop;
 
-use ::ffi::*;
 use ::errors::{check, Error};
 
 use super::{Atom, Topology, UnitCell};

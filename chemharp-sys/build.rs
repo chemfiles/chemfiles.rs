@@ -4,7 +4,7 @@ use std::fs::File;
 
 fn main() {
     // Building the chemharp C++ library
-    let dst = cmake::build("external").join("build");
+    let dst = cmake::build(".").join("build");
     println!("cargo:rustc-link-search=native={}/lib", dst.display());
 
     // Getting the list of needed C++ libraries

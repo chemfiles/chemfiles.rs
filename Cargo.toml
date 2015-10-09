@@ -1,19 +1,15 @@
 [package]
 name = "chemharp"
 version = "0.3.0"
-authors = ["Luthaf <luthaf@luthaf.fr>"]
+authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 documentation = "https://chemharp.readthedocs.org/"
 repository = "https://github.com/Luthaf/Chemharp.rs"
 readme = "README.md"
 license = "MPL-2.0"
-build = "build.rs"
 
 [lib]
 name = "chemharp"
 doctest = false
 
 [dependencies]
-libc = "*"
-
-[build-dependencies]
-cmake = "*"
+chemharp-sys = {path = "chemharp-sys"}
