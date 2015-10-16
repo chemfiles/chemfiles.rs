@@ -29,6 +29,10 @@ pub enum Error {
     FileError,
     /// Error in file formatting, *i.e.* the file is invalid
     FormatError,
+    /// The given path is not valid UTF8
+    UTF8PathError{
+        message: String
+    },
 }
 
 impl From<CHFL_STATUS> for Error {
@@ -51,7 +55,10 @@ impl From<Error> for CHFL_STATUS {
             Error::ChemfilesCppError{..} => 2,
             Error::MemoryError => 3,
             Error::FileError => 4,
-            Error::FormatError => 5
+            Error::FormatError => 5,
+            Error::UTF8PathError{..} => {
+                panic!("Can not convert UTF8PathError to C error code. It is a Rust error.")
+            },
         }
     }
 }
@@ -61,7 +68,9 @@ impl Error {
     pub fn message(&self) -> String {
         let error = self.clone();
         match error {
-            Error::CppStdError{message} | Error::ChemfilesCppError{message} => message,
+            Error::CppStdError{message} |
+            Error::ChemfilesCppError{message} |
+            Error::UTF8PathError{message}  => message,
             _ => {
                 unsafe {
                     string::from_c(chfl_strerror(CHFL_STATUS::from(error)))

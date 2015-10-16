@@ -9,6 +9,8 @@
 extern crate chemfiles_sys;
 use self::chemfiles_sys::*;
 
+use std::path::Path;
+
 use string;
 use errors::{Error, check};
 
@@ -59,10 +61,19 @@ pub fn set_level(level: LogLevel) -> Result<(), Error> {
 }
 
 /// Write logs to the file at `path`, creating it if needed.
-pub fn log_to_file<'a, S>(path: S) -> Result<(), Error> where S: Into<&'a str> {
-    let buffer = string::to_c(path.into());
+pub fn log_to_file<P>(filename: P) -> Result<(), Error> where P: AsRef<Path> {
+    let filename = match filename.as_ref().to_str() {
+        Some(val) => val,
+        None => {
+            return Err(
+                Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
+            )
+        }
+    };
+
+    let filename = string::to_c(filename);
     unsafe {
-        try!(check(chfl_logfile(buffer.as_ptr())));
+        try!(check(chfl_logfile(filename.as_ptr())));
     }
     Ok(())
 }

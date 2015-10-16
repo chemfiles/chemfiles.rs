@@ -9,6 +9,7 @@ extern crate chemfiles_sys;
 use self::chemfiles_sys::*;
 
 use std::ops::Drop;
+use std::path::Path;
 
 use errors::{check, Error};
 use string;
@@ -23,9 +24,18 @@ pub struct Trajectory {
 
 impl Trajectory {
     /// Open a trajectory file in read mode.
-    pub fn open<'a, S>(filename: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
+    pub fn open<P>(filename: P) -> Result<Trajectory, Error> where P: AsRef<Path>{
+        let filename = match filename.as_ref().to_str() {
+            Some(val) => val,
+            None => {
+                return Err(
+                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
+                )
+            }
+        };
+
         let handle: *mut CHFL_TRAJECTORY;
-        let filename = string::to_c(filename.into());
+        let filename = string::to_c(filename);
         let mode = string::to_c("r");
         unsafe {
             handle = chfl_trajectory_open(filename.as_ptr(), mode.as_ptr());
@@ -37,9 +47,18 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in write mode.
-    pub fn create<'a, S>(filename: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
+    pub fn create<P>(filename: P) -> Result<Trajectory, Error> where P: AsRef<Path> {
+        let filename = match filename.as_ref().to_str() {
+            Some(val) => val,
+            None => {
+                return Err(
+                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
+                )
+            }
+        };
+
         let handle: *mut CHFL_TRAJECTORY;
-        let filename = string::to_c(filename.into());
+        let filename = string::to_c(filename);
         let mode = string::to_c("w");
         unsafe {
             handle = chfl_trajectory_open(filename.as_ptr(), mode.as_ptr());
@@ -51,9 +70,18 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in read mode using a specific `format`.
-    pub fn open_with_format<'a, S>(filename: S, format: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
+    pub fn open_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory, Error> where P: AsRef<Path>, S: Into<&'a str> {
+        let filename = match filename.as_ref().to_str() {
+            Some(val) => val,
+            None => {
+                return Err(
+                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
+                )
+            }
+        };
+
         let handle: *mut CHFL_TRAJECTORY;
-        let filename = string::to_c(filename.into());
+        let filename = string::to_c(filename);
         let format = string::to_c(format.into());
         let mode = string::to_c("r");
         unsafe {
@@ -66,9 +94,18 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in write mode.
-    pub fn create_with_format<'a, S>(filename: S, format: S) -> Result<Trajectory, Error> where S: Into<&'a str> {
+    pub fn create_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory, Error> where P: AsRef<Path>, S: Into<&'a str> {
+        let filename = match filename.as_ref().to_str() {
+            Some(val) => val,
+            None => {
+                return Err(
+                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
+                )
+            }
+        };
+
         let handle: *mut CHFL_TRAJECTORY;
-        let filename = string::to_c(filename.into());
+        let filename = string::to_c(filename);
         let mode = string::to_c("w");
         let format = string::to_c(format.into());
         unsafe {
@@ -121,10 +158,19 @@ impl Trajectory {
 
     /// Set the topology associated with a trajectory by reading the first frame
     /// of `filename`; and extracting the topology of this frame.
-    pub fn set_topology_file<'a, S>(&mut self, filename: S) -> Result<(), Error> where S: Into<&'a str> {
-        let buffer = string::to_c(filename.into());
+    pub fn set_topology_file<P>(&mut self, filename: P) -> Result<(), Error> where P: AsRef<Path> {
+        let filename = match filename.as_ref().to_str() {
+            Some(val) => val,
+            None => {
+                return Err(
+                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
+                )
+            }
+        };
+
+        let filename = string::to_c(filename);
         unsafe {
-            try!(check(chfl_trajectory_set_topology_file(self.handle, buffer.as_ptr())))
+            try!(check(chfl_trajectory_set_topology_file(self.handle, filename.as_ptr())))
         }
         Ok(())
     }
