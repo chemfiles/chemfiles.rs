@@ -1,11 +1,13 @@
 language: rust
-sudo: required
+sudo: false
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - kalakris-cmake
     packages:
     - g++-4.9
+    - cmake
 os:
   - linux
   - osx
@@ -14,29 +16,21 @@ rust:
     - beta
 install:
     - |
-      if [ ${TRAVIS_OS_NAME} == "linux" ]
-      then
-          sudo add-apt-repository --yes ppa:yjwong/cmake
-          sudo apt-get update
-          sudo apt-cache search cmake
-          sudo apt-get remove --yes cmake
-          sudo apt-get install --yes cmake
-          pip install 'travis-cargo' --user
-          export PATH=$HOME/.local/bin:$PATH
+      if test "${TRAVIS_OS_NAME}" == "linux"; then
+          pip install --user travis-cargo
+          export PATH=$PATH:$HOME/.local/bin
           export CC=gcc-4.9
           export CXX=g++-4.9
       fi
     - |
-      if [ ${TRAVIS_OS_NAME} == "osx" ]
-      then
-          sudo pip install 'travis-cargo'
+      if test "${TRAVIS_OS_NAME}" == "osx"; then
+          sudo pip install travis-cargo
       fi
 script:
     - travis-cargo build
     - travis-cargo test
-    - travis-cargo bench
-    - travis-cargo --only stable doc
 after_success:
+    - travis-cargo --only stable doc
     - travis-cargo --only stable doc-upload
 env:
   global:
