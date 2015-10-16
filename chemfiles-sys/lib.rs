@@ -46,6 +46,7 @@ extern "C" {
     pub fn chfl_trajectory_set_topology_file(file: *mut CHFL_TRAJECTORY, filename: *const libc::c_char) -> CHFL_STATUS;
     pub fn chfl_trajectory_set_cell(file: *mut CHFL_TRAJECTORY, cell: *const CHFL_CELL) -> CHFL_STATUS;
     pub fn chfl_trajectory_nsteps(file: *mut CHFL_TRAJECTORY, nsteps: *mut libc::size_t) -> CHFL_STATUS;
+    pub fn chfl_trajectory_sync(file: *mut CHFL_TRAJECTORY) -> CHFL_STATUS;
     pub fn chfl_trajectory_close(file: *mut CHFL_TRAJECTORY) -> CHFL_STATUS;
 
     pub fn chfl_frame(natoms: libc::size_t) -> *mut CHFL_FRAME;

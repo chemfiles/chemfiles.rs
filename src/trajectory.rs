@@ -148,6 +148,14 @@ impl Trajectory {
         Ok(res)
     }
 
+    /// Synchronize any buffered content to the hard drive.
+    pub fn sync(&mut self) -> Result<(), Error> {
+        unsafe {
+            try!(check(chfl_trajectory_sync(self.handle)));
+        }
+        Ok(())
+    }
+
     /// Create a `Trajectory` from a C pointer. This function is unsafe because
     /// no validity check is made on the pointer.
     pub unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Trajectory {
@@ -243,38 +251,38 @@ mod test {
     #[test]
     fn write() {
         let filename = "test-tmp.xyz";
-        {
-            let mut file = Trajectory::create(filename).unwrap();
-            let mut positions = Vec::new();
-            for _ in 0..4 {
-                positions.push([1.0, 2.0, 3.0]);
-            }
 
-            let mut topology = Topology::new().unwrap();
-            let atom = Atom::new("X").unwrap();
-            for _ in 0..4 {
-                topology.push(&atom).unwrap();
-            }
+        let mut file = Trajectory::create(filename).unwrap();
+        let mut positions = Vec::new();
+        for _ in 0..4 {
+            positions.push([1.0, 2.0, 3.0]);
+        }
 
-            let mut frame = Frame::new(0).unwrap();
-            frame.set_topology(&topology).unwrap();
-            frame.set_positions(positions.clone()).unwrap();
-
-            assert!(file.write(&frame).is_ok());
-
-            positions.clear();
-            for _ in 0..6 {
-                positions.push([4.0, 5.0, 6.0]);
-            }
+        let mut topology = Topology::new().unwrap();
+        let atom = Atom::new("X").unwrap();
+        for _ in 0..4 {
             topology.push(&atom).unwrap();
-            topology.push(&atom).unwrap();
+        }
 
-            frame.set_topology(&topology).unwrap();
-            frame.set_positions(positions).unwrap();
+        let mut frame = Frame::new(0).unwrap();
+        frame.set_topology(&topology).unwrap();
+        frame.set_positions(positions.clone()).unwrap();
 
-            assert!(file.write(&frame).is_ok());
+        assert!(file.write(&frame).is_ok());
 
-        } // file.close()
+        positions.clear();
+        for _ in 0..6 {
+            positions.push([4.0, 5.0, 6.0]);
+        }
+        topology.push(&atom).unwrap();
+        topology.push(&atom).unwrap();
+
+        frame.set_topology(&topology).unwrap();
+        frame.set_positions(positions).unwrap();
+
+        assert!(file.write(&frame).is_ok());
+
+        file.sync().unwrap();
 
         let expected_content = ["4",
                                 "Written by the chemfiles library",
