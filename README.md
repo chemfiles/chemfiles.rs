@@ -1,5 +1,8 @@
 # chemfiles.rs
 
+[![Build Status](https://travis-ci.org/chemfiles/chemfiles.rs.svg?branch=master)](https://travis-ci.org/chemfiles/chemfiles.rs)
+[![codecov.io](https://codecov.io/github/chemfiles/chemfiles.rs/coverage.svg?branch=master)](https://codecov.io/github/chemfiles/chemfiles.rs?branch=master)
+
 Rust binding for the [chemfiles](https://github.com/chemfiles/chemfiles) library.
 
 ## Installation
