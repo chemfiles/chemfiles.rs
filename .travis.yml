@@ -8,6 +8,9 @@ addons:
     packages:
     - g++-4.9
     - cmake
+    - libcurl4-openssl-dev
+    - libelf-dev
+    - libdw-dev
 os:
   - linux
   - osx
@@ -17,7 +20,7 @@ rust:
 install:
     - |
       if test "${TRAVIS_OS_NAME}" == "linux"; then
-          pip install --user travis-cargo
+          pip install --user travis-cargo codecov
           export PATH=$PATH:$HOME/.local/bin
           export CC=gcc-4.9
           export CXX=g++-4.9
@@ -32,6 +35,11 @@ script:
 after_success:
     - travis-cargo --only stable doc
     - travis-cargo --only stable doc-upload
+    - |
+      if test "${TRAVIS_OS_NAME}" == "linux" && test "${TRAVIS_RUST_VERSION}" == "stable" ; then
+          travis-cargo coverage --no-sudo
+          codecov --file target/kcov/kcov-merged/cobertura.xml
+      fi
 env:
   global:
     secure: DlziexmlR66bR+pIXN/qUlMfnANY6sRSP6ZDKmLKyzLQghCShoL6TF5s+GEN7uB39U4IT9/706MrvCUPD7azobrJTX/mQsKraSPwlQ3uBlPtiVy6sLSK51jfBsucuiFibMiwv9FGv0DB687qnpDW1Wo2x1UkdcxsILlpThxCNlHWuQCficgI/LAegXoyvxfNfrcEeXhAQhPuUILMEODfbPuLwwynclQHN+JiMIhjVfU/rVffdJPflvxMBz0M9YaJKHgYvffDxIRVcZRYjzzMMyhbrFlLbTWOqfie2jppKqqZ7LhnT+ycqXPGowif5mt5yNWIEI7xYL4k11LgsVLbCg2x3OGUTjqhV39QKl49/rClH1K63I8CqF3KjOZXJ1iMhbkUoZ5OlyTA7OT7K0JN/+ha7bmoQuE6OkJ6cVhJH0IchJtprius9z+z6uVIlF5weotZ0uiAJjDggRqz5PEvVIIwaVmEnhVj0NfOIxd73ct31HnJkT7Ye5jOSmA+8NOuXyNQOXQZPhi4KQmpBIpe7ett5XMGJZXv8Guk3kEygJr2hEldB9KxXWuEoQ2wPTtfVvAXsW1CIxso+FqvMuehLMJjgJUJRuPyvPFYKfF/wLPc7p2csLlJj2S6NXp4DdZt7i2dAZDCDFp3pkhdvULBmGrGQZC6wCDYijNQ0mJiimw=
