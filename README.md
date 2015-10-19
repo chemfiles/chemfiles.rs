@@ -5,24 +5,26 @@
 
 Rust binding for the [chemfiles](https://github.com/chemfiles/chemfiles) library.
 
-## Installation
+## Usage
 
-First, build and install chemfiles. Then, it is as easy as:
+Add this to your `Cargo.toml` file:
 
+```toml
+[dependencies.chemfiles]
+git = "https://github.com/chemfiles/chemfiles.rs"
 ```
-git clone https://github.com/chemfiles/chemfiles.rs
-cd chemfiles.rs
-cargo build
-```
 
-## Usage example
-
-Here is a simple usage example for the `chemfiles` crate. Please see the `examples` folder
-for other examples.
+And then use `chemfiles` in your project:
 
 ```rust
 extern crate chemfiles;
-use chemfiles::Trajectory;
+```
+
+Here is a simple usage example. Please see the `examples` folder for more examples.
+
+```rust
+extern crate chemfiles;
+use chemfiles::{Trajectory, Frame};
 
 fn main() {
     let mut trajectory = Trajectory::new("filename.xyz").unwrap();
@@ -37,8 +39,6 @@ fn main() {
     // Do awesome things with the positions here !
 }
 ```
-
-See the `examples` folder for other examples.
 
 ## Bug reports, feature requests
 
