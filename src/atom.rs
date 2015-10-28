@@ -98,7 +98,7 @@ impl Atom {
     pub fn name(&self) -> Result<String, Error> {
         let mut buffer = vec![0; 10];
         unsafe {
-            try!(check(chfl_atom_name(self.handle, &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_name(self.handle, &mut buffer[0], buffer.len() as usize)));
         }
         return Ok(string::from_c(&buffer[0]));
     }
@@ -118,7 +118,7 @@ impl Atom {
     pub fn full_name(&mut self) -> Result<String, Error> {
         let mut buffer = vec![0; 10];
         unsafe {
-            try!(check(chfl_atom_full_name(self.handle, &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_full_name(self.handle, &mut buffer[0], buffer.len() as usize)));
         }
         return Ok(string::from_c(&buffer[0]));
     }

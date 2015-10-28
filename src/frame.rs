@@ -23,7 +23,7 @@ pub struct Frame {
 impl Frame {
     /// Create an empty frame with initial capacity of `natoms`. It will be
     /// resized by the library as needed.
-    pub fn new(natoms: u64) -> Result<Frame, Error> {
+    pub fn new(natoms: usize) -> Result<Frame, Error> {
         let handle : *const CHFL_FRAME;
         unsafe {
             handle = chfl_frame(natoms);
@@ -35,7 +35,7 @@ impl Frame {
     }
 
     /// Get a specific `Atom` from a frame, given its `index` in the frame
-    pub fn atom(&self, index: u64) -> Result<Atom, Error> {
+    pub fn atom(&self, index: usize) -> Result<Atom, Error> {
         let handle : *const CHFL_ATOM;
         unsafe {
             handle = chfl_atom_from_frame(self.handle as *mut CHFL_FRAME, index);
@@ -65,7 +65,7 @@ impl Frame {
             try!(check(chfl_frame_positions(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
-                natoms as u64
+                natoms as usize
             )));
         }
         return Ok(res);
@@ -77,7 +77,7 @@ impl Frame {
             try!(check(chfl_frame_set_positions(
                 self.handle as *mut CHFL_FRAME,
                 (*positions.as_ptr()).as_ptr(),
-                positions.len() as u64)));
+                positions.len() as usize)));
         }
         Ok(())
     }
@@ -90,7 +90,7 @@ impl Frame {
             try!(check(chfl_frame_velocities(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
-                natoms as u64
+                natoms as usize
             )));
         }
         return Ok(res);
@@ -102,7 +102,7 @@ impl Frame {
             try!(check(chfl_frame_set_velocities(
                 self.handle as *mut CHFL_FRAME,
                 (*velocities.as_ptr()).as_ptr(),
-                velocities.len() as u64)));
+                velocities.len() as usize)));
         }
         Ok(())
     }
@@ -167,7 +167,7 @@ impl Frame {
     }
 
     /// Get the `Frame` step, i.e. the frame number in the trajectory
-    pub fn step(&self) -> Result<u64, Error> {
+    pub fn step(&self) -> Result<usize, Error> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_frame_step(self.handle, &mut res)));
@@ -176,7 +176,7 @@ impl Frame {
     }
 
     /// Set the `Frame` step
-    pub fn set_step(&mut self, step: u64) -> Result<(), Error> {
+    pub fn set_step(&mut self, step: usize) -> Result<(), Error> {
         unsafe {
             try!(check(chfl_frame_set_step(self.handle as *mut CHFL_FRAME, step)));
         }

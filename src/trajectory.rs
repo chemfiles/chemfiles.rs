@@ -128,7 +128,7 @@ impl Trajectory {
     }
 
     /// Read a specific step of the trajectory in a frame
-    pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<(), Error> {
+    pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
             try!(check(chfl_trajectory_read_step(
                 self.handle,
@@ -186,7 +186,7 @@ impl Trajectory {
     }
 
     /// Get the number of steps (the number of frames) in a trajectory.
-    pub fn nsteps(&mut self) -> Result<u64, Error> {
+    pub fn nsteps(&mut self) -> Result<usize, Error> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_trajectory_nsteps(self.handle, &mut res)));

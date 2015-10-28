@@ -9,7 +9,7 @@ extern crate chemfiles_sys;
 use self::chemfiles_sys::*;
 
 use std::ops::Drop;
-use std::u64;
+use std::usize;
 
 use errors::{check, Error};
 use atom::Atom;
@@ -37,7 +37,7 @@ impl Topology {
     }
 
     /// Get a specific `Atom` from a topology, given its `index` in the topology
-    pub fn atom(&self, index: u64) -> Result<Atom, Error> {
+    pub fn atom(&self, index: usize) -> Result<Atom, Error> {
         let handle : *const CHFL_ATOM;
         unsafe {
             handle = chfl_atom_from_topology(self.handle, index);
@@ -72,7 +72,7 @@ impl Topology {
 
     /// Remove an `Atom` from a topology by index. This modify all the other
     /// atoms indexes.
-    pub fn remove(&mut self, index: u64) -> Result<(), Error> {
+    pub fn remove(&mut self, index: usize) -> Result<(), Error> {
         unsafe {
             try!(check(chfl_topology_remove(self.handle as *mut CHFL_TOPOLOGY, index)));
         }
@@ -80,7 +80,7 @@ impl Topology {
     }
 
     /// Tell if the atoms at indexes `i` and `j` are bonded together
-    pub fn is_bond(&self, i: u64, j: u64) -> Result<bool, Error> {
+    pub fn is_bond(&self, i: usize, j: usize) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_topology_isbond(self.handle, i, j, &mut res)));
@@ -89,7 +89,7 @@ impl Topology {
     }
 
     /// Tell if the atoms at indexes `i`, `j` and `k` constitues an angle
-    pub fn is_angle(&self, i: u64, j: u64, k: u64) -> Result<bool, Error> {
+    pub fn is_angle(&self, i: usize, j: usize, k: usize) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_topology_isangle(self.handle, i, j, k, &mut res)));
@@ -99,7 +99,7 @@ impl Topology {
 
     /// Tell if the atoms at indexes `i`, `j`, `k` and `m` constitues a dihedral
     /// angle
-    pub fn is_dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> Result<bool, Error> {
+    pub fn is_dihedral(&self, i: usize, j: usize, k: usize, m: usize) -> Result<bool, Error> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_topology_isdihedral(self.handle, i, j, k, m, &mut res)));
@@ -135,49 +135,49 @@ impl Topology {
     }
 
     /// Get the list of bonds in the system
-    pub fn bonds(&self) -> Result<Vec<[u64; 2]>, Error> {
+    pub fn bonds(&self) -> Result<Vec<[usize; 2]>, Error> {
         let nbonds = try!(self.bonds_count());
-        let mut res = vec![[u64::MAX; 2]; nbonds];
+        let mut res = vec![[usize::MAX; 2]; nbonds];
         unsafe {
             try!(check(chfl_topology_bonds(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
-                nbonds as u64
+                nbonds as usize
             )));
         }
         return Ok(res);
     }
 
     /// Get the list of angles in the system
-    pub fn angles(&self) -> Result<Vec<[u64; 3]>, Error> {
+    pub fn angles(&self) -> Result<Vec<[usize; 3]>, Error> {
         let nangles = try!(self.angles_count());
-        let mut res = vec![[u64::MAX; 3]; nangles];
+        let mut res = vec![[usize::MAX; 3]; nangles];
         unsafe {
             try!(check(chfl_topology_angles(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
-                nangles as u64
+                nangles as usize
             )));
         }
         return Ok(res);
     }
 
     /// Get the list of dihedral angles in the system
-    pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>, Error> {
+    pub fn dihedrals(&self) -> Result<Vec<[usize; 4]>, Error> {
         let ndihedrals = try!(self.dihedrals_count());
-        let mut res = vec![[u64::MAX; 4]; ndihedrals];
+        let mut res = vec![[usize::MAX; 4]; ndihedrals];
         unsafe {
             try!(check(chfl_topology_dihedrals(
                 self.handle,
                 (*res.as_mut_ptr()).as_mut_ptr(),
-                ndihedrals as u64
+                ndihedrals as usize
             )));
         }
         return Ok(res);
     }
 
     /// Add a bond between the atoms at indexes `i` and `j` in the system
-    pub fn add_bond(&mut self, i: u64, j: u64) -> Result<(), Error> {
+    pub fn add_bond(&mut self, i: usize, j: usize) -> Result<(), Error> {
         unsafe {
             try!(check(chfl_topology_add_bond(self.handle as *mut CHFL_TOPOLOGY, i, j)));
         }
@@ -186,7 +186,7 @@ impl Topology {
 
     /// Remove any existing bond between the atoms at indexes `i` and `j` in
     /// the system
-    pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<(), Error> {
+    pub fn remove_bond(&mut self, i: usize, j: usize) -> Result<(), Error> {
         unsafe {
             try!(check(chfl_topology_remove_bond(self.handle as *mut CHFL_TOPOLOGY, i, j)));
         }
