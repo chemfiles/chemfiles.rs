@@ -12,8 +12,8 @@ documentation is available [here](http://chemfiles.github.io/chemfiles.rs/chemfi
 Add this to your `Cargo.toml` file:
 
 ```toml
-[dependencies.chemfiles]
-git = "https://github.com/chemfiles/chemfiles.rs"
+[dependencies]
+chemfiles = "0.4.0"
 ```
 
 And then use `chemfiles` in your project:
