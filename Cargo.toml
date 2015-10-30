@@ -1,9 +1,11 @@
 [package]
 name = "chemfiles"
-version = "0.4.0-dev"
+version = "0.4.0"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 documentation = "https://chemfiles.readthedocs.org/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
+homepage = "https://github.com/chemfiles/chemfiles.rs"
+description = "Rust bindings to the chemfiles library"
 readme = "README.md"
 license = "MPL-2.0"
 
@@ -12,4 +14,4 @@ name = "chemfiles"
 doctest = false
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.4.0"}
