@@ -3,9 +3,13 @@ use std::io::prelude::*;
 use std::fs::File;
 
 fn main() {
+    let mut cfg = cmake::Config::new(".");
+    cfg.define("BUILD_SHARED_LIBS", "OFF");
+    cfg.define("CMAKE_POSITION_INDEPENDENT_CODE", "ON");
+
     // Building the chemfiles C++ library
-    let dst = cmake::build(".").join("build");
-    println!("cargo:rustc-link-search=native={}/lib", dst.display());
+    let dst = cfg.build().join("build");
+    println!("cargo:rustc-link-search=native={}/chemfiles", dst.display());
 
     // Getting the list of needed C++ libraries
     let mut dirs_file = File::open(dst.join("cxx_link_dirs.cmake")).unwrap();

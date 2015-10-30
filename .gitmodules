@@ -1,0 +1,3 @@
+[submodule "chemfiles C++ library"]
+	path = chemfiles-sys/chemfiles
+	url = https://github.com/chemfiles/chemfiles
