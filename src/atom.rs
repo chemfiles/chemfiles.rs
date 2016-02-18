@@ -5,12 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemfiles_sys;
-use self::chemfiles_sys::*;
-
 use std::ops::Drop;
 
-use errors::{check, Error};
+use chemfiles_sys::*;
+use errors::{check, Error, ErrorKind};
 use string;
 
 /// Available types of atoms
@@ -18,9 +16,9 @@ use string;
 pub enum AtomType {
     /// Element from the periodic table of elements
     Element = ELEMENT as isize,
-    /// Corse-grained atom are composed of more than one element: CH3 groups,
+    /// Coarse-grained atom are composed of more than one element: CH3 groups,
     /// amino-acids are corse-grained atoms.
-    CorseGrain = CORSE_GRAIN as isize,
+    CorseGrain = COARSE_GRAINED as isize,
     /// Dummy site, with no physical reality
     Dummy = DUMMY as isize,
     /// Undefined atom type
@@ -31,7 +29,7 @@ impl From<CHFL_ATOM_TYPE> for AtomType {
     fn from(atomtype: CHFL_ATOM_TYPE) -> AtomType {
         match atomtype {
             ELEMENT => AtomType::Element,
-            CORSE_GRAIN => AtomType::CorseGrain,
+            COARSE_GRAINED => AtomType::CorseGrain,
             DUMMY => AtomType::Dummy,
             UNDEFINED => AtomType::Undefined,
             _ => unreachable!()
@@ -55,7 +53,7 @@ impl Atom {
             handle = chfl_atom(buffer.as_ptr());
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Atom{handle: handle})
     }

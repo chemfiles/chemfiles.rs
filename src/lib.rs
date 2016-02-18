@@ -24,15 +24,22 @@
 //!
 //! As all the function call the underlying C library, they all can fail and
 //! thus all return a `Result<_, Error>` value.
-#[macro_use]
-mod tests;
+#![deny(missing_docs)]
+
+#[macro_use] extern crate lazy_static;
+
+extern crate chemfiles_sys;
+use chemfiles_sys::chfl_version;
+
+#[macro_use] mod tests;
 
 mod string;
 
 mod errors;
 pub use errors::Error;
 
-pub mod logging;
+mod logging;
+pub use logging::Logger;
 
 mod atom;
 pub use atom::Atom;
@@ -50,3 +57,10 @@ pub use frame::Frame;
 
 mod trajectory;
 pub use trajectory::Trajectory;
+
+/// Get the version of the chemfiles library
+pub fn version() -> String {
+    unsafe {
+        string::from_c(chfl_version())
+    }
+}

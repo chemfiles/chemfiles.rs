@@ -12,7 +12,7 @@ fn main() {
     let positions = frame.positions().unwrap();
     let mut indexes = Vec::new();
 
-    for i in 0..frame.natoms().unwrap() {
+    for i in 0..positions.len() {
         if positions[i][0] < 5.0 {
             indexes.push(i);
         }

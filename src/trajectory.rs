@@ -5,16 +5,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemfiles_sys;
-use self::chemfiles_sys::*;
-
 use std::ops::Drop;
 use std::path::Path;
 
-use errors::{check, Error};
+use chemfiles_sys::*;
+use errors::{check, Error, ErrorKind};
 use string;
 
-use super::{UnitCell, Topology, Frame};
+use {UnitCell, Topology, Frame};
 
 /// A Trajectory is a chemistry file on the hard drive. It is the main entry
 /// point of chemfiles.
@@ -28,9 +26,10 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(
-                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
-                )
+                return Err(Error {
+                    kind: ErrorKind::UTF8PathError,
+                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
+                })
             }
         };
 
@@ -41,7 +40,7 @@ impl Trajectory {
             handle = chfl_trajectory_open(filename.as_ptr(), mode.as_ptr());
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Trajectory{handle: handle})
     }
@@ -51,9 +50,10 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(
-                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
-                )
+                return Err(Error{
+                    kind: ErrorKind::UTF8PathError,
+                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
+                })
             }
         };
 
@@ -64,7 +64,7 @@ impl Trajectory {
             handle = chfl_trajectory_open(filename.as_ptr(), mode.as_ptr());
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Trajectory{handle: handle})
     }
@@ -74,9 +74,10 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(
-                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
-                )
+                return Err(Error{
+                    kind: ErrorKind::UTF8PathError,
+                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
+                })
             }
         };
 
@@ -88,7 +89,7 @@ impl Trajectory {
             handle = chfl_trajectory_with_format(filename.as_ptr(), mode.as_ptr(), format.as_ptr());
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Trajectory{handle: handle})
     }
@@ -98,9 +99,10 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(
-                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
-                )
+                return Err(Error{
+                    kind: ErrorKind::UTF8PathError,
+                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
+                })
             }
         };
 
@@ -112,7 +114,7 @@ impl Trajectory {
             handle = chfl_trajectory_with_format(filename.as_ptr(), mode.as_ptr(), format.as_ptr());
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Trajectory{handle: handle})
     }
@@ -162,9 +164,10 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(
-                    Error::UTF8PathError{message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
-                )
+                return Err(Error{
+                    kind: ErrorKind::UTF8PathError,
+                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
+                })
             }
         };
 
@@ -247,9 +250,12 @@ mod test {
         assert!(file.read(&mut frame).is_ok());
 
         assert_eq!(frame.natoms(), Ok(297));
-        let positions = frame.positions().unwrap();
-        assert_eq!(positions[0], [0.417219, 8.303366, 11.737172]);
-        assert_eq!(positions[124], [5.099554, -0.045104, 14.153846]);
+
+        {
+            let positions = frame.positions().unwrap();
+            assert_eq!(positions[0], [0.417219, 8.303366, 11.737172]);
+            assert_eq!(positions[124], [5.099554, -0.045104, 14.153846]);
+        }
 
         assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("O")));
 
@@ -259,9 +265,11 @@ mod test {
         let cell = frame.cell().unwrap();
         assert_eq!(cell.lengths(), Ok((30.0, 30.0, 30.0)));
 
-        let positions = frame.positions().unwrap();
-        assert_eq!(positions[0], [0.761277, 8.106125, 10.622949]);
-        assert_eq!(positions[124], [5.13242, 0.079862, 14.194161]);
+        {
+            let positions = frame.positions().unwrap();
+            assert_eq!(positions[0], [0.761277, 8.106125, 10.622949]);
+            assert_eq!(positions[124], [5.13242, 0.079862, 14.194161]);
+        }
 
         let topology = frame.topology().unwrap();
         assert_eq!(topology.natoms(), Ok(297));
@@ -299,9 +307,14 @@ mod test {
         let filename = "test-tmp.xyz";
 
         let mut file = Trajectory::create(filename).unwrap();
-        let mut positions = Vec::new();
-        for _ in 0..4 {
-            positions.push([1.0, 2.0, 3.0]);
+
+        let mut frame = Frame::new(4).unwrap();
+
+        {
+            let positions = frame.positions().unwrap();
+            for i in 0..positions.len() {
+                positions[i] = [1.0, 2.0, 3.0];
+            }
         }
 
         let mut topology = Topology::new().unwrap();
@@ -309,22 +322,21 @@ mod test {
         for _ in 0..4 {
             topology.push(&atom).unwrap();
         }
-
-        let mut frame = Frame::new(0).unwrap();
         frame.set_topology(&topology).unwrap();
-        frame.set_positions(positions.clone()).unwrap();
 
         assert!(file.write(&frame).is_ok());
 
-        positions.clear();
-        for _ in 0..6 {
-            positions.push([4.0, 5.0, 6.0]);
+        frame.resize(6).unwrap();
+        {
+            let positions = frame.positions().unwrap();
+            for i in 0..positions.len() {
+                positions[i] = [4.0, 5.0, 6.0];
+            }
         }
-        topology.push(&atom).unwrap();
-        topology.push(&atom).unwrap();
 
+        topology.push(&atom).unwrap();
+        topology.push(&atom).unwrap();
         frame.set_topology(&topology).unwrap();
-        frame.set_positions(positions).unwrap();
 
         assert!(file.write(&frame).is_ok());
 

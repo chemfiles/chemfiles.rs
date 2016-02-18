@@ -5,14 +5,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemfiles_sys;
-use self::chemfiles_sys::*;
-
 use std::ops::Drop;
+use std::ptr;
+use std::slice;
 
-use ::errors::{check, Error};
-
-use super::{Atom, Topology, UnitCell};
+use chemfiles_sys::*;
+use string;
+use errors::{check, Error, ErrorKind};
+use {Atom, Topology, UnitCell};
 
 /// A `Frame` holds data from one step of a simulation: the current `Topology`,
 /// the positions, and maybe the velocities of the particles in the system.
@@ -29,7 +29,7 @@ impl Frame {
             handle = chfl_frame(natoms);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Frame{handle: handle})
     }
@@ -38,10 +38,10 @@ impl Frame {
     pub fn atom(&self, index: usize) -> Result<Atom, Error> {
         let handle : *const CHFL_ATOM;
         unsafe {
-            handle = chfl_atom_from_frame(self.handle as *mut CHFL_FRAME, index);
+            handle = chfl_atom_from_frame(self.handle, index);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         unsafe {
             Ok(Atom::from_ptr(handle))
@@ -57,54 +57,48 @@ impl Frame {
         return Ok(natoms as usize);
     }
 
-    /// Get the positions from the `Frame`.
-    pub fn positions(&self) -> Result<Vec<[f32; 3]>, Error> {
-        let natoms = try!(self.natoms());
-        let mut res = vec![[0.0; 3]; natoms];
+    /// Resize the positions and the velocities in frame, to make space for
+    /// `natoms` atoms. Previous data is conserved, as well as the presence of
+    /// absence of velocities.
+    pub fn resize(&mut self, natoms: usize) -> Result<(), Error> {
         unsafe {
-            try!(check(chfl_frame_positions(
-                self.handle,
-                (*res.as_mut_ptr()).as_mut_ptr(),
-                natoms as usize
-            )));
+            try!(check(chfl_frame_resize(self.handle as *mut CHFL_FRAME, natoms)));
         }
-        return Ok(res);
+        return Ok(());
     }
 
-    /// Set the positions in the `Frame`.
-    pub fn set_positions(&mut self, positions: Vec<[f32; 3]>) -> Result<(), Error> {
+    /// Get the positions from the `Frame`.
+    pub fn positions(&mut self) -> Result<&mut [[f32; 3]], Error> {
+        let mut ptr = ptr::null_mut();
+        let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_set_positions(
+            try!(check(chfl_frame_positions(
                 self.handle as *mut CHFL_FRAME,
-                (*positions.as_ptr()).as_ptr(),
-                positions.len() as usize)));
+                &mut ptr,
+                &mut natoms
+            )));
         }
-        Ok(())
+        let res = unsafe {
+            slice::from_raw_parts_mut(ptr, natoms)
+        };
+        return Ok(res);
     }
 
     /// Get the velocities from the `Frame`.
-    pub fn velocities(&self) -> Result<Vec<[f32; 3]>, Error> {
-        let natoms = try!(self.natoms());
-        let mut res = vec![[0.0; 3]; natoms];
+    pub fn velocities(&mut self) -> Result<&mut [[f32; 3]], Error> {
+        let mut ptr = ptr::null_mut();
+        let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_velocities(
-                self.handle,
-                (*res.as_mut_ptr()).as_mut_ptr(),
-                natoms as usize
+                self.handle as *mut CHFL_FRAME,
+                &mut ptr,
+                &mut natoms
             )));
         }
+        let res = unsafe {
+            slice::from_raw_parts_mut(ptr, natoms)
+        };
         return Ok(res);
-    }
-
-    /// Set the velocities in the `Frame`.
-    pub fn set_velocities(&mut self, velocities: Vec<[f32; 3]>) -> Result<(), Error> {
-        unsafe {
-            try!(check(chfl_frame_set_velocities(
-                self.handle as *mut CHFL_FRAME,
-                (*velocities.as_ptr()).as_ptr(),
-                velocities.len() as usize)));
-        }
-        Ok(())
     }
 
     /// Check if the `Frame` has velocity information.
@@ -116,14 +110,23 @@ impl Frame {
         return Ok(res != 0);
     }
 
+    /// Add velocity storage to this frame for `Frame::natoms` atoms. If the
+    /// frame already have velocities, this does nothing.
+    pub fn add_velocities(&mut self) -> Result<(), Error> {
+        unsafe {
+            try!(check(chfl_frame_add_velocities(self.handle as *mut CHFL_FRAME)));
+        }
+        return Ok(());
+    }
+
     /// Get the `UnitCell` from the `Frame`
     pub fn cell(&self) -> Result<UnitCell, Error> {
         let handle : *const CHFL_CELL;
         unsafe {
-            handle = chfl_cell_from_frame(self.handle as *mut CHFL_FRAME);
+            handle = chfl_cell_from_frame(self.handle);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         unsafe {
             Ok(UnitCell::from_ptr(handle))
@@ -145,10 +148,10 @@ impl Frame {
     pub fn topology(&self) -> Result<Topology, Error> {
         let handle : *const CHFL_TOPOLOGY;
         unsafe {
-            handle = chfl_topology_from_frame(self.handle as *mut CHFL_FRAME);
+            handle = chfl_topology_from_frame(self.handle);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         unsafe {
             Ok(Topology::from_ptr(handle))
@@ -193,6 +196,32 @@ impl Frame {
         return Ok(());
     }
 
+    /// Select atoms in a frame, from a specific selection string.
+    ///
+    /// This function select atoms in a frame matching a selection string. For
+    /// example, `"name H and x > 4"` will select all the atoms with name `"H"`
+    /// and `x` coordinate less than 4. See the C++ documentation for the full
+    /// selection language.
+    ///
+    /// The result is a `Vec<bool>` containing `true` at position `i` if the
+    /// atom at position `i` matches the selection string, and `false`
+    /// otherwise.
+    pub fn select(&self, selection: &str) -> Result<Vec<bool>, Error> {
+        let natoms = self.natoms().unwrap();
+        let mut res = vec![0u8; natoms];
+        let c_str = string::to_c(selection);
+        unsafe {
+            try!(check(chfl_frame_selection(
+                self.handle,
+                c_str.into_raw(),
+                res.as_mut_ptr(),
+                natoms
+            )));
+        }
+        let res = res.iter().map(|&u| u8_to_bool(u)).collect::<Vec<_>>();
+        Ok(res)
+    }
+
     /// Create a `Frame` from a C pointer. This function is unsafe because
     /// no validity check is made on the pointer.
     pub unsafe fn from_ptr(ptr: *const CHFL_FRAME) -> Frame {
@@ -213,6 +242,13 @@ fn bool_to_u8(val: bool) -> u8 {
     }
 }
 
+fn u8_to_bool(val: u8) -> bool {
+    match val {
+        0 => false,
+        _ => true
+    }
+}
+
 impl Drop for Frame {
     fn drop(&mut self) {
         unsafe {
@@ -228,10 +264,21 @@ mod test {
     use super::*;
     use ::{Atom, Topology, UnitCell};
 
+    // TODO: remove this when 1.7.0 hit stable. This is slice::clone_from_slice
+    fn clone_from_slice<T: Clone>(dst: &mut [T], src: &[T]) {
+        assert!(dst.len() == src.len());
+        for (d, s) in dst.iter_mut().zip(src) {
+            *d = s.clone();
+        }
+    }
+
     #[test]
     fn size() {
-        let frame = Frame::new(0).unwrap();
+        let mut frame = Frame::new(0).unwrap();
         assert_eq!(frame.natoms(), Ok(0));
+
+        frame.resize(12).unwrap();
+        assert_eq!(frame.natoms(), Ok(12));
 
         let frame = Frame::new(4).unwrap();
         assert_eq!(frame.natoms(), Ok(4));
@@ -240,28 +287,50 @@ mod test {
     #[test]
     fn positions() {
         let mut frame = Frame::new(4).unwrap();
-        let positions = vec![[1.0, 2.0, 3.0],
-                             [4.0, 5.0, 6.0],
-                             [7.0, 8.0, 9.0],
-                             [10.0, 11.0, 12.0],];
+        let expected: &mut [[f32; 3]] = &mut [[1.0, 2.0, 3.0],
+                                              [4.0, 5.0, 6.0],
+                                              [7.0, 8.0, 9.0],
+                                              [10.0, 11.0, 12.0]];
+        {
+            let positions = frame.positions().unwrap();
+            clone_from_slice(positions, expected);
+        }
 
-        assert!(frame.set_positions(positions.clone()).is_ok());
-        assert_eq!(frame.positions(), Ok(positions));
+        assert_eq!(frame.positions(), Ok(expected));
+    }
+
+    #[test]
+    fn selection() {
+        let mut frame = Frame::new(4).unwrap();
+        let mut topology = Topology::new().unwrap();
+        topology.push(&Atom::new("H").unwrap()).unwrap();
+        topology.push(&Atom::new("O").unwrap()).unwrap();
+        topology.push(&Atom::new("O").unwrap()).unwrap();
+        topology.push(&Atom::new("H").unwrap()).unwrap();
+        frame.set_topology(&topology).unwrap();
+
+        let matched = frame.select("name H").unwrap();
+        assert_eq!(matched, vec![true, false, false, true]);
     }
 
     #[test]
     fn velocities() {
         let mut frame = Frame::new(4).unwrap();
-
         assert_eq!(frame.has_velocities(), Ok(false));
-        let velocities = vec![[1.0, 2.0, 3.0],
-                             [4.0, 5.0, 6.0],
-                             [7.0, 8.0, 9.0],
-                             [10.0, 11.0, 12.0],];
-
-        assert!(frame.set_velocities(velocities.clone()).is_ok());
-        assert_eq!(frame.velocities(), Ok(velocities));
+        frame.add_velocities().unwrap();
         assert_eq!(frame.has_velocities(), Ok(true));
+
+        let expected: &mut [[f32; 3]] = &mut [[1.0, 2.0, 3.0],
+                                              [4.0, 5.0, 6.0],
+                                              [7.0, 8.0, 9.0],
+                                              [10.0, 11.0, 12.0]];
+
+        {
+            let velocities = frame.velocities().unwrap();
+            clone_from_slice(velocities, expected);
+        }
+
+        assert_eq!(frame.velocities(), Ok(expected));
     }
 
     #[test]

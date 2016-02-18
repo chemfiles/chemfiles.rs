@@ -5,13 +5,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemfiles_sys;
-use self::chemfiles_sys::*;
-
 use std::ops::Drop;
 use std::usize;
 
-use errors::{check, Error};
+use chemfiles_sys::*;
+use errors::{check, Error, ErrorKind};
 use atom::Atom;
 
 /// A `Topology` contains the definition of all the particles in the system, and
@@ -31,7 +29,7 @@ impl Topology {
             handle = chfl_topology();
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(Topology{handle: handle})
     }
@@ -43,7 +41,7 @@ impl Topology {
             handle = chfl_atom_from_topology(self.handle, index);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         unsafe {
             Ok(Atom::from_ptr(handle))

@@ -5,12 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-extern crate chemfiles_sys;
-use self::chemfiles_sys::*;
-
 use std::ops::Drop;
 
-use errors::{check, Error};
+use chemfiles_sys::*;
+use errors::{check, Error, ErrorKind};
 
 /// Available unit cell types
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -53,14 +51,14 @@ pub struct UnitCell {
 }
 
 impl UnitCell {
-    /// Create an `Orthorombic` `UnitCell` from the three lenghts
+    /// Create an `Orthorombic` `UnitCell` from the three lenghts, in Angstroms.
     pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell, Error> {
         let handle : *const CHFL_CELL;
         unsafe {
             handle = chfl_cell(a, b, c);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(UnitCell{handle: handle})
     }
@@ -72,21 +70,24 @@ impl UnitCell {
             handle = chfl_cell(0.0, 0.0, 0.0);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         let mut cell = UnitCell{handle: handle};
         try!(cell.set_cell_type(CellType::Infinite));
         Ok(cell)
     }
 
-    /// Create an `Triclinic` `UnitCell` from the three lenghts and three angles
+    /// Create an `Triclinic` `UnitCell` from the three lenghts (in Angstroms)
+    /// and three angles (in degree). `alpha` is the angle between the vectors
+    /// `b` and `c`; `beta` is the between the vectors `a` and `c` and `gamma`
+    /// is the angle between the vectors `a` and `b`.
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell, Error> {
         let handle : *const CHFL_CELL;
         unsafe {
             handle = chfl_cell_triclinic(a, b, c, alpha, beta, gamma);
         }
         if handle.is_null() {
-            return Err(Error::ChemfilesCppError{message: Error::last_error()})
+            return Err(Error::new(ErrorKind::ChemfilesCppError));
         }
         Ok(UnitCell{handle: handle})
     }
@@ -152,28 +153,6 @@ impl UnitCell {
         Ok(())
     }
 
-    /// Get the cell periodic boundary conditions along the three axis
-    pub fn periodicity(&self) -> Result<(bool, bool, bool), Error> {
-        let (mut x, mut y, mut z) = (0, 0, 0);
-        unsafe {
-            try!(check(chfl_cell_periodicity(self.handle, &mut x, &mut y, &mut z)));
-        }
-        Ok((x != 0, y != 0, z != 0))
-    }
-
-    /// Set the cell periodic boundary conditions along the three axis
-    pub fn set_periodicity(&mut self, x: bool, y: bool, z: bool) -> Result<(), Error> {
-        unsafe {
-            try!(check(chfl_cell_set_periodicity(
-                self.handle as *mut CHFL_CELL,
-                bool_to_u8(x),
-                bool_to_u8(y),
-                bool_to_u8(z)
-            )));
-        }
-        Ok(())
-    }
-
     /// Get the volume of the unit cell
     pub fn volume(&self) -> Result<f64, Error> {
         let mut res = 0.0;
@@ -193,13 +172,6 @@ impl UnitCell {
     /// lifetime guarantee is made on the pointer.
     pub unsafe fn as_ptr(&self) -> *const CHFL_CELL {
         self.handle
-    }
-}
-
-fn bool_to_u8(val: bool) -> u8 {
-    match val {
-        true => 1,
-        false => 0
     }
 }
 
@@ -272,15 +244,5 @@ mod test {
 
         let cell = UnitCell::infinite().unwrap();
         assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
-    }
-
-    #[test]
-    fn periodicity() {
-        let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
-
-        assert_eq!(cell.periodicity(), Ok((true, true, true)));
-
-        assert!(cell.set_periodicity(false, true, false).is_ok());
-        assert_eq!(cell.periodicity(), Ok((false, true, false)));
     }
 }
