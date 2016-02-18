@@ -1,8 +1,15 @@
 extern crate cmake;
 use std::io::prelude::*;
 use std::fs::File;
+use std::path::Path;
 
 fn main() {
+    let path = Path::new("chemfiles").join("CMakeLists.txt");
+    if !path.exists() {
+        panic!("The git submodule for chemfiles is not initalized.\n\
+                Please run `git submodule update --init.`")
+    }
+
     let mut cfg = cmake::Config::new(".");
     cfg.define("BUILD_SHARED_LIBS", "OFF");
     cfg.define("CMAKE_POSITION_INDEPENDENT_CODE", "ON");
