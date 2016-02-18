@@ -13,7 +13,7 @@ name = "chemfiles_sys"
 path = "lib.rs"
 
 [dependencies]
-libc = "*"
+libc = "0.2.7"
 
 [build-dependencies]
-cmake = "*"
+cmake = "0.1.13"
