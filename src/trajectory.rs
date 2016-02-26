@@ -311,7 +311,7 @@ mod test {
         let mut frame = Frame::new(4).unwrap();
 
         {
-            let positions = frame.positions().unwrap();
+            let positions = frame.positions_mut().unwrap();
             for i in 0..positions.len() {
                 positions[i] = [1.0, 2.0, 3.0];
             }
@@ -328,7 +328,7 @@ mod test {
 
         frame.resize(6).unwrap();
         {
-            let positions = frame.positions().unwrap();
+            let positions = frame.positions_mut().unwrap();
             for i in 0..positions.len() {
                 positions[i] = [4.0, 5.0, 6.0];
             }

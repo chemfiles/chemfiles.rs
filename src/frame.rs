@@ -67,8 +67,25 @@ impl Frame {
         return Ok(());
     }
 
-    /// Get the positions from the `Frame`.
-    pub fn positions(&mut self) -> Result<&mut [[f32; 3]], Error> {
+    /// Get a view into the positions of the `Frame`.
+    pub fn positions(&self) -> Result<&[[f32; 3]], Error> {
+        let mut ptr = ptr::null_mut();
+        let mut natoms = 0;
+        unsafe {
+            try!(check(chfl_frame_positions(
+                self.handle as *mut CHFL_FRAME,
+                &mut ptr,
+                &mut natoms
+            )));
+        }
+        let res = unsafe {
+            slice::from_raw_parts(ptr, natoms)
+        };
+        return Ok(res);
+    }
+
+    /// Get a mutable view into the positions of the `Frame`.
+    pub fn positions_mut(&mut self) -> Result<&mut [[f32; 3]], Error> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -84,8 +101,25 @@ impl Frame {
         return Ok(res);
     }
 
-    /// Get the velocities from the `Frame`.
-    pub fn velocities(&mut self) -> Result<&mut [[f32; 3]], Error> {
+    /// Get a view into the velocities of the `Frame`.
+    pub fn velocities(&self) -> Result<&[[f32; 3]], Error> {
+        let mut ptr = ptr::null_mut();
+        let mut natoms = 0;
+        unsafe {
+            try!(check(chfl_frame_velocities(
+                self.handle as *mut CHFL_FRAME,
+                &mut ptr,
+                &mut natoms
+            )));
+        }
+        let res = unsafe {
+            slice::from_raw_parts(ptr, natoms)
+        };
+        return Ok(res);
+    }
+
+    /// Get a mutable view into the velocities of the `Frame`.
+    pub fn velocities_mut(&mut self) -> Result<&mut [[f32; 3]], Error> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -287,16 +321,16 @@ mod test {
     #[test]
     fn positions() {
         let mut frame = Frame::new(4).unwrap();
-        let expected: &mut [[f32; 3]] = &mut [[1.0, 2.0, 3.0],
-                                              [4.0, 5.0, 6.0],
-                                              [7.0, 8.0, 9.0],
-                                              [10.0, 11.0, 12.0]];
+        let mut expected = [[1.0, 2.0, 3.0],
+                            [4.0, 5.0, 6.0],
+                            [7.0, 8.0, 9.0],
+                            [10.0, 11.0, 12.0]];
         {
-            let positions = frame.positions().unwrap();
-            clone_from_slice(positions, expected);
+            let positions = frame.positions_mut().unwrap();
+            clone_from_slice(positions, &mut expected);
         }
 
-        assert_eq!(frame.positions(), Ok(expected));
+        assert_eq!(frame.positions(), Ok(expected.as_ref()));
     }
 
     #[test]
@@ -320,17 +354,17 @@ mod test {
         frame.add_velocities().unwrap();
         assert_eq!(frame.has_velocities(), Ok(true));
 
-        let expected: &mut [[f32; 3]] = &mut [[1.0, 2.0, 3.0],
-                                              [4.0, 5.0, 6.0],
-                                              [7.0, 8.0, 9.0],
-                                              [10.0, 11.0, 12.0]];
+        let mut expected = [[1.0, 2.0, 3.0],
+                            [4.0, 5.0, 6.0],
+                            [7.0, 8.0, 9.0],
+                            [10.0, 11.0, 12.0]];
 
         {
-            let velocities = frame.velocities().unwrap();
-            clone_from_slice(velocities, expected);
+            let velocities = frame.velocities_mut().unwrap();
+            clone_from_slice(velocities, &mut expected);
         }
 
-        assert_eq!(frame.velocities(), Ok(expected));
+        assert_eq!(frame.velocities(), Ok(expected.as_ref()));
     }
 
     #[test]
