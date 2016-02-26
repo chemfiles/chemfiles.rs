@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 documentation = "https://chemfiles.readthedocs.org/"
 repository = "https://github.com/chemfiles/chemfiles.rs"

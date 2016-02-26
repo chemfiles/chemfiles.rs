@@ -39,7 +39,7 @@ mod errors;
 pub use errors::Error;
 
 mod logging;
-pub use logging::Logger;
+pub use logging::{Logger, LogLevel};
 
 mod atom;
 pub use atom::Atom;
