@@ -223,7 +223,7 @@ impl Frame {
     /// Try to guess the bonds, angles and dihedrals in the system. If `bonds`
     /// is true, guess everything; else only guess the angles and dihedrals from
     /// the topology bond list.
-    pub fn guess_topology(&self, bonds: bool) -> Result<(), Error> {
+    pub fn guess_topology(&mut self, bonds: bool) -> Result<(), Error> {
         unsafe {
             try!(check(chfl_frame_guess_topology(self.handle as *mut CHFL_FRAME, bool_to_u8(bonds))));
         }
