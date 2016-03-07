@@ -36,7 +36,7 @@ use chemfiles_sys::chfl_version;
 mod string;
 
 mod errors;
-pub use errors::Error;
+pub use errors::{Error, ErrorKind};
 
 mod logging;
 pub use logging::{Logger, LogLevel};
