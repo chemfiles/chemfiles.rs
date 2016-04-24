@@ -8,6 +8,9 @@
 use chemfiles_sys::*;
 use string;
 
+use std::error;
+use std::fmt;
+
 #[derive(Clone, Debug, PartialEq)]
 /// Error type for Chemfiles.
 pub struct Error {
@@ -100,6 +103,28 @@ pub fn check(status: CHFL_STATUS) -> Result<(), Error> {
     }
     return Ok(());
 }
+
+
+impl fmt::Display for Error {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(fmt, "{}", self.message)
+    }
+}
+
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match self.kind {
+            ErrorKind::CppStdError => "Exception in the C++ standard library",
+            ErrorKind::ChemfilesCppError => "Exception in the C++ chemfiles library",
+            ErrorKind::MemoryError => "Error in memory allocations",
+            ErrorKind::FileError => "Error while reading or writing a file",
+            ErrorKind::FormatError => "Error in file formatting, i.e. the file is invalid",
+	        ErrorKind::SelectionError => "Error in selection string syntax",
+	        ErrorKind::UTF8PathError => "The given path is not valid UTF8",
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod test {
