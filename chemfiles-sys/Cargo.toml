@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles-sys"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 links = "chemfiles"
 build = "build.rs"
@@ -13,7 +13,7 @@ name = "chemfiles_sys"
 path = "lib.rs"
 
 [dependencies]
-libc = "0.2.7"
+libc = "0.2"
 
 [build-dependencies]
-cmake = "0.1.13"
+cmake = "0.1"
