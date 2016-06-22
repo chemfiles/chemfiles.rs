@@ -14,19 +14,19 @@ use errors::{check, Error, ErrorKind};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CellType {
     /// Orthorombic cell, with the three angles equals to 90°
-    Orthorombic = ORTHOROMBIC as isize,
+    Orthorhombic = CHFL_CELL_ORTHORHOMBIC as isize,
     /// Triclinic cell, with any values for the angles.
-    Triclinic = TRICLINIC as isize,
+    Triclinic = CHFL_CELL_TRICLINIC as isize,
     /// Infinite cell, to use when there is no cell.
-    Infinite = INFINITE as isize
+    Infinite = CHFL_CELL_INFINITE as isize,
 }
 
-impl From<CHFL_CELL_TYPE> for CellType {
-    fn from(celltype: CHFL_CELL_TYPE) -> CellType {
+impl From<CHFL_CELL_TYPES> for CellType {
+    fn from(celltype: CHFL_CELL_TYPES) -> CellType {
         match celltype {
-            ORTHOROMBIC => CellType::Orthorombic,
-            TRICLINIC => CellType::Triclinic,
-            INFINITE => CellType::Infinite,
+            CHFL_CELL_ORTHORHOMBIC => CellType::Orthorhombic,
+            CHFL_CELL_TRICLINIC => CellType::Triclinic,
+            CHFL_CELL_INFINITE => CellType::Infinite,
             _ => unreachable!()
         }
     }
@@ -131,7 +131,7 @@ impl UnitCell {
     pub fn matrix(&self) -> Result<[[f64; 3]; 3], Error> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
-            try!(check(chfl_cell_matrix(self.handle, &mut res[0])));
+            try!(check(chfl_cell_matrix(self.handle, res.as_mut_ptr())));
         }
         Ok(res)
     }
@@ -148,7 +148,7 @@ impl UnitCell {
     /// Set the type of the unit cell
     pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<(), Error> {
         unsafe {
-            try!(check(chfl_cell_set_type(self.handle as *mut CHFL_CELL, cell_type as CHFL_CELL_TYPE)));
+            try!(check(chfl_cell_set_type(self.handle as *mut CHFL_CELL, cell_type as CHFL_CELL_TYPES)));
         }
         Ok(())
     }
@@ -237,7 +237,7 @@ mod test {
     fn cell_type() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
 
-        assert_eq!(cell.cell_type(), Ok(CellType::Orthorombic));
+        assert_eq!(cell.cell_type(), Ok(CellType::Orthorhombic));
 
         assert!(cell.set_cell_type(CellType::Infinite).is_ok());
         assert_eq!(cell.cell_type(), Ok(CellType::Infinite));

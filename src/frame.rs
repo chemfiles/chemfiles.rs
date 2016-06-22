@@ -10,7 +10,6 @@ use std::ptr;
 use std::slice;
 
 use chemfiles_sys::*;
-use string;
 use errors::{check, Error, ErrorKind};
 use {Atom, Topology, UnitCell};
 
@@ -220,40 +219,13 @@ impl Frame {
         return Ok(());
     }
 
-    /// Try to guess the bonds, angles and dihedrals in the system. If `bonds`
-    /// is true, guess everything; else only guess the angles and dihedrals from
-    /// the topology bond list.
-    pub fn guess_topology(&mut self, bonds: bool) -> Result<(), Error> {
+    /// Guess the bonds, angles and dihedrals in the system using an atomic
+    /// distance criteria
+    pub fn guess_topology(&mut self) -> Result<(), Error> {
         unsafe {
-            try!(check(chfl_frame_guess_topology(self.handle as *mut CHFL_FRAME, bool_to_u8(bonds))));
+            try!(check(chfl_frame_guess_topology(self.handle as *mut CHFL_FRAME)));
         }
         return Ok(());
-    }
-
-    /// Select atoms in a frame, from a specific selection string.
-    ///
-    /// This function select atoms in a frame matching a selection string. For
-    /// example, `"name H and x > 4"` will select all the atoms with name `"H"`
-    /// and `x` coordinate less than 4. See the C++ documentation for the full
-    /// selection language.
-    ///
-    /// The result is a `Vec<bool>` containing `true` at position `i` if the
-    /// atom at position `i` matches the selection string, and `false`
-    /// otherwise.
-    pub fn select(&self, selection: &str) -> Result<Vec<bool>, Error> {
-        let natoms = self.natoms().unwrap();
-        let mut res = vec![0u8; natoms];
-        let c_str = string::to_c(selection);
-        unsafe {
-            try!(check(chfl_frame_selection(
-                self.handle,
-                c_str.into_raw(),
-                res.as_mut_ptr(),
-                natoms
-            )));
-        }
-        let res = res.iter().map(|&u| u8_to_bool(u)).collect::<Vec<_>>();
-        Ok(res)
     }
 
     /// Create a `Frame` from a C pointer. This function is unsafe because
@@ -266,20 +238,6 @@ impl Frame {
     /// lifetime guarantee is made on the pointer.
     pub unsafe fn as_ptr(&self) -> *const CHFL_FRAME {
         self.handle
-    }
-}
-
-fn bool_to_u8(val: bool) -> u8 {
-    match val {
-        true => 1,
-        false => 0
-    }
-}
-
-fn u8_to_bool(val: u8) -> bool {
-    match val {
-        0 => false,
-        _ => true
     }
 }
 
@@ -334,20 +292,6 @@ mod test {
     }
 
     #[test]
-    fn selection() {
-        let mut frame = Frame::new(4).unwrap();
-        let mut topology = Topology::new().unwrap();
-        topology.push(&Atom::new("H").unwrap()).unwrap();
-        topology.push(&Atom::new("O").unwrap()).unwrap();
-        topology.push(&Atom::new("O").unwrap()).unwrap();
-        topology.push(&Atom::new("H").unwrap()).unwrap();
-        frame.set_topology(&topology).unwrap();
-
-        let matched = frame.select("name H").unwrap();
-        assert_eq!(matched, vec![true, false, false, true]);
-    }
-
-    #[test]
     fn velocities() {
         let mut frame = Frame::new(4).unwrap();
         assert_eq!(frame.has_velocities(), Ok(false));
@@ -380,7 +324,7 @@ mod test {
 
     #[test]
     fn topology() {
-        let mut frame = Frame::new(0).unwrap();
+        let mut frame = Frame::new(2).unwrap();
         let mut topology = Topology::new().unwrap();
 
         topology.push(&Atom::new("Zn").unwrap()).unwrap();

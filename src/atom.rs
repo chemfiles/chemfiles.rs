@@ -15,23 +15,23 @@ use string;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AtomType {
     /// Element from the periodic table of elements
-    Element = ELEMENT as isize,
+    Element = CHFL_ATOM_ELEMENT as isize,
     /// Coarse-grained atom are composed of more than one element: CH3 groups,
     /// amino-acids are corse-grained atoms.
-    CorseGrain = COARSE_GRAINED as isize,
+    CorseGrain = CHFL_ATOM_COARSE_GRAINED as isize,
     /// Dummy site, with no physical reality
-    Dummy = DUMMY as isize,
+    Dummy = CHFL_ATOM_DUMMY as isize,
     /// Undefined atom type
-    Undefined = UNDEFINED as isize,
+    Undefined = CHFL_ATOM_UNDEFINED as isize,
 }
 
-impl From<CHFL_ATOM_TYPE> for AtomType {
-    fn from(atomtype: CHFL_ATOM_TYPE) -> AtomType {
+impl From<CHFL_ATOM_TYPES> for AtomType {
+    fn from(atomtype: CHFL_ATOM_TYPES) -> AtomType {
         match atomtype {
-            ELEMENT => AtomType::Element,
-            COARSE_GRAINED => AtomType::CorseGrain,
-            DUMMY => AtomType::Dummy,
-            UNDEFINED => AtomType::Undefined,
+            CHFL_ATOM_ELEMENT => AtomType::Element,
+            CHFL_ATOM_COARSE_GRAINED => AtomType::CorseGrain,
+            CHFL_ATOM_DUMMY => AtomType::Dummy,
+            CHFL_ATOM_UNDEFINED => AtomType::Undefined,
             _ => unreachable!()
         }
     }
@@ -163,7 +163,7 @@ impl Atom {
     /// Set the type of the atom
     pub fn set_atom_type(&mut self, atom_type: AtomType) -> Result<(), Error> {
         unsafe {
-            try!(check(chfl_atom_set_type(self.handle as *mut CHFL_ATOM, atom_type as CHFL_ATOM_TYPE)));
+            try!(check(chfl_atom_set_type(self.handle as *mut CHFL_ATOM, atom_type as CHFL_ATOM_TYPES)));
         }
         Ok(())
     }

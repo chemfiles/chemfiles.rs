@@ -35,9 +35,8 @@ impl Trajectory {
 
         let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
-        let mode = string::to_c("r");
         unsafe {
-            handle = chfl_trajectory_open(filename.as_ptr(), mode.as_ptr());
+            handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
         }
         if handle.is_null() {
             return Err(Error::new(ErrorKind::ChemfilesCppError));
@@ -59,9 +58,8 @@ impl Trajectory {
 
         let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
-        let mode = string::to_c("w");
         unsafe {
-            handle = chfl_trajectory_open(filename.as_ptr(), mode.as_ptr());
+            handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
         }
         if handle.is_null() {
             return Err(Error::new(ErrorKind::ChemfilesCppError));
@@ -84,9 +82,8 @@ impl Trajectory {
         let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
         let format = string::to_c(format.into());
-        let mode = string::to_c("r");
         unsafe {
-            handle = chfl_trajectory_with_format(filename.as_ptr(), mode.as_ptr(), format.as_ptr());
+            handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
         }
         if handle.is_null() {
             return Err(Error::new(ErrorKind::ChemfilesCppError));
@@ -108,10 +105,9 @@ impl Trajectory {
 
         let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
-        let mode = string::to_c("w");
         let format = string::to_c(format.into());
         unsafe {
-            handle = chfl_trajectory_with_format(filename.as_ptr(), mode.as_ptr(), format.as_ptr());
+            handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
         }
         if handle.is_null() {
             return Err(Error::new(ErrorKind::ChemfilesCppError));
@@ -275,7 +271,7 @@ mod test {
         assert_eq!(topology.natoms(), Ok(297));
         assert_eq!(topology.bonds_count(), Ok(0));
 
-        assert!(frame.guess_topology(true).is_ok());
+        assert!(frame.guess_topology().is_ok());
         let topology = frame.topology().unwrap();
         assert_eq!(topology.natoms(), Ok(297));
         assert_eq!(topology.bonds_count(), Ok(181));

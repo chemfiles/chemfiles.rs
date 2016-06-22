@@ -20,22 +20,22 @@ use errors::{Error, ErrorKind, check};
 #[derive(Clone, Debug, PartialEq)]
 pub enum LogLevel {
     /// Only log errors
-    Error = ERROR as isize,
+    Error = CHFL_LOG_ERROR as isize,
     /// Log errors and warnings
-    Warning = WARNING as isize,
+    Warning = CHFL_LOG_WARNING as isize,
     /// Log errors, warnings and informations
-    Info = INFO as isize,
+    Info = CHFL_LOG_INFO as isize,
     /// Log everything (errors, warnings, informations and debug informations)
-    Debug = DEBUG as isize,
+    Debug = CHFL_LOG_DEBUG as isize,
 }
 
 impl From<CHFL_LOG_LEVEL> for LogLevel {
     fn from(level: CHFL_LOG_LEVEL) -> LogLevel {
         match level {
-            ERROR => LogLevel::Error,
-            WARNING => LogLevel::Warning,
-            INFO => LogLevel::Info,
-            DEBUG => LogLevel::Debug,
+            CHFL_LOG_ERROR => LogLevel::Error,
+            CHFL_LOG_WARNING => LogLevel::Warning,
+            CHFL_LOG_INFO => LogLevel::Info,
+            CHFL_LOG_DEBUG => LogLevel::Debug,
             _ => unreachable!()
         }
     }

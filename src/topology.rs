@@ -139,7 +139,7 @@ impl Topology {
         unsafe {
             try!(check(chfl_topology_bonds(
                 self.handle,
-                (*res.as_mut_ptr()).as_mut_ptr(),
+                res.as_mut_ptr(),
                 nbonds as usize
             )));
         }
@@ -153,7 +153,7 @@ impl Topology {
         unsafe {
             try!(check(chfl_topology_angles(
                 self.handle,
-                (*res.as_mut_ptr()).as_mut_ptr(),
+                res.as_mut_ptr(),
                 nangles as usize
             )));
         }
@@ -167,7 +167,7 @@ impl Topology {
         unsafe {
             try!(check(chfl_topology_dihedrals(
                 self.handle,
-                (*res.as_mut_ptr()).as_mut_ptr(),
+                res.as_mut_ptr(),
                 ndihedrals as usize
             )));
         }
