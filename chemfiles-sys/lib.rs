@@ -47,9 +47,10 @@ pub type chfl_logging_callback_t = extern fn(CHFL_LOG_LEVEL, *const c_char);
 pub type c_bool = u8;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct chfl_match_t {
-    size: c_char,
-    atoms: [size_t; 4],
+    pub size: c_char,
+    pub atoms: [size_t; 4],
 }
 
 // TODO: use an enum here
