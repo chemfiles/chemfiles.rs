@@ -8,7 +8,7 @@
 use std::ops::Drop;
 
 use chemfiles_sys::*;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use string;
 use Result;
 
@@ -53,10 +53,12 @@ impl Atom {
         unsafe {
             handle = chfl_atom(buffer.as_ptr());
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Atom{handle: handle})
         }
-        Ok(Atom{handle: handle})
     }
 
     /// Get the `Atom` mass, in atomic mass units

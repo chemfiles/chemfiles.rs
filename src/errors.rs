@@ -8,6 +8,7 @@
 use std::error;
 use std::fmt;
 use std::result;
+use std::path::Path;
 
 use chemfiles_sys::*;
 use string;
@@ -39,6 +40,8 @@ pub enum ErrorKind {
     SelectionError,
     /// The given path is not valid UTF8
     UTF8PathError,
+    /// We got a null pointer from C++
+    NullPtr,
 }
 
 impl From<CHFL_STATUS> for Error {
@@ -68,19 +71,29 @@ impl From<Error> for CHFL_STATUS {
             ErrorKind::FileError => CHFL_FILE_ERROR,
             ErrorKind::FormatError => CHFL_FORMAT_ERROR,
             ErrorKind::SelectionError => CHFL_SELECTION_ERROR,
-            ErrorKind::UTF8PathError => {
-                panic!("Can not convert UTF8PathError to C error code. It is a Rust-side error.")
+            ErrorKind::UTF8PathError | ErrorKind::NullPtr  => {
+                panic!(
+                    "Can not convert this error to error code. \
+                    It is a Rust-side only error."
+                )
             },
         }
     }
 }
 
 impl Error {
-    /// Create a new error of the given `kind` and the last error message from
-    /// the C++ library.
-    pub fn new(kind: ErrorKind) -> Error {
+    /// Create a new error because the given `path` is invalid UTF-8 data
+    pub fn utf8_path_error(path: &Path) -> Error {
         Error {
-            kind: kind,
+            kind: ErrorKind::UTF8PathError,
+            message: format!("Could not convert '{}' to UTF8", path.display())
+        }
+    }
+
+    /// Create a new error because we got a null pointer from C++
+    pub fn null_ptr() -> Error {
+        Error {
+            kind: ErrorKind::NullPtr,
             message: Error::last_error()
         }
     }
@@ -116,13 +129,14 @@ impl fmt::Display for Error {
 impl error::Error for Error {
     fn description(&self) -> &str {
         match self.kind {
-            ErrorKind::CppStdError => "Exception in the C++ standard library",
-            ErrorKind::ChemfilesCppError => "Exception in the C++ chemfiles library",
+            ErrorKind::CppStdError => "Exception from the C++ standard library",
+            ErrorKind::ChemfilesCppError => "Exception from the chemfiles library",
             ErrorKind::MemoryError => "Error in memory allocations",
             ErrorKind::FileError => "Error while reading or writing a file",
             ErrorKind::FormatError => "Error in file formatting, i.e. the file is invalid",
 	        ErrorKind::SelectionError => "Error in selection string syntax",
 	        ErrorKind::UTF8PathError => "The given path is not valid UTF8",
+            ErrorKind::NullPtr => "We got a NULL pointer from C++"
         }
     }
 }

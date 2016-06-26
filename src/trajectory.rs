@@ -9,7 +9,7 @@ use std::ops::Drop;
 use std::path::Path;
 
 use chemfiles_sys::*;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use string;
 use Result;
 
@@ -27,10 +27,7 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(Error {
-                    kind: ErrorKind::UTF8PathError,
-                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
-                })
+                return Err(Error::utf8_path_error(filename.as_ref()))
             }
         };
 
@@ -39,10 +36,12 @@ impl Trajectory {
         unsafe {
             handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Trajectory{handle: handle})
         }
-        Ok(Trajectory{handle: handle})
     }
 
     /// Open a trajectory file in write mode.
@@ -50,10 +49,7 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(Error{
-                    kind: ErrorKind::UTF8PathError,
-                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
-                })
+                return Err(Error::utf8_path_error(filename.as_ref()))
             }
         };
 
@@ -62,10 +58,12 @@ impl Trajectory {
         unsafe {
             handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Trajectory{handle: handle})
         }
-        Ok(Trajectory{handle: handle})
     }
 
     /// Open a trajectory file in read mode using a specific `format`.
@@ -73,10 +71,7 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(Error{
-                    kind: ErrorKind::UTF8PathError,
-                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
-                })
+                return Err(Error::utf8_path_error(filename.as_ref()))
             }
         };
 
@@ -86,10 +81,12 @@ impl Trajectory {
         unsafe {
             handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Trajectory{handle: handle})
         }
-        Ok(Trajectory{handle: handle})
     }
 
     /// Open a trajectory file in write mode.
@@ -97,10 +94,7 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(Error{
-                    kind: ErrorKind::UTF8PathError,
-                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
-                })
+                return Err(Error::utf8_path_error(filename.as_ref()))
             }
         };
 
@@ -110,10 +104,12 @@ impl Trajectory {
         unsafe {
             handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Trajectory{handle: handle})
         }
-        Ok(Trajectory{handle: handle})
     }
 
     /// Read the next step of the trajectory into a frame
@@ -161,10 +157,7 @@ impl Trajectory {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(Error{
-                    kind: ErrorKind::UTF8PathError,
-                    message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())
-                })
+                return Err(Error::utf8_path_error(filename.as_ref()))
             }
         };
 

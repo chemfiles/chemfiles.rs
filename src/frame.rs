@@ -10,7 +10,7 @@ use std::ptr;
 use std::slice;
 
 use chemfiles_sys::*;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use {Atom, Topology, UnitCell};
 use Result;
 
@@ -28,10 +28,12 @@ impl Frame {
         unsafe {
             handle = chfl_frame(natoms);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Frame{handle: handle})
         }
-        Ok(Frame{handle: handle})
     }
 
     /// Get a specific `Atom` from a frame, given its `index` in the frame
@@ -40,11 +42,13 @@ impl Frame {
         unsafe {
             handle = chfl_atom_from_frame(self.handle, index);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
-        }
-        unsafe {
-            Ok(Atom::from_ptr(handle))
+            Err(Error::null_ptr())
+        } else {
+            unsafe {
+                Ok(Atom::from_ptr(handle))
+            }
         }
     }
 
@@ -159,11 +163,13 @@ impl Frame {
         unsafe {
             handle = chfl_cell_from_frame(self.handle);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
-        }
-        unsafe {
-            Ok(UnitCell::from_ptr(handle))
+            Err(Error::null_ptr())
+        } else {
+            unsafe {
+                Ok(UnitCell::from_ptr(handle))
+            }
         }
     }
 
@@ -184,11 +190,13 @@ impl Frame {
         unsafe {
             handle = chfl_topology_from_frame(self.handle);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
-        }
-        unsafe {
-            Ok(Topology::from_ptr(handle))
+            Err(Error::null_ptr())
+        } else {
+            unsafe {
+                Ok(Topology::from_ptr(handle))
+            }
         }
     }
 

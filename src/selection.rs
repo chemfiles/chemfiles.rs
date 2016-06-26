@@ -11,7 +11,7 @@ use std::iter::IntoIterator;
 use std::slice::Iter;
 
 use chemfiles_sys::*;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use string;
 use frame::Frame;
 use Result;
@@ -101,10 +101,12 @@ impl Selection {
         unsafe {
             handle = chfl_selection(buffer.as_ptr());
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Selection{handle: handle})
         }
-        Ok(Selection{handle: handle})
     }
 
     /// Get the size of the selection, i.e. the number of atoms we are selecting

@@ -9,7 +9,7 @@ use std::ops::Drop;
 use std::usize;
 
 use chemfiles_sys::*;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use atom::Atom;
 use Result;
 
@@ -29,10 +29,12 @@ impl Topology {
         unsafe {
             handle = chfl_topology();
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(Topology{handle: handle})
         }
-        Ok(Topology{handle: handle})
     }
 
     /// Get a specific `Atom` from a topology, given its `index` in the topology
@@ -41,11 +43,13 @@ impl Topology {
         unsafe {
             handle = chfl_atom_from_topology(self.handle, index);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
-        }
-        unsafe {
-            Ok(Atom::from_ptr(handle))
+            Err(Error::null_ptr())
+        } else {
+            unsafe {
+                Ok(Atom::from_ptr(handle))
+            }
         }
     }
 

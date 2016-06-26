@@ -8,7 +8,7 @@
 use std::ops::Drop;
 
 use chemfiles_sys::*;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use Result;
 
 /// Available unit cell types
@@ -58,10 +58,12 @@ impl UnitCell {
         unsafe {
             handle = chfl_cell(a, b, c);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(UnitCell{handle: handle})
         }
-        Ok(UnitCell{handle: handle})
     }
 
     /// Create an `Infinite` `UnitCell`
@@ -71,7 +73,7 @@ impl UnitCell {
             handle = chfl_cell(0.0, 0.0, 0.0);
         }
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            return Err(Error::null_ptr())
         }
         let mut cell = UnitCell{handle: handle};
         try!(cell.set_cell_type(CellType::Infinite));
@@ -87,10 +89,12 @@ impl UnitCell {
         unsafe {
             handle = chfl_cell_triclinic(a, b, c, alpha, beta, gamma);
         }
+
         if handle.is_null() {
-            return Err(Error::new(ErrorKind::ChemfilesCppError));
+            Err(Error::null_ptr())
+        } else {
+            Ok(UnitCell{handle: handle})
         }
-        Ok(UnitCell{handle: handle})
     }
 
     /// Get the three lenghts of an `UnitCell`, in Angstroms.
