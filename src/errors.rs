@@ -5,11 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
-use chemfiles_sys::*;
-use string;
-
 use std::error;
 use std::fmt;
+use std::result;
+
+use chemfiles_sys::*;
+use string;
+use Result;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Error type for Chemfiles.
@@ -97,7 +99,7 @@ impl Error {
 }
 
 /// Check return value of a C function, and get the error if needed.
-pub fn check(status: CHFL_STATUS) -> Result<(), Error> {
+pub fn check(status: CHFL_STATUS) -> Result<()> {
     if status != CHFL_SUCCESS {
         return Err(Error::from(status));
     }
@@ -106,7 +108,7 @@ pub fn check(status: CHFL_STATUS) -> Result<(), Error> {
 
 
 impl fmt::Display for Error {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
         write!(fmt, "{}", self.message)
     }
 }

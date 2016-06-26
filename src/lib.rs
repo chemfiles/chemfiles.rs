@@ -23,7 +23,7 @@
 //!
 //!
 //! As all the function call the underlying C library, they all can fail and
-//! thus all return a `Result<_, Error>` value.
+//! thus all return a `Result<_>` value.
 #![deny(missing_docs)]
 
 #[macro_use] extern crate lazy_static;
@@ -37,6 +37,9 @@ mod string;
 
 mod errors;
 pub use errors::{Error, ErrorKind};
+
+/// Custom result type for working with errors in chemfiles
+pub type Result<T> = std::result::Result<T, Error>;
 
 mod logging;
 pub use logging::{Logger, LogLevel};

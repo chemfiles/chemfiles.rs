@@ -14,7 +14,8 @@ use std::sync::{MutexGuard, Mutex};
 
 use chemfiles_sys::*;
 use string;
-use errors::{Error, ErrorKind, check};
+use errors::{check, Error, ErrorKind};
+use Result;
 
 /// Available log levels
 #[derive(Clone, Debug, PartialEq)]
@@ -64,7 +65,7 @@ impl<'a> Logger<'a> {
     }
 
     /// Get the current maximal logging level
-    pub fn level(&self) -> Result<LogLevel, Error> {
+    pub fn level(&self) -> Result<LogLevel> {
         let mut level = 0;
         unsafe {
             try!(check(chfl_loglevel(&mut level)));
@@ -74,7 +75,7 @@ impl<'a> Logger<'a> {
 
 
     /// Set the maximal logging level to `level`
-    pub fn set_level(&self, level: LogLevel) -> Result<(), Error> {
+    pub fn set_level(&self, level: LogLevel) -> Result<()> {
         unsafe {
             try!(check(chfl_set_loglevel(level as CHFL_LOG_LEVEL)));
         }
@@ -82,7 +83,7 @@ impl<'a> Logger<'a> {
     }
 
     /// Write logs to the file at `path`, creating it if needed.
-    pub fn log_to_file<P>(&self, filename: P) -> Result<(), Error> where P: AsRef<Path> {
+    pub fn log_to_file<P>(&self, filename: P) -> Result<()> where P: AsRef<Path> {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
@@ -102,7 +103,7 @@ impl<'a> Logger<'a> {
     }
 
     /// Redirect the logs to the standard error stream. This is the default.
-    pub fn log_to_stderr(&self) -> Result<(), Error> {
+    pub fn log_to_stderr(&self) -> Result<()> {
         unsafe {
             try!(check(chfl_log_stderr()));
         }
@@ -110,7 +111,7 @@ impl<'a> Logger<'a> {
     }
 
     /// Redirect the logs to the standard output.
-    pub fn log_to_stdout(&self) -> Result<(), Error> {
+    pub fn log_to_stdout(&self) -> Result<()> {
         unsafe {
             try!(check(chfl_log_stdout()));
         }
@@ -118,7 +119,7 @@ impl<'a> Logger<'a> {
     }
 
     /// Remove all logging output.
-    pub fn log_silent(&self) -> Result<(), Error> {
+    pub fn log_silent(&self) -> Result<()> {
         unsafe {
             try!(check(chfl_log_silent()));
         }
@@ -128,7 +129,7 @@ impl<'a> Logger<'a> {
     /// Redirect all logging to user-provided logging. The `callback` function will
     /// be called at each loggin operation with the level of the message, and the
     /// the message itself.
-    pub fn log_callback<F>(&self, callback: F) -> Result<(), Error> where F: Fn(LogLevel, &str) + 'static {
+    pub fn log_callback<F>(&self, callback: F) -> Result<()> where F: Fn(LogLevel, &str) + 'static {
         let callback = Box::into_raw(Box::new(callback));
         unsafe {
             LOGGING_CALLBACK = Some(callback);

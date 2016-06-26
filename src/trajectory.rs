@@ -11,6 +11,7 @@ use std::path::Path;
 use chemfiles_sys::*;
 use errors::{check, Error, ErrorKind};
 use string;
+use Result;
 
 use {UnitCell, Topology, Frame};
 
@@ -22,7 +23,7 @@ pub struct Trajectory {
 
 impl Trajectory {
     /// Open a trajectory file in read mode.
-    pub fn open<P>(filename: P) -> Result<Trajectory, Error> where P: AsRef<Path>{
+    pub fn open<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path>{
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
@@ -45,7 +46,7 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in write mode.
-    pub fn create<P>(filename: P) -> Result<Trajectory, Error> where P: AsRef<Path> {
+    pub fn create<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path> {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
@@ -68,7 +69,7 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in read mode using a specific `format`.
-    pub fn open_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory, Error> where P: AsRef<Path>, S: Into<&'a str> {
+    pub fn open_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
@@ -92,7 +93,7 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in write mode.
-    pub fn create_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory, Error> where P: AsRef<Path>, S: Into<&'a str> {
+    pub fn create_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
@@ -116,7 +117,7 @@ impl Trajectory {
     }
 
     /// Read the next step of the trajectory into a frame
-    pub fn read(&mut self, frame: &mut Frame) -> Result<(), Error> {
+    pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read(
                 self.handle,
@@ -126,7 +127,7 @@ impl Trajectory {
     }
 
     /// Read a specific step of the trajectory in a frame
-    pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<(), Error> {
+    pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read_step(
                 self.handle,
@@ -137,7 +138,7 @@ impl Trajectory {
     }
 
     /// Write a frame to the trajectory.
-    pub fn write(&mut self, frame: &Frame) -> Result<(), Error> {
+    pub fn write(&mut self, frame: &Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_write(self.handle, frame.as_ptr())))
         }
@@ -147,7 +148,7 @@ impl Trajectory {
     /// Set the topology associated with a trajectory. This topology will be
     /// used when reading and writing the files, replacing any topology in the
     /// frames or files.
-    pub fn set_topology(&mut self, topology: Topology) -> Result<(), Error> {
+    pub fn set_topology(&mut self, topology: Topology) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_set_topology(self.handle, topology.as_ptr())))
         }
@@ -156,7 +157,7 @@ impl Trajectory {
 
     /// Set the topology associated with a trajectory by reading the first frame
     /// of `filename`; and extracting the topology of this frame.
-    pub fn set_topology_file<P>(&mut self, filename: P) -> Result<(), Error> where P: AsRef<Path> {
+    pub fn set_topology_file<P>(&mut self, filename: P) -> Result<()> where P: AsRef<Path> {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
@@ -177,7 +178,7 @@ impl Trajectory {
     /// Set the unit cell associated with a trajectory. This cell will be used
     /// when reading and writing the files, replacing any unit cell in the
     /// frames or files.
-    pub fn set_cell(&mut self, cell: UnitCell) -> Result<(), Error> {
+    pub fn set_cell(&mut self, cell: UnitCell) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_set_cell(self.handle, cell.as_ptr())))
         }
@@ -185,7 +186,7 @@ impl Trajectory {
     }
 
     /// Get the number of steps (the number of frames) in a trajectory.
-    pub fn nsteps(&mut self) -> Result<usize, Error> {
+    pub fn nsteps(&mut self) -> Result<usize> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_trajectory_nsteps(self.handle, &mut res)));
@@ -194,7 +195,7 @@ impl Trajectory {
     }
 
     /// Synchronize any buffered content to the hard drive.
-    pub fn sync(&mut self) -> Result<(), Error> {
+    pub fn sync(&mut self) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_sync(self.handle)));
         }

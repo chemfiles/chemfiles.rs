@@ -10,6 +10,7 @@ use std::ops::Drop;
 use chemfiles_sys::*;
 use errors::{check, Error, ErrorKind};
 use string;
+use Result;
 
 /// Available types of atoms
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -46,7 +47,7 @@ pub struct Atom {
 
 impl Atom {
     /// Create a new `Atom` from a `name`.
-    pub fn new<'a, S>(name: S) -> Result<Atom, Error> where S: Into<&'a str>{
+    pub fn new<'a, S>(name: S) -> Result<Atom> where S: Into<&'a str>{
         let handle : *const CHFL_ATOM;
         let buffer = string::to_c(name.into());
         unsafe {
@@ -59,7 +60,7 @@ impl Atom {
     }
 
     /// Get the `Atom` mass, in atomic mass units
-    pub fn mass(&self) -> Result<f32, Error> {
+    pub fn mass(&self) -> Result<f32> {
         let mut mass: f32 = 0.0;
         unsafe {
             try!(check(chfl_atom_mass(self.handle, &mut mass)));
@@ -68,7 +69,7 @@ impl Atom {
     }
 
     /// Set the `Atom` mass, in atomic mass units
-    pub fn set_mass(&mut self, mass: f32) -> Result<(), Error> {
+    pub fn set_mass(&mut self, mass: f32) -> Result<()> {
         unsafe {
             try!(check(chfl_atom_set_mass(self.handle as *mut CHFL_ATOM, mass)));
         }
@@ -76,7 +77,7 @@ impl Atom {
     }
 
     /// Get the `Atom` charge, in number of the electron charge *e*
-    pub fn charge(&self) -> Result<f32, Error> {
+    pub fn charge(&self) -> Result<f32> {
         let mut charge: f32 = 0.0;
         unsafe {
             try!(check(chfl_atom_charge(self.handle, &mut charge)));
@@ -85,7 +86,7 @@ impl Atom {
     }
 
     /// Set the `Atom` charge, in number of the electron charge *e*
-    pub fn set_charge(&mut self, charge: f32) -> Result<(), Error> {
+    pub fn set_charge(&mut self, charge: f32) -> Result<()> {
         unsafe {
             try!(check(chfl_atom_set_charge(self.handle as *mut CHFL_ATOM, charge)));
         }
@@ -93,7 +94,7 @@ impl Atom {
     }
 
     /// Get the `Atom` name
-    pub fn name(&self) -> Result<String, Error> {
+    pub fn name(&self) -> Result<String> {
         let mut buffer = vec![0; 10];
         unsafe {
             try!(check(chfl_atom_name(self.handle, &mut buffer[0], buffer.len() as usize)));
@@ -102,7 +103,7 @@ impl Atom {
     }
 
     /// Set the `Atom` name
-    pub fn set_name<'a, S>(&mut self, name: S) -> Result<(), Error> where S: Into<&'a str>{
+    pub fn set_name<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
         let buffer = string::to_c(name.into());
         unsafe {
             try!(check(chfl_atom_set_name(self.handle as *mut CHFL_ATOM, buffer.as_ptr())));
@@ -113,7 +114,7 @@ impl Atom {
     /// Try to get the full name of the `Atom`. The full name of "He" is
     /// "Helium", and so on. If the name can not be found, returns the empty
     /// string.
-    pub fn full_name(&mut self) -> Result<String, Error> {
+    pub fn full_name(&mut self) -> Result<String> {
         let mut buffer = vec![0; 10];
         unsafe {
             try!(check(chfl_atom_full_name(self.handle, &mut buffer[0], buffer.len() as usize)));
@@ -123,7 +124,7 @@ impl Atom {
 
     /// Try to get the Van der Waals radius of the `Atom`. If the radius can not
     /// be found, returns -1.
-    pub fn vdw_radius(&self) -> Result<f64, Error> {
+    pub fn vdw_radius(&self) -> Result<f64> {
         let mut radius: f64 = 0.0;
         unsafe {
             try!(check(chfl_atom_vdw_radius(self.handle, &mut radius)));
@@ -133,7 +134,7 @@ impl Atom {
 
     /// Try to get the covalent radius of the `Atom`. If the radius can not be
     /// found, returns -1.
-    pub fn covalent_radius(&self) -> Result<f64, Error> {
+    pub fn covalent_radius(&self) -> Result<f64> {
         let mut radius: f64 = 0.0;
         unsafe {
             try!(check(chfl_atom_covalent_radius(self.handle, &mut radius)));
@@ -143,7 +144,7 @@ impl Atom {
 
     /// Try to get the atomic number of the `Atom`. If the number can not be
     /// found, returns -1.
-    pub fn atomic_number(&self) -> Result<i32, Error> {
+    pub fn atomic_number(&self) -> Result<i32> {
         let mut number: i32 = 0;
         unsafe {
             try!(check(chfl_atom_atomic_number(self.handle, &mut number)));
@@ -152,7 +153,7 @@ impl Atom {
     }
 
     /// Get the type of the atom
-    pub fn atom_type(&self) -> Result<AtomType, Error> {
+    pub fn atom_type(&self) -> Result<AtomType> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_atom_type(self.handle, &mut res)));
@@ -161,7 +162,7 @@ impl Atom {
     }
 
     /// Set the type of the atom
-    pub fn set_atom_type(&mut self, atom_type: AtomType) -> Result<(), Error> {
+    pub fn set_atom_type(&mut self, atom_type: AtomType) -> Result<()> {
         unsafe {
             try!(check(chfl_atom_set_type(self.handle as *mut CHFL_ATOM, atom_type as CHFL_ATOM_TYPES)));
         }

@@ -14,6 +14,7 @@ use chemfiles_sys::*;
 use errors::{check, Error, ErrorKind};
 use string;
 use frame::Frame;
+use Result;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It should
@@ -94,7 +95,7 @@ impl Drop for Selection {
 
 impl Selection {
     /// Create a new selection from the given selection string.
-    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection, Error> {
+    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
         let handle : *const CHFL_SELECTION;
         let buffer = string::to_c(selection.into());
         unsafe {
@@ -112,7 +113,7 @@ impl Selection {
     /// This value is 1 for the 'atom' context, 2 for the 'pair' and 'bond'
     /// context, 3 for the 'three' and 'angles' contextes and 4 for the 'four'
     /// and 'dihedral' contextes.
-    pub fn size(&self) -> Result<usize, Error> {
+    pub fn size(&self) -> Result<usize> {
         let mut size = 0;
         unsafe {
             try!(check(chfl_selection_size(self.handle, &mut size)));
@@ -122,7 +123,7 @@ impl Selection {
 
     /// Evaluate a selection for a given frame, and return the corresponding
     /// matches.
-    pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>, Error> {
+    pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
         let mut n_matches = 0;
         unsafe {
             try!(check(chfl_selection_evalutate(
@@ -149,7 +150,7 @@ impl Selection {
     /// # Panics
     ///
     /// If the selection size is not 1.
-    pub fn list(&mut self, frame: &Frame) -> Result<Vec<usize>, Error> {
+    pub fn list(&mut self, frame: &Frame) -> Result<Vec<usize>> {
         let matches = try!(self.evaluate(frame));
         let mut list = vec![0; matches.len()];
         for (i, m) in matches.iter().enumerate() {

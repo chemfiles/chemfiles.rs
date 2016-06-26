@@ -9,6 +9,7 @@ use std::ops::Drop;
 
 use chemfiles_sys::*;
 use errors::{check, Error, ErrorKind};
+use Result;
 
 /// Available unit cell types
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -52,7 +53,7 @@ pub struct UnitCell {
 
 impl UnitCell {
     /// Create an `Orthorombic` `UnitCell` from the three lenghts, in Angstroms.
-    pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell, Error> {
+    pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell> {
         let handle : *const CHFL_CELL;
         unsafe {
             handle = chfl_cell(a, b, c);
@@ -64,7 +65,7 @@ impl UnitCell {
     }
 
     /// Create an `Infinite` `UnitCell`
-    pub fn infinite() -> Result<UnitCell, Error> {
+    pub fn infinite() -> Result<UnitCell> {
         let handle : *const CHFL_CELL;
         unsafe {
             handle = chfl_cell(0.0, 0.0, 0.0);
@@ -81,7 +82,7 @@ impl UnitCell {
     /// and three angles (in degree). `alpha` is the angle between the vectors
     /// `b` and `c`; `beta` is the between the vectors `a` and `c` and `gamma`
     /// is the angle between the vectors `a` and `b`.
-    pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell, Error> {
+    pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell> {
         let handle : *const CHFL_CELL;
         unsafe {
             handle = chfl_cell_triclinic(a, b, c, alpha, beta, gamma);
@@ -93,7 +94,7 @@ impl UnitCell {
     }
 
     /// Get the three lenghts of an `UnitCell`, in Angstroms.
-    pub fn lengths(&self) -> Result<(f64, f64, f64), Error> {
+    pub fn lengths(&self) -> Result<(f64, f64, f64)> {
         let (mut a, mut b, mut c) = (0.0, 0.0, 0.0);
         unsafe {
             try!(check(chfl_cell_lengths(self.handle, &mut a, &mut b, &mut c)));
@@ -102,7 +103,7 @@ impl UnitCell {
     }
 
     /// Set the three lenghts of an `UnitCell`, in Angstroms.
-    pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<(), Error> {
+    pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_lengths(self.handle as *mut CHFL_CELL, a, b, c)));
         }
@@ -110,7 +111,7 @@ impl UnitCell {
     }
 
     /// Get the three angles of an `UnitCell`, in degrees.
-    pub fn angles(&self) -> Result<(f64, f64, f64), Error> {
+    pub fn angles(&self) -> Result<(f64, f64, f64)> {
         let (mut alpha, mut beta, mut gamma) = (0.0, 0.0, 0.0);
         unsafe {
             try!(check(chfl_cell_angles(self.handle, &mut alpha, &mut beta, &mut gamma)));
@@ -120,7 +121,7 @@ impl UnitCell {
 
     /// Set the three angles of an `UnitCell`, in degrees. This is only possible
     /// with `Triclinic` cells.
-    pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<(), Error> {
+    pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_angles(self.handle as *mut CHFL_CELL, alpha, beta, gamma)));
         }
@@ -128,7 +129,7 @@ impl UnitCell {
     }
 
     /// Get the unit cell matricial representation.
-    pub fn matrix(&self) -> Result<[[f64; 3]; 3], Error> {
+    pub fn matrix(&self) -> Result<[[f64; 3]; 3]> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
             try!(check(chfl_cell_matrix(self.handle, res.as_mut_ptr())));
@@ -137,7 +138,7 @@ impl UnitCell {
     }
 
     /// Get the type of the unit cell
-    pub fn cell_type(&self) -> Result<CellType, Error> {
+    pub fn cell_type(&self) -> Result<CellType> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_cell_type(self.handle, &mut res)));
@@ -146,7 +147,7 @@ impl UnitCell {
     }
 
     /// Set the type of the unit cell
-    pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<(), Error> {
+    pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_type(self.handle as *mut CHFL_CELL, cell_type as CHFL_CELL_TYPES)));
         }
@@ -154,7 +155,7 @@ impl UnitCell {
     }
 
     /// Get the volume of the unit cell
-    pub fn volume(&self) -> Result<f64, Error> {
+    pub fn volume(&self) -> Result<f64> {
         let mut res = 0.0;
         unsafe {
             try!(check(chfl_cell_volume(self.handle, &mut res)));
