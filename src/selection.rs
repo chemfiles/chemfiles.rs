@@ -72,13 +72,14 @@ impl<'a> IntoIterator for &'a Match {
 
 /******************************************************************************/
 
-/// This struct allow to select atoms in a `Frame`, using a selection language.
+/// Select atoms in a `Frame` with a selection language.
 ///
 /// The selection language is built by combining basic operations. Each basic
 /// operation follows the `<selector>[(<variable>)] <operator> <value>`
 /// structure, where `<operator>` is a comparison operator in `== != < <= > >=`.
-/// Refer to the full documentation to know the allowed selectors and how to use
-/// them.
+/// Refer to the [full
+/// documentation](http://chemfiles.rtfd.io/en/latest/selections.html) to know
+/// the allowed selectors and how to use them.
 pub struct Selection {
     handle: *const CHFL_SELECTION
 }

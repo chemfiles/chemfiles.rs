@@ -17,13 +17,13 @@
 //! please see its [documentation](http://chemfiles.rtfd.org). Specifically, the
 //! following pages are worth reading:
 //!
-//! - The [overview](http://chemfiles.rtfd.org/en/latest/overview.html) of the
+//! - The [overview](http://chemfiles.rtfd.io/en/latest/overview.html) of the
 //!   classes organisation;
-//! - The [supported formats](http://chemfiles.rtfd.org/en/latest/formats.html);
-//!
+//! - The lisf of [supported formats](http://chemfiles.rtfd.io/en/latest/formats.html);
+//! - The documentation for the [selection language](http://chemfiles.rtfd.io/en/latest/selections.html);
 //!
 //! As all the function call the underlying C library, they all can fail and
-//! thus all return a `Result<_>` value.
+//! thus all return a `Result<_, Error>` value.
 #![deny(missing_docs)]
 
 #[macro_use] extern crate lazy_static;

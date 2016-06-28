@@ -83,6 +83,7 @@ impl From<Error> for CHFL_STATUS {
 
 impl Error {
     /// Create a new error because the given `path` is invalid UTF-8 data
+    #[doc(hidden)]
     pub fn utf8_path_error(path: &Path) -> Error {
         Error {
             kind: ErrorKind::UTF8PathError,
@@ -91,6 +92,7 @@ impl Error {
     }
 
     /// Create a new error because we got a null pointer from C++
+    #[doc(hidden)]
     pub fn null_ptr() -> Error {
         Error {
             kind: ErrorKind::NullPtr,
