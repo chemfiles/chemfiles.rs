@@ -87,6 +87,13 @@ impl Error {
             string::from_c(chfl_last_error())
         }
     }
+
+    /// Clear any error from the C++ library
+    pub fn cleaup() {
+        unsafe {
+            chfl_clear_errors();
+        }
+    }
 }
 
 /// Check return value of a C function, and get the error if needed.
@@ -123,12 +130,21 @@ impl error::Error for Error {
 #[cfg(test)]
 mod test {
     use super::*;
+    use Trajectory;
+    use Logger;
     use chemfiles_sys::*;
     use std::error::Error as ErrorTrait;
 
     #[test]
     fn errors() {
+        let logger = Logger::get();
+        logger.log_silent().unwrap();
         assert_eq!(Error::last_error(), "");
+        assert!(Trajectory::open("nope").is_err());
+        assert_eq!(Error::last_error(), "Can not find a format associated with the \"\" extension.");
+        Error::cleaup();
+        assert_eq!(Error::last_error(), "");
+        logger.log_to_stderr().unwrap();
     }
 
     #[test]
