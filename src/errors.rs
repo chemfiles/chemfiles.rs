@@ -100,12 +100,7 @@ impl Error {
         }
     }
 
-    /// Get the message associated with this error.
-    pub fn message(&self) -> String {
-        self.message.clone()
-    }
-
-    /// Get the last error message.
+    /// Get the last error message from the C++ library.
     pub fn last_error() -> String {
         unsafe {
             string::from_c(chfl_last_error())
