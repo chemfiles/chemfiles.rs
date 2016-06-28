@@ -31,7 +31,7 @@
 extern crate chemfiles_sys;
 use chemfiles_sys::chfl_version;
 
-#[macro_use] mod tests;
+#[macro_use] mod testing;
 
 mod string;
 
@@ -68,5 +68,13 @@ pub use selection::{Selection, Match};
 pub fn version() -> String {
     unsafe {
         string::from_c(chfl_version())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn version() {
+        assert!(::version().len() > 0);
     }
 }

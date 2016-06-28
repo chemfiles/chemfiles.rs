@@ -213,6 +213,22 @@ mod tests {
         }
 
         #[test]
+        fn iter() {
+            let match_ = Match::new(&[1, 2, 3, 4]);
+            assert_eq!(
+                match_.iter().cloned().collect::<Vec<usize>>(),
+                vec![1, 2, 3, 4]
+            );
+
+            let v = vec![1, 2, 3, 4];
+            let mut i = 0;
+            for &m in &match_ {
+                assert_eq!(v[i], m);
+                i += 1;
+            }
+        }
+
+        #[test]
         #[should_panic]
         fn out_of_bound() {
             let m = Match::new(&[1, 2]);

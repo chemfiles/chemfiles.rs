@@ -62,25 +62,6 @@ impl From<CHFL_STATUS> for Error {
     }
 }
 
-impl From<Error> for CHFL_STATUS {
-    fn from(error: Error) -> CHFL_STATUS {
-        match error.kind {
-            ErrorKind::CppStdError => CHFL_CXX_ERROR,
-            ErrorKind::ChemfilesCppError => CHFL_GENERIC_ERROR,
-            ErrorKind::MemoryError => CHFL_MEMORY_ERROR,
-            ErrorKind::FileError => CHFL_FILE_ERROR,
-            ErrorKind::FormatError => CHFL_FORMAT_ERROR,
-            ErrorKind::SelectionError => CHFL_SELECTION_ERROR,
-            ErrorKind::UTF8PathError | ErrorKind::NullPtr  => {
-                panic!(
-                    "Can not convert this error to error code. \
-                    It is a Rust-side only error."
-                )
-            },
-        }
-    }
-}
-
 impl Error {
     /// Create a new error because the given `path` is invalid UTF-8 data
     #[doc(hidden)]
@@ -142,9 +123,31 @@ impl error::Error for Error {
 #[cfg(test)]
 mod test {
     use super::*;
+    use chemfiles_sys::*;
+    use std::error::Error as ErrorTrait;
 
     #[test]
     fn errors() {
         assert_eq!(Error::last_error(), "");
+    }
+
+    #[test]
+    fn codes() {
+        assert_eq!(Error::from(CHFL_CXX_ERROR).kind, ErrorKind::CppStdError);
+        assert_eq!(Error::from(CHFL_GENERIC_ERROR).kind, ErrorKind::ChemfilesCppError);
+        assert_eq!(Error::from(CHFL_MEMORY_ERROR).kind, ErrorKind::MemoryError);
+        assert_eq!(Error::from(CHFL_FILE_ERROR).kind, ErrorKind::FileError);
+        assert_eq!(Error::from(CHFL_FORMAT_ERROR).kind, ErrorKind::FormatError);
+        assert_eq!(Error::from(CHFL_SELECTION_ERROR).kind, ErrorKind::SelectionError);
+    }
+
+    #[test]
+    fn messages() {
+        assert!(Error::from(CHFL_CXX_ERROR).description().contains("C++ standard library"));
+        assert!(Error::from(CHFL_GENERIC_ERROR).description().contains("chemfiles library"));
+        assert!(Error::from(CHFL_MEMORY_ERROR).description().contains("memory"));
+        assert!(Error::from(CHFL_FILE_ERROR).description().contains("file"));
+        assert!(Error::from(CHFL_FORMAT_ERROR).description().contains("format"));
+        assert!(Error::from(CHFL_SELECTION_ERROR).description().contains("selection"));
     }
 }

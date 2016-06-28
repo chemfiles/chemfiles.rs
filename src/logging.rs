@@ -14,7 +14,7 @@ use std::sync::{MutexGuard, Mutex};
 
 use chemfiles_sys::*;
 use string;
-use errors::{check, Error, ErrorKind};
+use errors::{check, Error};
 use Result;
 
 /// Available log levels
@@ -87,11 +87,7 @@ impl<'a> Logger<'a> {
         let filename = match filename.as_ref().to_str() {
             Some(val) => val,
             None => {
-                return Err(
-                    Error{
-                        kind: ErrorKind::UTF8PathError,
-                        message: format!("Could not convert '{}' to UTF8 string", filename.as_ref().display())}
-                )
+                return Err(Error::utf8_path_error(filename.as_ref()));
             }
         };
 
@@ -154,6 +150,15 @@ mod test {
 
     use super::*;
     use Trajectory;
+
+    #[test]
+    fn backends() {
+        let logger = Logger::get();
+
+        assert!(logger.log_to_stdout().is_ok());
+        assert!(logger.log_to_stderr().is_ok());
+        assert!(logger.log_silent().is_ok());
+    }
 
     #[test]
     fn file() {

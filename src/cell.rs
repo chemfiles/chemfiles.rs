@@ -215,6 +215,9 @@ mod test {
         assert!(cell.set_angles(80.0, 89.0, 100.0).is_ok());
 
         assert_eq!(cell.angles(), Ok((80.0, 89.0, 100.0)));
+
+        let cell = UnitCell::triclinic(1., 2., 3., 80., 90., 100.).unwrap();
+        assert_eq!(cell.angles(), Ok((80.0, 90.0, 100.0)));
     }
 
     #[test]
@@ -241,7 +244,6 @@ mod test {
     #[test]
     fn cell_type() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
-
         assert_eq!(cell.cell_type(), Ok(CellType::Orthorhombic));
 
         assert!(cell.set_cell_type(CellType::Infinite).is_ok());
@@ -249,5 +251,8 @@ mod test {
 
         let cell = UnitCell::infinite().unwrap();
         assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
+
+        let cell = UnitCell::triclinic(1., 2., 3., 80., 90., 100.).unwrap();
+        assert_eq!(cell.cell_type(), Ok(CellType::Triclinic));
     }
 }
