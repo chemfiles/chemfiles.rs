@@ -2,10 +2,11 @@
 name = "chemfiles"
 version = "0.6.0"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
-documentation = "https://chemfiles.readthedocs.org/"
+documentation = "https://chemfiles.github.io/chemfiles.rs/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
 homepage = "https://github.com/chemfiles/chemfiles.rs"
-description = "Rust bindings to the chemfiles library"
+description = "Modern library for chemistry trajectories reading and writing"
+keywords = ["computational", "theoretical", "chemistry", "file", "trajectory"]
 readme = "README.md"
 license = "MPL-2.0"
 
