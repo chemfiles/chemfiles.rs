@@ -2,10 +2,11 @@
 
 [![Build Status](https://travis-ci.org/chemfiles/chemfiles.rs.svg?branch=master)](https://travis-ci.org/chemfiles/chemfiles.rs)
 [![codecov.io](https://codecov.io/github/chemfiles/chemfiles.rs/coverage.svg?branch=master)](https://codecov.io/github/chemfiles/chemfiles.rs?branch=master)
-[![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](http://chemfiles.github.io/chemfiles.rs/chemfiles/index.html)
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](http://chemfiles.github.io/chemfiles.rs/)
 
-Rust binding for the [chemfiles](https://github.com/chemfiles/chemfiles) library. The
-documentation is available [here](http://chemfiles.github.io/chemfiles.rs/chemfiles).
+Rust binding for the [chemfiles](https://github.com/chemfiles/chemfiles)
+library. Documentation is available
+[here](http://chemfiles.github.io/chemfiles.rs/).
 
 ## Usage
 
@@ -13,7 +14,7 @@ Add this to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-chemfiles = "0.5"
+chemfiles = "0.6"
 ```
 
 And then use `chemfiles` in your project:
@@ -44,4 +45,5 @@ fn main() {
 
 ## Bug reports, feature requests
 
-Please report any bug you find and any feature you may want as a [github issue](https://github.com/chemfiles/chemfiles.rs/issues/new).
+Please report any bug you find and any feature you may want as a [github
+issue](https://github.com/chemfiles/chemfiles.rs/issues/new).
