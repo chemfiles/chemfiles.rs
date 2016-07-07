@@ -89,7 +89,7 @@ impl Error {
     }
 
     /// Clear any error from the C++ library
-    pub fn cleaup() {
+    pub fn cleanup() {
         unsafe {
             chfl_clear_errors();
         }
@@ -139,10 +139,11 @@ mod test {
     fn errors() {
         let logger = Logger::get();
         logger.log_silent().unwrap();
+        Error::cleanup();
         assert_eq!(Error::last_error(), "");
         assert!(Trajectory::open("nope").is_err());
         assert_eq!(Error::last_error(), "Can not find a format associated with the \"\" extension.");
-        Error::cleaup();
+        Error::cleanup();
         assert_eq!(Error::last_error(), "");
         logger.log_to_stderr().unwrap();
     }
