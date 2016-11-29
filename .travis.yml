@@ -33,7 +33,7 @@ after_script:
           travis-cargo coverage --no-sudo
           codecov --file target/kcov/kcov-merged/cobertura.xml
           git clone https://${GH_TOKEN}@github.com/chemfiles/chemfiles.rs gh-pages
-          ./deploy-docs.sh
+          ./scripts/deploy-docs.sh
       fi
 env:
   global:
