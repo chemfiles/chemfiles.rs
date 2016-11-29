@@ -264,14 +264,6 @@ mod test {
     use super::*;
     use ::{Atom, Topology, UnitCell};
 
-    // TODO: remove this when 1.7.0 hit stable. This is slice::clone_from_slice
-    fn clone_from_slice<T: Clone>(dst: &mut [T], src: &[T]) {
-        assert!(dst.len() == src.len());
-        for (d, s) in dst.iter_mut().zip(src) {
-            *d = s.clone();
-        }
-    }
-
     #[test]
     fn size() {
         let mut frame = Frame::new().unwrap();
@@ -285,13 +277,13 @@ mod test {
     fn positions() {
         let mut frame = Frame::new().unwrap();
         frame.resize(4).unwrap();
-        let mut expected = [[1.0, 2.0, 3.0],
-                            [4.0, 5.0, 6.0],
-                            [7.0, 8.0, 9.0],
-                            [10.0, 11.0, 12.0]];
+        let expected = [[1.0, 2.0, 3.0],
+                        [4.0, 5.0, 6.0],
+                        [7.0, 8.0, 9.0],
+                        [10.0, 11.0, 12.0]];
         {
             let positions = frame.positions_mut().unwrap();
-            clone_from_slice(positions, &mut expected);
+            positions.clone_from_slice(expected.as_ref());
         }
 
         assert_eq!(frame.positions(), Ok(expected.as_ref()));
@@ -305,14 +297,14 @@ mod test {
         frame.add_velocities().unwrap();
         assert_eq!(frame.has_velocities(), Ok(true));
 
-        let mut expected = [[1.0, 2.0, 3.0],
-                            [4.0, 5.0, 6.0],
-                            [7.0, 8.0, 9.0],
-                            [10.0, 11.0, 12.0]];
+        let expected = [[1.0, 2.0, 3.0],
+                        [4.0, 5.0, 6.0],
+                        [7.0, 8.0, 9.0],
+                        [10.0, 11.0, 12.0]];
 
         {
             let velocities = frame.velocities_mut().unwrap();
-            clone_from_slice(velocities, &mut expected);
+            velocities.clone_from_slice(expected.as_ref());
         }
 
         assert_eq!(frame.velocities(), Ok(expected.as_ref()));
