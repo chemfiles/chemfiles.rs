@@ -122,6 +122,19 @@ impl Selection {
         return Ok(size);
     }
 
+    /// Get the selection string used to create this selection
+    pub fn string(&self) -> Result<String> {
+        let buffer = vec![0; 1024];
+        unsafe {
+            try!(check(chfl_selection_string(
+                self.handle,
+                buffer.as_ptr(),
+                buffer.len() as u64
+            )));
+        }
+        return Ok(string::from_c(buffer.as_ptr()));
+    }
+
     /// Evaluate a selection for a given frame, and return the corresponding
     /// matches.
     pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
@@ -251,6 +264,15 @@ mod tests {
 
         let sel = Selection::new("four: name(#1) H").unwrap();
         assert_eq!(sel.size(), Ok(4));
+    }
+
+    #[test]
+    fn string() {
+        let selection = Selection::new("name H").unwrap();
+        assert_eq!(selection.string().unwrap(), "name H");
+
+        let selection = Selection::new("angles: name(#1) H").unwrap();
+        assert_eq!(selection.string().unwrap(), "angles: name(#1) H");
     }
 
     #[test]

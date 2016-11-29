@@ -70,6 +70,31 @@ impl Frame {
         return Ok(());
     }
 
+    /// Add an `Atom` and the corresponding position and optionally velocity data to a `Frame`.
+    pub fn add_atom<V>(&mut self, atom: Atom, position: (f64, f64, f64), velocity: V) -> Result<()>
+        where V: Into<Option<(f64, f64, f64)>> {
+        let position = [position.0, position.1, position.2];
+        let velocity_data;
+        let velocity_ptr = match velocity.into() {
+            Some((x, y, z)) => {
+                velocity_data = [x, y, z];
+                velocity_data.as_ptr()
+            }
+            None => 0 as *const _
+        };
+
+        unsafe {
+            try!(check(chfl_frame_add_atom(
+                self.handle as *mut CHFL_FRAME,
+                atom.as_ptr(),
+                position.as_ptr(),
+                velocity_ptr
+            )));
+        }
+
+        return Ok(());
+    }
+
     /// Get a view into the positions of the `Frame`.
     pub fn positions(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
@@ -274,6 +299,33 @@ mod test {
     }
 
     #[test]
+    fn add_atom() {
+        let atom = Atom::new("U").unwrap();
+        let mut frame = Frame::new().unwrap();
+
+        frame.add_atom(atom, (1.0, 1.0, 2.0), None).unwrap();
+        assert_eq!(frame.natoms(), Ok(1));
+        assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
+
+        let positions: &[[f64; 3]] = &[[1.0, 1.0, 2.0]];
+        assert_eq!(frame.positions(), Ok(positions));
+
+        frame.add_velocities().unwrap();
+
+        let atom = Atom::new("F").unwrap();
+        frame.add_atom(atom, (1.0, 1.0, 2.0), (4.0, 3.0, 2.0)).unwrap();
+        assert_eq!(frame.natoms(), Ok(2));
+        assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
+        assert_eq!(frame.atom(1).unwrap().name(), Ok("F".into()));
+
+        let positions: &[[f64; 3]] = &[[1.0, 1.0, 2.0], [1.0, 1.0, 2.0]];
+        assert_eq!(frame.positions(), Ok(positions));
+
+        let velocities: &[[f64; 3]] = &[[0.0, 0.0, 0.0], [4.0, 3.0, 2.0]];
+        assert_eq!(frame.velocities(), Ok(velocities));
+    }
+
+    #[test]
     fn positions() {
         let mut frame = Frame::new().unwrap();
         frame.resize(4).unwrap();
@@ -319,7 +371,6 @@ mod test {
         let cell = frame.cell().unwrap();
         assert_eq!(cell.lengths(), Ok((3.0, 4.0, 5.0)));
     }
-
 
     #[test]
     fn topology() {

@@ -78,6 +78,24 @@ impl Atom {
         return Ok(string::from_c(&buffer[0]));
     }
 
+    /// Set the `Atom` type
+    pub fn set_atom_type<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
+        let buffer = string::to_c(name.into());
+        unsafe {
+            try!(check(chfl_atom_set_type(self.handle as *mut CHFL_ATOM, buffer.as_ptr())));
+        }
+        return Ok(());
+    }
+
+    /// Get the `Atom` type
+    pub fn atom_type(&self) -> Result<String> {
+        let mut buffer = vec![0; 10];
+        unsafe {
+            try!(check(chfl_atom_type(self.handle, &mut buffer[0], buffer.len() as u64)));
+        }
+        return Ok(string::from_c(&buffer[0]));
+    }
+
     /// Set the `Atom` name
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
         let buffer = string::to_c(name.into());
@@ -177,11 +195,20 @@ mod test {
     fn name() {
         let mut at = Atom::new("He").unwrap();
         assert_eq!(at.name(), Ok(String::from("He")));
+
+        assert!(at.set_name("Zn-12").is_ok());
+        assert_eq!(at.name(), Ok(String::from("Zn-12")));
+    }
+
+    #[test]
+    fn atom_type() {
+        let mut at = Atom::new("He").unwrap();
+        assert_eq!(at.atom_type(), Ok(String::from("He")));
         assert_eq!(at.full_name(), Ok(String::from("Helium")));
 
-        assert!(at.set_name("Zn").is_ok());
-        assert_eq!(at.name(), Ok(String::from("Zn")));
-        // assert_eq!(at.full_name(), Ok(String::from("Zinc")));
+        assert!(at.set_atom_type("Zn").is_ok());
+        assert_eq!(at.atom_type(), Ok(String::from("Zn")));
+        assert_eq!(at.full_name(), Ok(String::from("Zinc")));
     }
 
     #[test]

@@ -62,6 +62,15 @@ impl Topology {
         return Ok(natoms);
     }
 
+    /// Resize the topology to hold `natoms` atoms, inserting dummy atoms if
+    /// the new size if bigger than the old one.
+    pub fn resize(&mut self, size: u64) -> Result<()> {
+        unsafe {
+            try!(check(chfl_topology_resize(self.handle as *mut CHFL_TOPOLOGY, size)));
+        }
+        return Ok(());
+    }
+
     /// Add an `Atom` at the end of a topology
     pub fn push(&mut self, atom: &Atom) -> Result<()> {
         unsafe {

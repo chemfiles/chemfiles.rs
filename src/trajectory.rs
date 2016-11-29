@@ -173,6 +173,27 @@ impl Trajectory {
         Ok(())
     }
 
+    /// Set the topology associated with a trajectory by reading the first frame
+    /// of `filename` using the given `format`; and extracting the topology
+    /// from this frame.
+    pub fn set_topology_with_format<'a, P, S>(&mut self, filename: P, format: S) -> Result<()>
+        where P: AsRef<Path>, S: Into<&'a str> {
+        let filename = try!(filename.as_ref().to_str().ok_or(
+            Error::utf8_path_error(filename.as_ref())
+        ));
+
+        let format = string::to_c(format.into());
+        let filename = string::to_c(filename);
+        unsafe {
+            try!(check(chfl_trajectory_topology_file(
+                self.handle as *mut CHFL_TRAJECTORY,
+                filename.as_ptr(),
+                format.as_ptr()
+            )))
+        }
+        Ok(())
+    }
+
     /// Set the unit cell associated with a trajectory. This cell will be used
     /// when reading and writing the files, replacing any unit cell in the
     /// frames or files.
