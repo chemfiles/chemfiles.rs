@@ -106,7 +106,7 @@ impl UnitCell {
     pub fn lengths(&self) -> Result<(f64, f64, f64)> {
         let mut lengths = [0.0f64; 3];
         unsafe {
-            try!(check(chfl_cell_lengths(self.handle, lengths.as_mut_ptr())));
+            try!(check(chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr())));
         }
         Ok((lengths[0], lengths[1], lengths[2]))
     }
@@ -115,7 +115,7 @@ impl UnitCell {
     pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<()> {
         let lengths = [a, b, c];
         unsafe {
-            try!(check(chfl_cell_set_lengths(self.handle as *mut CHFL_CELL, lengths.as_ptr())));
+            try!(check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())));
         }
         Ok(())
     }
@@ -124,7 +124,7 @@ impl UnitCell {
     pub fn angles(&self) -> Result<(f64, f64, f64)> {
         let mut angles = [0.0f64; 3];
         unsafe {
-            try!(check(chfl_cell_angles(self.handle, angles.as_mut_ptr())));
+            try!(check(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr())));
         }
         Ok((angles[0], angles[1], angles[2]))
     }
@@ -134,7 +134,7 @@ impl UnitCell {
     pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<()> {
         let angles = [alpha, beta, gamma];
         unsafe {
-            try!(check(chfl_cell_set_angles(self.handle as *mut CHFL_CELL, angles.as_ptr())));
+            try!(check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())));
         }
         Ok(())
     }
@@ -143,7 +143,7 @@ impl UnitCell {
     pub fn matrix(&self) -> Result<[[f64; 3]; 3]> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
-            try!(check(chfl_cell_matrix(self.handle, res.as_mut_ptr())));
+            try!(check(chfl_cell_matrix(self.as_ptr(), res.as_mut_ptr())));
         }
         Ok(res)
     }
@@ -152,7 +152,7 @@ impl UnitCell {
     pub fn shape(&self) -> Result<CellShape> {
         let mut shape = chfl_cell_shape_t::CHFL_CELL_INFINITE;
         unsafe {
-            try!(check(chfl_cell_shape(self.handle, &mut shape)));
+            try!(check(chfl_cell_shape(self.as_ptr(), &mut shape)));
         }
         Ok(CellShape::from(shape))
     }
@@ -160,7 +160,7 @@ impl UnitCell {
     /// Set the shape of the unit cell
     pub fn set_shape(&mut self, shape: CellShape) -> Result<()> {
         unsafe {
-            try!(check(chfl_cell_set_shape(self.handle as *mut CHFL_CELL, shape.into())));
+            try!(check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into())));
         }
         Ok(())
     }
@@ -169,7 +169,7 @@ impl UnitCell {
     pub fn volume(&self) -> Result<f64> {
         let mut res = 0.0;
         unsafe {
-            try!(check(chfl_cell_volume(self.handle, &mut res)));
+            try!(check(chfl_cell_volume(self.as_ptr(), &mut res)));
         }
         Ok(res)
     }
@@ -180,10 +180,14 @@ impl UnitCell {
         UnitCell{handle: ptr}
     }
 
-    /// Get the underlying C pointer. This function is unsafe because no
-    /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHFL_CELL {
+    /// Get the underlying C pointer as a const pointer.
+    pub fn as_ptr(&self) -> *const CHFL_CELL {
         self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
+        self.handle as *mut CHFL_CELL
     }
 }
 
@@ -191,7 +195,7 @@ impl Drop for UnitCell {
     fn drop(&mut self) {
         unsafe {
             check(
-                chfl_cell_free(self.handle as *mut CHFL_CELL)
+                chfl_cell_free(self.as_mut_ptr())
             ).ok().expect("Error while freeing memory!");
         }
     }

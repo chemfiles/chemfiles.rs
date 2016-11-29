@@ -39,7 +39,7 @@ impl Frame {
     pub fn atom(&self, index: u64) -> Result<Atom> {
         let handle: *const CHFL_ATOM;
         unsafe {
-            handle = chfl_atom_from_frame(self.handle, index);
+            handle = chfl_atom_from_frame(self.as_ptr(), index);
         }
 
         if handle.is_null() {
@@ -55,9 +55,9 @@ impl Frame {
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_atoms_count(self.handle, &mut natoms)));
+            try!(check(chfl_frame_atoms_count(self.as_ptr(), &mut natoms)));
         }
-        return Ok(natoms as u64);
+        return Ok(natoms);
     }
 
     /// Resize the positions and the velocities in frame, to make space for
@@ -65,7 +65,7 @@ impl Frame {
     /// absence of velocities.
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_resize(self.handle as *mut CHFL_FRAME, natoms)));
+            try!(check(chfl_frame_resize(self.as_mut_ptr(), natoms)));
         }
         return Ok(());
     }
@@ -85,7 +85,7 @@ impl Frame {
 
         unsafe {
             try!(check(chfl_frame_add_atom(
-                self.handle as *mut CHFL_FRAME,
+                self.as_mut_ptr(),
                 atom.as_ptr(),
                 position.as_ptr(),
                 velocity_ptr
@@ -101,6 +101,8 @@ impl Frame {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_positions(
+                // not using .as_ptr() because the C function uses a *mut pointer
+                // and we are re-creating the shared/mut by ourselve here
                 self.handle as *mut CHFL_FRAME,
                 &mut ptr,
                 &mut natoms
@@ -118,7 +120,7 @@ impl Frame {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_positions(
-                self.handle as *mut CHFL_FRAME,
+                self.as_mut_ptr(),
                 &mut ptr,
                 &mut natoms
             )));
@@ -135,6 +137,8 @@ impl Frame {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_velocities(
+                // not using .as_ptr() because the C function uses a *mut pointer
+                // and we are re-creating the shared/mut by ourselve here
                 self.handle as *mut CHFL_FRAME,
                 &mut ptr,
                 &mut natoms
@@ -152,7 +156,7 @@ impl Frame {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_velocities(
-                self.handle as *mut CHFL_FRAME,
+                self.as_mut_ptr(),
                 &mut ptr,
                 &mut natoms
             )));
@@ -167,7 +171,7 @@ impl Frame {
     pub fn has_velocities(&self) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_frame_has_velocities(self.handle, &mut res)));
+            try!(check(chfl_frame_has_velocities(self.as_ptr(), &mut res)));
         }
         return Ok(res != 0);
     }
@@ -176,7 +180,7 @@ impl Frame {
     /// frame already have velocities, this does nothing.
     pub fn add_velocities(&mut self) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_add_velocities(self.handle as *mut CHFL_FRAME)));
+            try!(check(chfl_frame_add_velocities(self.as_mut_ptr())));
         }
         return Ok(());
     }
@@ -185,7 +189,7 @@ impl Frame {
     pub fn cell(&self) -> Result<UnitCell> {
         let handle: *const CHFL_CELL;
         unsafe {
-            handle = chfl_cell_from_frame(self.handle);
+            handle = chfl_cell_from_frame(self.as_ptr());
         }
 
         if handle.is_null() {
@@ -201,7 +205,7 @@ impl Frame {
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_cell(
-                self.handle as *mut CHFL_FRAME,
+                self.as_mut_ptr(),
                 cell.as_ptr()
             )));
         }
@@ -212,7 +216,7 @@ impl Frame {
     pub fn topology(&self) -> Result<Topology> {
         let handle: *const CHFL_TOPOLOGY;
         unsafe {
-            handle = chfl_topology_from_frame(self.handle);
+            handle = chfl_topology_from_frame(self.as_ptr());
         }
 
         if handle.is_null() {
@@ -228,7 +232,7 @@ impl Frame {
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_topology(
-                self.handle as *mut CHFL_FRAME,
+                self.as_mut_ptr(),
                 topology.as_ptr()
             )));
         }
@@ -239,7 +243,7 @@ impl Frame {
     pub fn step(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_frame_step(self.handle, &mut res)));
+            try!(check(chfl_frame_step(self.as_ptr(), &mut res)));
         }
         return Ok(res);
     }
@@ -247,7 +251,7 @@ impl Frame {
     /// Set the `Frame` step
     pub fn set_step(&mut self, step: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_set_step(self.handle as *mut CHFL_FRAME, step)));
+            try!(check(chfl_frame_set_step(self.as_mut_ptr(), step)));
         }
         return Ok(());
     }
@@ -256,7 +260,7 @@ impl Frame {
     /// distance criteria
     pub fn guess_topology(&mut self) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_guess_topology(self.handle as *mut CHFL_FRAME)));
+            try!(check(chfl_frame_guess_topology(self.as_mut_ptr())));
         }
         return Ok(());
     }
@@ -267,10 +271,14 @@ impl Frame {
         Frame{handle: ptr}
     }
 
-    /// Get the underlying C pointer. This function is unsafe because no
-    /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHFL_FRAME {
+    /// Get the underlying C pointer as a const pointer.
+    pub fn as_ptr(&self) -> *const CHFL_FRAME {
         self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_FRAME {
+        self.handle as *mut CHFL_FRAME
     }
 }
 
@@ -278,7 +286,7 @@ impl Drop for Frame {
     fn drop(&mut self) {
         unsafe {
             check(
-                chfl_frame_free(self.handle as *mut CHFL_FRAME)
+                chfl_frame_free(self.as_mut_ptr())
             ).ok().expect("Error while freeing memory!");
         }
     }

@@ -41,7 +41,7 @@ impl Topology {
     pub fn atom(&self, index: u64) -> Result<Atom> {
         let handle: *const CHFL_ATOM;
         unsafe {
-            handle = chfl_atom_from_topology(self.handle, index);
+            handle = chfl_atom_from_topology(self.as_ptr(), index);
         }
 
         if handle.is_null() {
@@ -57,7 +57,7 @@ impl Topology {
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_topology_atoms_count(self.handle, &mut natoms)));
+            try!(check(chfl_topology_atoms_count(self.as_ptr(), &mut natoms)));
         }
         return Ok(natoms);
     }
@@ -75,7 +75,7 @@ impl Topology {
     pub fn push(&mut self, atom: &Atom) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_atom(
-                self.handle as *mut CHFL_TOPOLOGY,
+                self.as_mut_ptr(),
                 atom.as_ptr()
             )));
         }
@@ -86,7 +86,7 @@ impl Topology {
     /// atoms indexes.
     pub fn remove(&mut self, index: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_remove(self.handle as *mut CHFL_TOPOLOGY, index)));
+            try!(check(chfl_topology_remove(self.as_mut_ptr(), index)));
         }
         return Ok(());
     }
@@ -95,7 +95,7 @@ impl Topology {
     pub fn is_bond(&self, i: u64, j: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_isbond(self.handle, i, j, &mut res)));
+            try!(check(chfl_topology_isbond(self.as_ptr(), i, j, &mut res)));
         }
         return Ok(res != 0);
     }
@@ -104,7 +104,7 @@ impl Topology {
     pub fn is_angle(&self, i: u64, j: u64, k: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_isangle(self.handle, i, j, k, &mut res)));
+            try!(check(chfl_topology_isangle(self.as_ptr(), i, j, k, &mut res)));
         }
         return Ok(res != 0);
     }
@@ -114,7 +114,7 @@ impl Topology {
     pub fn is_dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_isdihedral(self.handle, i, j, k, m, &mut res)));
+            try!(check(chfl_topology_isdihedral(self.as_ptr(), i, j, k, m, &mut res)));
         }
         return Ok(res != 0);
     }
@@ -123,27 +123,27 @@ impl Topology {
     pub fn bonds_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_bonds_count(self.handle, &mut res)));
+            try!(check(chfl_topology_bonds_count(self.as_ptr(), &mut res)));
         }
-        return Ok(res as u64);
+        return Ok(res);
     }
 
     /// Get the number of angles in the system
     pub fn angles_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_angles_count(self.handle, &mut res)));
+            try!(check(chfl_topology_angles_count(self.as_ptr(), &mut res)));
         }
-        return Ok(res as u64);
+        return Ok(res);
     }
 
     /// Get the number of dihedral angles in the system
     pub fn dihedrals_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_dihedrals_count(self.handle, &mut res)));
+            try!(check(chfl_topology_dihedrals_count(self.as_ptr(), &mut res)));
         }
-        return Ok(res as u64);
+        return Ok(res);
     }
 
     /// Get the list of bonds in the system
@@ -165,7 +165,7 @@ impl Topology {
         let nangles = try!(self.angles_count());
         let mut res = vec![[u64::MAX; 3]; nangles as usize];
         unsafe {
-            try!(check(chfl_topology_angles(self.handle, res.as_mut_ptr(), nangles)));
+            try!(check(chfl_topology_angles(self.as_ptr(), res.as_mut_ptr(), nangles)));
         }
         return Ok(res);
     }
@@ -175,7 +175,7 @@ impl Topology {
         let ndihedrals = try!(self.dihedrals_count());
         let mut res = vec![[u64::MAX; 4]; ndihedrals as usize];
         unsafe {
-            try!(check(chfl_topology_dihedrals(self.handle, res.as_mut_ptr(), ndihedrals)));
+            try!(check(chfl_topology_dihedrals(self.as_ptr(), res.as_mut_ptr(), ndihedrals)));
         }
         return Ok(res);
     }
@@ -183,7 +183,7 @@ impl Topology {
     /// Add a bond between the atoms at indexes `i` and `j` in the system
     pub fn add_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_add_bond(self.handle as *mut CHFL_TOPOLOGY, i, j)));
+            try!(check(chfl_topology_add_bond(self.as_mut_ptr(), i, j)));
         }
         Ok(())
     }
@@ -192,7 +192,7 @@ impl Topology {
     /// the system
     pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_remove_bond(self.handle as *mut CHFL_TOPOLOGY, i, j)));
+            try!(check(chfl_topology_remove_bond(self.as_mut_ptr(), i, j)));
         }
         Ok(())
     }
@@ -203,10 +203,14 @@ impl Topology {
         Topology{handle: ptr}
     }
 
-    /// Get the underlying C pointer. This function is unsafe because no
-    /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
+    /// Get the underlying C pointer as a const pointer.
+    pub fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
         self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
+        self.handle as *mut CHFL_TOPOLOGY
     }
 }
 
@@ -214,7 +218,7 @@ impl Drop for Topology {
     fn drop(&mut self) {
         unsafe {
             check(
-                chfl_topology_free(self.handle as *mut CHFL_TOPOLOGY)
+                chfl_topology_free(self.as_mut_ptr())
             ).ok().expect("Error while freeing memory!");
         }
     }

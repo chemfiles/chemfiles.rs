@@ -19,7 +19,7 @@ use {UnitCell, Topology, Frame};
 /// A Trajectory is a chemistry file on the hard drive. It is the main entry
 /// point of chemfiles.
 pub struct Trajectory {
-    handle: *mut CHFL_TRAJECTORY
+    handle: *const CHFL_TRAJECTORY
 }
 
 impl Trajectory {
@@ -117,8 +117,8 @@ impl Trajectory {
     pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read(
-                self.handle,
-                frame.as_ptr() as *mut CHFL_FRAME)))
+                self.as_mut_ptr(),
+                frame.as_mut_ptr())))
         }
         Ok(())
     }
@@ -127,9 +127,9 @@ impl Trajectory {
     pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read_step(
-                self.handle,
+                self.as_mut_ptr(),
                 step,
-                frame.as_ptr() as *mut CHFL_FRAME)))
+                frame.as_mut_ptr())))
         }
         Ok(())
     }
@@ -137,7 +137,7 @@ impl Trajectory {
     /// Write a frame to the trajectory.
     pub fn write(&mut self, frame: &Frame) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_write(self.handle, frame.as_ptr())))
+            try!(check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())))
         }
         Ok(())
     }
@@ -147,7 +147,7 @@ impl Trajectory {
     /// frames or files.
     pub fn set_topology(&mut self, topology: Topology) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_set_topology(self.handle, topology.as_ptr())))
+            try!(check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr())))
         }
         Ok(())
     }
@@ -165,7 +165,7 @@ impl Trajectory {
         let filename = string::to_c(filename);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
-                self.handle,
+                self.as_mut_ptr,
                 filename.as_ptr(),
                 ptr::null()
             )))
@@ -199,7 +199,7 @@ impl Trajectory {
     /// frames or files.
     pub fn set_cell(&mut self, cell: UnitCell) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_set_cell(self.handle, cell.as_ptr())))
+            try!(check(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr())))
         }
         Ok(())
     }
@@ -208,7 +208,7 @@ impl Trajectory {
     pub fn nsteps(&mut self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_trajectory_nsteps(self.handle, &mut res)));
+            try!(check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res)));
         }
         Ok(res)
     }
@@ -219,10 +219,14 @@ impl Trajectory {
         Trajectory{handle: ptr}
     }
 
-    /// Get the underlying C pointer. This function is unsafe because no
-    /// lifetime guarantee is made on the pointer.
-    pub unsafe fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
+    /// Get the underlying C pointer as a const pointer.
+    pub fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
         self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
+        self.handle as *mut CHFL_TRAJECTORY
     }
 }
 
@@ -230,7 +234,7 @@ impl Drop for Trajectory {
     fn drop(&mut self) {
         unsafe {
             check(
-                chfl_trajectory_close(self.handle as *mut CHFL_TRAJECTORY)
+                chfl_trajectory_close(self.as_mut_ptr())
             ).ok().expect("Error while freeing memory!");
         }
     }

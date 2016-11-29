@@ -27,7 +27,7 @@ impl Match {
     }
 
     fn len(&self) -> u64 {
-        self.0.size as u64
+        self.0.size
     }
 
     /// Create a new match containing the atoms in the `atoms` slice.
@@ -86,7 +86,7 @@ impl Drop for Selection {
     fn drop(&mut self) {
         unsafe {
             check(
-                chfl_selection_free(self.handle as *mut CHFL_SELECTION)
+                chfl_selection_free(self.as_mut_ptr())
             ).ok().expect("Error while freeing memory!");
         }
     }
@@ -117,7 +117,7 @@ impl Selection {
     pub fn size(&self) -> Result<u64> {
         let mut size = 0;
         unsafe {
-            try!(check(chfl_selection_size(self.handle, &mut size)));
+            try!(check(chfl_selection_size(self.as_ptr(), &mut size)));
         }
         return Ok(size);
     }
@@ -141,7 +141,7 @@ impl Selection {
         let mut matches_count = 0;
         unsafe {
             try!(check(chfl_selection_evaluate(
-                self.handle as *mut CHFL_SELECTION,
+                self.as_mut_ptr(),
                 frame.as_ptr(),
                 &mut matches_count
             )));
@@ -151,7 +151,7 @@ impl Selection {
         unsafe {
             try!(check(chfl_selection_matches(
                 self.handle,
-                matches.as_mut_ptr() as *mut chfl_match_t,
+                matches.as_mut_ptr() as *mut _,
                 matches_count
             )));
         }
@@ -171,6 +171,16 @@ impl Selection {
             list[i] = m[0];
         }
         Ok(list)
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    pub fn as_ptr(&self) -> *const CHFL_SELECTION {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_SELECTION {
+        self.handle as *mut CHFL_SELECTION
     }
 }
 
