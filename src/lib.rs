@@ -64,6 +64,9 @@ mod cell;
 pub use cell::UnitCell;
 pub use cell::CellShape;
 
+mod residue;
+pub use residue::Residue;
+
 mod topology;
 pub use topology::Topology;
 

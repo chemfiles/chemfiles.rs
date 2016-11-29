@@ -10,7 +10,7 @@ use std::u64;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
-use atom::Atom;
+use {Atom, Residue};
 use Result;
 
 /// A `Topology` contains the definition of all the particles in the system, and
@@ -207,6 +207,62 @@ impl Topology {
         }
         Ok(())
     }
+
+    /// Get a specific `Residue` from a topology, given its `index` in the
+    /// topology
+    pub fn residue(&self, index: u64) -> Result<Residue> {
+        unsafe {
+            let handle = chfl_residue_from_topology(self.as_ptr(), index);
+            Residue::from_ptr(handle)
+        }
+    }
+
+    /// Get the `Residue` containing the atom at the given index, if there is
+    /// one.
+    pub fn residue_for_atom(&self, index: u64) -> Result<Option<Residue>> {
+        let handle = unsafe {
+            chfl_residue_for_atom(self.as_ptr(), index)
+        };
+        if handle.is_null() {
+            Ok(None)
+        } else {
+            let residue = unsafe {
+                try!(Residue::from_ptr(handle))
+            };
+            Ok(Some(residue))
+        }
+    }
+
+    /// Get the number of residues in the system
+    pub fn residues_count(&self) -> Result<u64> {
+        let mut res = 0;
+        unsafe {
+            try!(check(chfl_topology_residues_count(self.as_ptr(), &mut res)));
+        }
+        Ok(res)
+    }
+
+    /// Add a residue to this topology
+    pub fn add_residue(&mut self, residue: Residue) -> Result<()> {
+        unsafe {
+            try!(check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())));
+        }
+        Ok(())
+    }
+
+    /// Add a residue to this topology
+    pub fn are_linked(&self, first: &Residue, second: &Residue) -> Result<bool> {
+        let mut res = 0;
+        unsafe {
+            try!(check(chfl_topology_residues_linked(
+                self.as_ptr(),
+                first.as_ptr(),
+                second.as_ptr(),
+                &mut res
+            )));
+        }
+        Ok(res != 0)
+    }
 }
 
 impl Drop for Topology {
@@ -222,7 +278,7 @@ impl Drop for Topology {
 #[cfg(test)]
 mod test {
     use super::*;
-    use ::atom::Atom;
+    use {Atom, Residue};
 
     #[test]
     fn topology() {
@@ -273,5 +329,38 @@ mod test {
 
         assert!(top.remove(3).is_ok());
         assert_eq!(top.natoms(), Ok(3));
+    }
+
+    #[test]
+    fn residues() {
+        let mut topology = Topology::new().unwrap();
+        assert_eq!(topology.residues_count(), Ok(0));
+        let h = Atom::new("H").unwrap();
+        let o = Atom::new("O").unwrap();
+
+        topology.push(&h).unwrap();
+        topology.push(&o).unwrap();
+        topology.push(&o).unwrap();
+        topology.push(&h).unwrap();
+
+        let mut residue = Residue::new("Foo").unwrap();
+        residue.add_atom(0).unwrap();
+        residue.add_atom(2).unwrap();
+
+        topology.add_residue(residue).unwrap();
+        assert_eq!(topology.residues_count(), Ok(1));
+
+        assert_eq!(topology.residue(0).unwrap().name(), Ok("Foo".into()));
+        let residue = topology.residue_for_atom(2).unwrap().unwrap();
+        assert_eq!(residue.name(), Ok("Foo".into()));
+
+        let mut residue = Residue::new("Bar").unwrap();
+        residue.add_atom(3).unwrap();
+        topology.add_residue(residue).unwrap();
+        assert_eq!(topology.residues_count(), Ok(2));
+
+        let first = topology.residue(0).unwrap();
+        let second = topology.residue(0).unwrap();
+        assert_eq!(topology.are_linked(&first, &second), Ok(true));
     }
 }
