@@ -20,18 +20,37 @@ pub struct Atom {
 }
 
 impl Atom {
-    /// Create a new `Atom` from a `name`.
-    pub fn new<'a, S>(name: S) -> Result<Atom> where S: Into<&'a str>{
-        let handle: *const CHFL_ATOM;
-        let buffer = string::to_c(name.into());
-        unsafe {
-            handle = chfl_atom(buffer.as_ptr());
-        }
-
-        if handle.is_null() {
+    /// Create an `Atom` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the pointer,
+    /// except for it being non-null.
+    #[inline]
+    pub unsafe fn from_ptr(ptr: *const CHFL_ATOM) -> Result<Atom> {
+        if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Atom{handle: handle})
+            Ok(Atom{handle: ptr})
+        }
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    #[inline]
+    pub fn as_ptr(&self) -> *const CHFL_ATOM {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_ATOM {
+        self.handle as *mut CHFL_ATOM
+    }
+
+    /// Create a new `Atom` from a `name`.
+    pub fn new<'a, S>(name: S) -> Result<Atom> where S: Into<&'a str>{
+        let buffer = string::to_c(name.into());
+        unsafe {
+            let handle = chfl_atom(buffer.as_ptr());
+            Atom::from_ptr(handle)
         }
     }
 
@@ -144,22 +163,6 @@ impl Atom {
             try!(check(chfl_atom_atomic_number(self.as_ptr(), &mut number)));
         }
         return Ok(number);
-    }
-
-    /// Create an `Atom` from a C pointer. This function is unsafe because no
-    /// validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHFL_ATOM) -> Atom {
-        Atom{handle: ptr}
-    }
-
-    /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_ATOM {
-        self.handle
-    }
-
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_ATOM {
-        self.handle as *mut CHFL_ATOM
     }
 }
 

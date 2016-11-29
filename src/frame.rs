@@ -21,6 +21,31 @@ pub struct Frame {
 }
 
 impl Frame {
+    /// Create a `Frame` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the pointer,
+    /// except for it being non-null.
+    #[inline]
+    pub unsafe fn from_ptr(ptr: *const CHFL_FRAME) -> Result<Frame> {
+        if ptr.is_null() {
+            Err(Error::null_ptr())
+        } else {
+            Ok(Frame{handle: ptr})
+        }
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    #[inline]
+    pub fn as_ptr(&self) -> *const CHFL_FRAME {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_FRAME {
+        self.handle as *mut CHFL_FRAME
+    }
+
     /// Create an empty frame. It will be resized by the library as needed.
     pub fn new() -> Result<Frame> {
         let handle: *const CHFL_FRAME;
@@ -37,17 +62,9 @@ impl Frame {
 
     /// Get a specific `Atom` from a frame, given its `index` in the frame
     pub fn atom(&self, index: u64) -> Result<Atom> {
-        let handle: *const CHFL_ATOM;
         unsafe {
-            handle = chfl_atom_from_frame(self.as_ptr(), index);
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            unsafe {
-                Ok(Atom::from_ptr(handle))
-            }
+            let handle = chfl_atom_from_frame(self.as_ptr(), index);
+            Atom::from_ptr(handle)
         }
     }
 
@@ -187,17 +204,9 @@ impl Frame {
 
     /// Get the `UnitCell` from the `Frame`
     pub fn cell(&self) -> Result<UnitCell> {
-        let handle: *const CHFL_CELL;
         unsafe {
-            handle = chfl_cell_from_frame(self.as_ptr());
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            unsafe {
-                Ok(UnitCell::from_ptr(handle))
-            }
+            let handle = chfl_cell_from_frame(self.as_ptr());
+            UnitCell::from_ptr(handle)
         }
     }
 
@@ -214,17 +223,9 @@ impl Frame {
 
     /// Get the `Topology` from the `Frame`
     pub fn topology(&self) -> Result<Topology> {
-        let handle: *const CHFL_TOPOLOGY;
         unsafe {
-            handle = chfl_topology_from_frame(self.as_ptr());
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            unsafe {
-                Ok(Topology::from_ptr(handle))
-            }
+            let handle = chfl_topology_from_frame(self.as_ptr());
+            Topology::from_ptr(handle)
         }
     }
 
@@ -263,22 +264,6 @@ impl Frame {
             try!(check(chfl_frame_guess_topology(self.as_mut_ptr())));
         }
         return Ok(());
-    }
-
-    /// Create a `Frame` from a C pointer. This function is unsafe because
-    /// no validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHFL_FRAME) -> Frame {
-        Frame{handle: ptr}
-    }
-
-    /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_FRAME {
-        self.handle
-    }
-
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_FRAME {
-        self.handle as *mut CHFL_FRAME
     }
 }
 

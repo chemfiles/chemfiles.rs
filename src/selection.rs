@@ -93,18 +93,37 @@ impl Drop for Selection {
 }
 
 impl Selection {
-    /// Create a new selection from the given selection string.
-    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
-        let handle: *const CHFL_SELECTION;
-        let buffer = string::to_c(selection.into());
-        unsafe {
-            handle = chfl_selection(buffer.as_ptr());
-        }
-
-        if handle.is_null() {
+    /// Create a `Selection` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the pointer,
+    /// except for it being non-null.
+    #[inline]
+    pub unsafe fn from_ptr(ptr: *const CHFL_SELECTION) -> Result<Selection> {
+        if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Selection{handle: handle})
+            Ok(Selection{handle: ptr})
+        }
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    #[inline]
+    pub fn as_ptr(&self) -> *const CHFL_SELECTION {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_SELECTION {
+        self.handle as *mut CHFL_SELECTION
+    }
+
+    /// Create a new selection from the given selection string.
+    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
+        let buffer = string::to_c(selection.into());
+        unsafe {
+            let handle = chfl_selection(buffer.as_ptr());
+            Selection::from_ptr(handle)
         }
     }
 
@@ -127,7 +146,7 @@ impl Selection {
         let buffer = vec![0; 1024];
         unsafe {
             try!(check(chfl_selection_string(
-                self.handle,
+                self.as_ptr(),
                 buffer.as_ptr(),
                 buffer.len() as u64
             )));
@@ -171,16 +190,6 @@ impl Selection {
             list[i] = m[0];
         }
         Ok(list)
-    }
-
-    /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_SELECTION {
-        self.handle
-    }
-
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_SELECTION {
-        self.handle as *mut CHFL_SELECTION
     }
 }
 

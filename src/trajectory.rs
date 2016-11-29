@@ -23,6 +23,31 @@ pub struct Trajectory {
 }
 
 impl Trajectory {
+    /// Create a `Trajectory` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the pointer,
+    /// except for it being non-null.
+    #[inline]
+    pub unsafe fn from_ptr(ptr: *const CHFL_TRAJECTORY) -> Result<Trajectory> {
+        if ptr.is_null() {
+            Err(Error::null_ptr())
+        } else {
+            Ok(Trajectory{handle: ptr})
+        }
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    #[inline]
+    pub fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
+        self.handle as *mut CHFL_TRAJECTORY
+    }
+
     /// Open a trajectory file in read mode.
     pub fn open<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path>{
         let filename = match filename.as_ref().to_str() {
@@ -32,16 +57,10 @@ impl Trajectory {
             }
         };
 
-        let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
         unsafe {
-            handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(Trajectory{handle: handle})
+            let handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
+            Trajectory::from_ptr(handle)
         }
     }
 
@@ -54,16 +73,10 @@ impl Trajectory {
             }
         };
 
-        let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
         unsafe {
-            handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(Trajectory{handle: handle})
+            let handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
+            Trajectory::from_ptr(handle)
         }
     }
 
@@ -76,17 +89,11 @@ impl Trajectory {
             }
         };
 
-        let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
         let format = string::to_c(format.into());
         unsafe {
-            handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(Trajectory{handle: handle})
+            let handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
+            Trajectory::from_ptr(handle)
         }
     }
 
@@ -99,17 +106,11 @@ impl Trajectory {
             }
         };
 
-        let handle: *mut CHFL_TRAJECTORY;
         let filename = string::to_c(filename);
         let format = string::to_c(format.into());
         unsafe {
-            handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(Trajectory{handle: handle})
+            let handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
+            Trajectory::from_ptr(handle)
         }
     }
 
@@ -165,7 +166,7 @@ impl Trajectory {
         let filename = string::to_c(filename);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
-                self.as_mut_ptr,
+                self.as_mut_ptr(),
                 filename.as_ptr(),
                 ptr::null()
             )))
@@ -186,7 +187,7 @@ impl Trajectory {
         let filename = string::to_c(filename);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
-                self.handle as *mut CHFL_TRAJECTORY,
+                self.as_mut_ptr(),
                 filename.as_ptr(),
                 format.as_ptr()
             )))
@@ -211,22 +212,6 @@ impl Trajectory {
             try!(check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res)));
         }
         Ok(res)
-    }
-
-    /// Create a `Trajectory` from a C pointer. This function is unsafe because
-    /// no validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Trajectory {
-        Trajectory{handle: ptr}
-    }
-
-    /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
-        self.handle
-    }
-
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
-        self.handle as *mut CHFL_TRAJECTORY
     }
 }
 

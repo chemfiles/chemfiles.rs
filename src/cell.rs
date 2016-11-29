@@ -61,18 +61,37 @@ pub struct UnitCell {
 }
 
 impl UnitCell {
-    /// Create an `Orthorombic` `UnitCell` from the three lenghts, in Angstroms.
-    pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell> {
-        let handle: *const CHFL_CELL;
-        let lenghts = [a, b, c];
-        unsafe {
-            handle = chfl_cell(lenghts.as_ptr());
-        }
-
-        if handle.is_null() {
+    /// Create an `UnitCell` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the pointer,
+    /// except for it being non-null.
+    #[inline]
+    pub unsafe fn from_ptr(ptr: *const CHFL_CELL) -> Result<UnitCell> {
+        if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(UnitCell{handle: handle})
+            Ok(UnitCell{handle: ptr})
+        }
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    #[inline]
+    pub fn as_ptr(&self) -> *const CHFL_CELL {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
+        self.handle as *mut CHFL_CELL
+    }
+
+    /// Create an `Orthorombic` `UnitCell` from the three lenghts, in Angstroms.
+    pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell> {
+        let lenghts = [a, b, c];
+        unsafe {
+            let handle = chfl_cell(lenghts.as_ptr());
+            UnitCell::from_ptr(handle)
         }
     }
 
@@ -88,17 +107,11 @@ impl UnitCell {
     /// `b` and `c`; `beta` is the between the vectors `a` and `c` and `gamma`
     /// is the angle between the vectors `a` and `b`.
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell> {
-        let handle: *const CHFL_CELL;
         let lenghts = [a, b, c];
         let angles = [alpha, beta, gamma];
         unsafe {
-            handle = chfl_cell_triclinic(lenghts.as_ptr(), angles.as_ptr());
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(UnitCell{handle: handle})
+            let handle = chfl_cell_triclinic(lenghts.as_ptr(), angles.as_ptr());
+            UnitCell::from_ptr(handle)
         }
     }
 
@@ -172,22 +185,6 @@ impl UnitCell {
             try!(check(chfl_cell_volume(self.as_ptr(), &mut res)));
         }
         Ok(res)
-    }
-
-    /// Create an `UnitCell` from a C pointer. This function is unsafe because
-    /// no validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHFL_CELL) -> UnitCell {
-        UnitCell{handle: ptr}
-    }
-
-    /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_CELL {
-        self.handle
-    }
-
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
-        self.handle as *mut CHFL_CELL
     }
 }
 

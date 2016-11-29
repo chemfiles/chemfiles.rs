@@ -23,33 +23,44 @@ pub struct Topology {
 }
 
 impl Topology {
-    /// Create a new empty topology
-    pub fn new() -> Result<Topology> {
-        let handle: *const CHFL_TOPOLOGY;
-        unsafe {
-            handle = chfl_topology();
-        }
-
-        if handle.is_null() {
+    /// Create a `Topology` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the pointer,
+    /// except for it being non-null.
+    #[inline]
+    pub unsafe fn from_ptr(ptr: *const CHFL_TOPOLOGY) -> Result<Topology> {
+        if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Topology{handle: handle})
+            Ok(Topology{handle: ptr})
+        }
+    }
+
+    /// Get the underlying C pointer as a const pointer.
+    #[inline]
+    pub fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer.
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
+        self.handle as *mut CHFL_TOPOLOGY
+    }
+
+    /// Create a new empty topology
+    pub fn new() -> Result<Topology> {
+        unsafe {
+            let handle = chfl_topology();
+            Topology::from_ptr(handle)
         }
     }
 
     /// Get a specific `Atom` from a topology, given its `index` in the topology
     pub fn atom(&self, index: u64) -> Result<Atom> {
-        let handle: *const CHFL_ATOM;
         unsafe {
-            handle = chfl_atom_from_topology(self.as_ptr(), index);
-        }
-
-        if handle.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            unsafe {
-                Ok(Atom::from_ptr(handle))
-            }
+            let handle = chfl_atom_from_topology(self.as_ptr(), index);
+            Atom::from_ptr(handle)
         }
     }
 
@@ -66,7 +77,7 @@ impl Topology {
     /// the new size if bigger than the old one.
     pub fn resize(&mut self, size: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_resize(self.handle as *mut CHFL_TOPOLOGY, size)));
+            try!(check(chfl_topology_resize(self.as_mut_ptr(), size)));
         }
         return Ok(());
     }
@@ -195,22 +206,6 @@ impl Topology {
             try!(check(chfl_topology_remove_bond(self.as_mut_ptr(), i, j)));
         }
         Ok(())
-    }
-
-    /// Create a `Topology` from a C pointer. This function is unsafe because no
-    /// validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *const CHFL_TOPOLOGY) -> Topology {
-        Topology{handle: ptr}
-    }
-
-    /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
-        self.handle
-    }
-
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
-        self.handle as *mut CHFL_TOPOLOGY
     }
 }
 
