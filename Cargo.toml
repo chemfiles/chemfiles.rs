@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles"
-version = "0.6.1"
+version = "0.7.0"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 documentation = "https://chemfiles.github.io/chemfiles.rs/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
@@ -15,6 +15,6 @@ name = "chemfiles"
 doctest = false
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.6.0"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.7.0"}
 libc = "0.2"
 lazy_static = "0.2"

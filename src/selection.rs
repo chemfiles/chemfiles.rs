@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
 use std::ops::{Drop, Index};
-use std::usize;
+use std::u64;
 use std::iter::IntoIterator;
 use std::slice::Iter;
 
@@ -16,9 +16,9 @@ use string;
 use frame::Frame;
 use Result;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It should
-/// be used like a `&[usize]`.
+/// be used like a `&[u64]`.
 pub struct Match(chfl_match_t);
 
 impl Match {
@@ -26,8 +26,8 @@ impl Match {
         Match(chfl_match_t{size: 0, atoms: [0; 4]})
     }
 
-    fn len(&self) -> usize {
-        self.0.size as usize
+    fn len(&self) -> u64 {
+        self.0.size as u64
     }
 
     /// Create a new match containing the atoms in the `atoms` slice.
@@ -36,37 +36,35 @@ impl Match {
     ///
     /// If the slice contains more than 4 elements, which is the maximal size
     /// of a match.
-    pub fn new(atoms: &[usize]) -> Match {
+    pub fn new(atoms: &[u64]) -> Match {
         assert!(atoms.len() <= 4);
-        let size = atoms.len() as i8;
-        let mut matches = [usize::MAX; 4];
+        let size = atoms.len();
+        let mut matches = [u64::MAX; 4];
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Match(chfl_match_t{size: size, atoms: matches})
+        Match(chfl_match_t{size: size as u64, atoms: matches})
     }
 
     /// Iterate over the atomic indexes in the match.
-    pub fn iter<'a>(&'a self) -> Iter<'a, usize> {
-        self.0.atoms[..self.len()].iter()
+    pub fn iter<'a>(&'a self) -> Iter<'a, u64> {
+        self.0.atoms[..self.len() as usize].iter()
     }
 }
 
-impl Index<usize> for Match {
-    type Output = usize;
-    fn index(&self, i: usize) -> &usize {
+impl Index<u64> for Match {
+    type Output = u64;
+    fn index(&self, i: u64) -> &u64 {
         assert!(i < self.len(), "");
-        unsafe {
-            self.0.atoms.get_unchecked(i)
-        }
+        &self.0.atoms[i as usize]
     }
 }
 
 impl<'a> IntoIterator for &'a Match {
-    type Item = &'a usize;
-    type IntoIter = Iter<'a, usize>;
-    fn into_iter(self) -> Iter<'a, usize> {
-        self.0.atoms[..self.len()].into_iter()
+    type Item = &'a u64;
+    type IntoIter = Iter<'a, u64>;
+    fn into_iter(self) -> Iter<'a, u64> {
+        self.0.atoms[..self.len() as usize].into_iter()
     }
 }
 
@@ -97,7 +95,7 @@ impl Drop for Selection {
 impl Selection {
     /// Create a new selection from the given selection string.
     pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
-        let handle : *const CHFL_SELECTION;
+        let handle: *const CHFL_SELECTION;
         let buffer = string::to_c(selection.into());
         unsafe {
             handle = chfl_selection(buffer.as_ptr());
@@ -116,7 +114,7 @@ impl Selection {
     /// This value is 1 for the 'atom' context, 2 for the 'pair' and 'bond'
     /// context, 3 for the 'three' and 'angles' contextes and 4 for the 'four'
     /// and 'dihedral' contextes.
-    pub fn size(&self) -> Result<usize> {
+    pub fn size(&self) -> Result<u64> {
         let mut size = 0;
         unsafe {
             try!(check(chfl_selection_size(self.handle, &mut size)));
@@ -127,21 +125,21 @@ impl Selection {
     /// Evaluate a selection for a given frame, and return the corresponding
     /// matches.
     pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
-        let mut n_matches = 0;
+        let mut matches_count = 0;
         unsafe {
-            try!(check(chfl_selection_evalutate(
+            try!(check(chfl_selection_evaluate(
                 self.handle as *mut CHFL_SELECTION,
                 frame.as_ptr(),
-                &mut n_matches
+                &mut matches_count
             )));
         }
 
-        let mut matches = vec![Match::zero(); n_matches];
+        let mut matches = vec![Match::zero(); matches_count as usize];
         unsafe {
             try!(check(chfl_selection_matches(
                 self.handle,
                 matches.as_mut_ptr() as *mut chfl_match_t,
-                n_matches
+                matches_count
             )));
         }
         return Ok(matches);
@@ -153,7 +151,7 @@ impl Selection {
     /// # Panics
     ///
     /// If the selection size is not 1.
-    pub fn list(&mut self, frame: &Frame) -> Result<Vec<usize>> {
+    pub fn list(&mut self, frame: &Frame) -> Result<Vec<u64>> {
         let matches = try!(self.evaluate(frame));
         let mut list = vec![0; matches.len()];
         for (i, m) in matches.iter().enumerate() {
@@ -183,7 +181,8 @@ mod tests {
         topology.add_bond(1, 2).unwrap();
         topology.add_bond(2, 3).unwrap();
 
-        let mut frame = Frame::new(4).unwrap();
+        let mut frame = Frame::new().unwrap();
+        frame.resize(4).unwrap();
         frame.set_topology(&topology).unwrap();
         return frame;
     }
@@ -216,7 +215,7 @@ mod tests {
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
             assert_eq!(
-                match_.iter().cloned().collect::<Vec<usize>>(),
+                match_.iter().cloned().collect::<Vec<u64>>(),
                 vec![1, 2, 3, 4]
             );
 
@@ -247,10 +246,10 @@ mod tests {
         let sel = Selection::new("name H").unwrap();
         assert_eq!(sel.size(), Ok(1));
 
-        let sel = Selection::new("angles: name($1) H").unwrap();
+        let sel = Selection::new("angles: name(#1) H").unwrap();
         assert_eq!(sel.size(), Ok(3));
 
-        let sel = Selection::new("four: name($1) H").unwrap();
+        let sel = Selection::new("four: name(#1) H").unwrap();
         assert_eq!(sel.size(), Ok(4));
     }
 

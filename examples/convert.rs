@@ -6,7 +6,7 @@ use chemfiles::*;
 
 fn main() {
     let mut input = Trajectory::open("water.xyz").unwrap();
-    let mut frame = Frame::new(0).unwrap();
+    let mut frame = Frame::new().unwrap();
     let mut water_topology = Topology::new().unwrap();
     // Orthorombic UnitCell with lengths of 20, 15 and 35 A
     let cell = UnitCell::new(20.0, 15.0, 35.0).unwrap();

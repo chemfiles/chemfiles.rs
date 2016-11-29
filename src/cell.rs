@@ -11,24 +11,33 @@ use chemfiles_sys::*;
 use errors::{check, Error};
 use Result;
 
-/// Available unit cell types
+/// Available unit cell shapes
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum CellType {
+pub enum CellShape {
     /// Orthorombic cell, with the three angles equals to 90°
-    Orthorhombic = CHFL_CELL_ORTHORHOMBIC as isize,
+    Orthorhombic,
     /// Triclinic cell, with any values for the angles.
-    Triclinic = CHFL_CELL_TRICLINIC as isize,
+    Triclinic,
     /// Infinite cell, to use when there is no cell.
-    Infinite = CHFL_CELL_INFINITE as isize,
+    Infinite,
 }
 
-impl From<CHFL_CELL_TYPES> for CellType {
-    fn from(celltype: CHFL_CELL_TYPES) -> CellType {
+impl From<chfl_cell_shape_t> for CellShape {
+    fn from(celltype: chfl_cell_shape_t) -> CellShape {
         match celltype {
-            CHFL_CELL_ORTHORHOMBIC => CellType::Orthorhombic,
-            CHFL_CELL_TRICLINIC => CellType::Triclinic,
-            CHFL_CELL_INFINITE => CellType::Infinite,
-            _ => unreachable!()
+            chfl_cell_shape_t::CHFL_CELL_ORTHORHOMBIC => CellShape::Orthorhombic,
+            chfl_cell_shape_t::CHFL_CELL_TRICLINIC => CellShape::Triclinic,
+            chfl_cell_shape_t::CHFL_CELL_INFINITE => CellShape::Infinite,
+        }
+    }
+}
+
+impl From<CellShape> for chfl_cell_shape_t {
+    fn from(celltype: CellShape) -> chfl_cell_shape_t {
+        match celltype {
+            CellShape::Orthorhombic => chfl_cell_shape_t::CHFL_CELL_ORTHORHOMBIC,
+            CellShape::Triclinic => chfl_cell_shape_t::CHFL_CELL_TRICLINIC,
+            CellShape::Infinite => chfl_cell_shape_t::CHFL_CELL_INFINITE,
         }
     }
 }
@@ -54,9 +63,10 @@ pub struct UnitCell {
 impl UnitCell {
     /// Create an `Orthorombic` `UnitCell` from the three lenghts, in Angstroms.
     pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell> {
-        let handle : *const CHFL_CELL;
+        let handle: *const CHFL_CELL;
+        let lenghts = [a, b, c];
         unsafe {
-            handle = chfl_cell(a, b, c);
+            handle = chfl_cell(lenghts.as_ptr());
         }
 
         if handle.is_null() {
@@ -68,15 +78,8 @@ impl UnitCell {
 
     /// Create an `Infinite` `UnitCell`
     pub fn infinite() -> Result<UnitCell> {
-        let handle : *const CHFL_CELL;
-        unsafe {
-            handle = chfl_cell(0.0, 0.0, 0.0);
-        }
-        if handle.is_null() {
-            return Err(Error::null_ptr())
-        }
-        let mut cell = UnitCell{handle: handle};
-        try!(cell.set_cell_type(CellType::Infinite));
+        let mut cell = try!(UnitCell::new(0.0, 0.0, 0.0));
+        try!(cell.set_shape(CellShape::Infinite));
         Ok(cell)
     }
 
@@ -85,9 +88,11 @@ impl UnitCell {
     /// `b` and `c`; `beta` is the between the vectors `a` and `c` and `gamma`
     /// is the angle between the vectors `a` and `b`.
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell> {
-        let handle : *const CHFL_CELL;
+        let handle: *const CHFL_CELL;
+        let lenghts = [a, b, c];
+        let angles = [alpha, beta, gamma];
         unsafe {
-            handle = chfl_cell_triclinic(a, b, c, alpha, beta, gamma);
+            handle = chfl_cell_triclinic(lenghts.as_ptr(), angles.as_ptr());
         }
 
         if handle.is_null() {
@@ -99,35 +104,37 @@ impl UnitCell {
 
     /// Get the three lenghts of an `UnitCell`, in Angstroms.
     pub fn lengths(&self) -> Result<(f64, f64, f64)> {
-        let (mut a, mut b, mut c) = (0.0, 0.0, 0.0);
+        let mut lengths = [0.0f64; 3];
         unsafe {
-            try!(check(chfl_cell_lengths(self.handle, &mut a, &mut b, &mut c)));
+            try!(check(chfl_cell_lengths(self.handle, lengths.as_mut_ptr())));
         }
-        Ok((a, b, c))
+        Ok((lengths[0], lengths[1], lengths[2]))
     }
 
     /// Set the three lenghts of an `UnitCell`, in Angstroms.
     pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<()> {
+        let lengths = [a, b, c];
         unsafe {
-            try!(check(chfl_cell_set_lengths(self.handle as *mut CHFL_CELL, a, b, c)));
+            try!(check(chfl_cell_set_lengths(self.handle as *mut CHFL_CELL, lengths.as_ptr())));
         }
         Ok(())
     }
 
     /// Get the three angles of an `UnitCell`, in degrees.
     pub fn angles(&self) -> Result<(f64, f64, f64)> {
-        let (mut alpha, mut beta, mut gamma) = (0.0, 0.0, 0.0);
+        let mut angles = [0.0f64; 3];
         unsafe {
-            try!(check(chfl_cell_angles(self.handle, &mut alpha, &mut beta, &mut gamma)));
+            try!(check(chfl_cell_angles(self.handle, angles.as_mut_ptr())));
         }
-        Ok((alpha, beta, gamma))
+        Ok((angles[0], angles[1], angles[2]))
     }
 
     /// Set the three angles of an `UnitCell`, in degrees. This is only possible
     /// with `Triclinic` cells.
     pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<()> {
+        let angles = [alpha, beta, gamma];
         unsafe {
-            try!(check(chfl_cell_set_angles(self.handle as *mut CHFL_CELL, alpha, beta, gamma)));
+            try!(check(chfl_cell_set_angles(self.handle as *mut CHFL_CELL, angles.as_ptr())));
         }
         Ok(())
     }
@@ -141,19 +148,19 @@ impl UnitCell {
         Ok(res)
     }
 
-    /// Get the type of the unit cell
-    pub fn cell_type(&self) -> Result<CellType> {
-        let mut res = 0;
+    /// Get the shape of the unit cell
+    pub fn shape(&self) -> Result<CellShape> {
+        let mut shape = chfl_cell_shape_t::CHFL_CELL_INFINITE;
         unsafe {
-            try!(check(chfl_cell_type(self.handle, &mut res)));
+            try!(check(chfl_cell_shape(self.handle, &mut shape)));
         }
-        Ok(CellType::from(res))
+        Ok(CellShape::from(shape))
     }
 
-    /// Set the type of the unit cell
-    pub fn set_cell_type(&mut self, cell_type: CellType) -> Result<()> {
+    /// Set the shape of the unit cell
+    pub fn set_shape(&mut self, shape: CellShape) -> Result<()> {
         unsafe {
-            try!(check(chfl_cell_set_type(self.handle as *mut CHFL_CELL, cell_type as CHFL_CELL_TYPES)));
+            try!(check(chfl_cell_set_shape(self.handle as *mut CHFL_CELL, shape.into())));
         }
         Ok(())
     }
@@ -211,7 +218,7 @@ mod test {
 
         assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
 
-        assert!(cell.set_cell_type(CellType::Triclinic).is_ok());
+        assert!(cell.set_shape(CellShape::Triclinic).is_ok());
         assert!(cell.set_angles(80.0, 89.0, 100.0).is_ok());
 
         assert_eq!(cell.angles(), Ok((80.0, 89.0, 100.0)));
@@ -242,17 +249,17 @@ mod test {
     }
 
     #[test]
-    fn cell_type() {
+    fn shape() {
         let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
-        assert_eq!(cell.cell_type(), Ok(CellType::Orthorhombic));
+        assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
 
-        assert!(cell.set_cell_type(CellType::Infinite).is_ok());
-        assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
+        assert!(cell.set_shape(CellShape::Infinite).is_ok());
+        assert_eq!(cell.shape(), Ok(CellShape::Infinite));
 
         let cell = UnitCell::infinite().unwrap();
-        assert_eq!(cell.cell_type(), Ok(CellType::Infinite));
+        assert_eq!(cell.shape(), Ok(CellShape::Infinite));
 
         let cell = UnitCell::triclinic(1., 2., 3., 80., 90., 100.).unwrap();
-        assert_eq!(cell.cell_type(), Ok(CellType::Triclinic));
+        assert_eq!(cell.shape(), Ok(CellShape::Triclinic));
     }
 }

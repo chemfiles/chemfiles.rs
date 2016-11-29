@@ -7,6 +7,7 @@
 */
 use std::ops::Drop;
 use std::path::Path;
+use std::ptr;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
@@ -123,7 +124,7 @@ impl Trajectory {
     }
 
     /// Read a specific step of the trajectory in a frame
-    pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<()> {
+    pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read_step(
                 self.handle,
@@ -163,7 +164,11 @@ impl Trajectory {
 
         let filename = string::to_c(filename);
         unsafe {
-            try!(check(chfl_trajectory_set_topology_file(self.handle, filename.as_ptr())))
+            try!(check(chfl_trajectory_topology_file(
+                self.handle,
+                filename.as_ptr(),
+                ptr::null()
+            )))
         }
         Ok(())
     }
@@ -179,20 +184,12 @@ impl Trajectory {
     }
 
     /// Get the number of steps (the number of frames) in a trajectory.
-    pub fn nsteps(&mut self) -> Result<usize> {
+    pub fn nsteps(&mut self) -> Result<u64> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_trajectory_nsteps(self.handle, &mut res)));
         }
         Ok(res)
-    }
-
-    /// Synchronize any buffered content to the hard drive.
-    pub fn sync(&mut self) -> Result<()> {
-        unsafe {
-            try!(check(chfl_trajectory_sync(self.handle)));
-        }
-        Ok(())
     }
 
     /// Create a `Trajectory` from a C pointer. This function is unsafe because
@@ -236,7 +233,7 @@ mod test {
 
         assert_eq!(file.nsteps(), Ok(100));
 
-        let mut frame = Frame::new(0).unwrap();
+        let mut frame = Frame::new().unwrap();
         assert!(file.read(&mut frame).is_ok());
 
         assert_eq!(frame.natoms(), Ok(297));
@@ -292,13 +289,10 @@ mod test {
         assert_eq!(frame.natoms(), Ok(125));
     }
 
-    #[test]
-    fn write() {
-        let filename = "test-tmp.xyz";
-
-        let mut file = Trajectory::create(filename).unwrap();
-
-        let mut frame = Frame::new(4).unwrap();
+    fn write_file(path: &str) {
+        let mut file = Trajectory::create(path).unwrap();
+        let mut frame = Frame::new().unwrap();
+        frame.resize(4).unwrap();
 
         {
             let positions = frame.positions_mut().unwrap();
@@ -313,39 +307,20 @@ mod test {
             topology.push(&atom).unwrap();
         }
         frame.set_topology(&topology).unwrap();
-
         assert!(file.write(&frame).is_ok());
+    }
 
-        frame.resize(6).unwrap();
-        {
-            let positions = frame.positions_mut().unwrap();
-            for i in 0..positions.len() {
-                positions[i] = [4.0, 5.0, 6.0];
-            }
-        }
+    #[test]
+    fn write() {
+        let filename = "test-tmp.xyz";
+        write_file(filename);
 
-        topology.push(&atom).unwrap();
-        topology.push(&atom).unwrap();
-        frame.set_topology(&topology).unwrap();
-
-        assert!(file.write(&frame).is_ok());
-
-        file.sync().unwrap();
-
-        let expected_content = ["4",
-                                "Written by the chemfiles library",
-                                "X 1 2 3",
-                                "X 1 2 3",
-                                "X 1 2 3",
-                                "X 1 2 3",
-                                "6",
-                                "Written by the chemfiles library",
-                                "X 4 5 6",
-                                "X 4 5 6",
-                                "X 4 5 6",
-                                "X 4 5 6",
-                                "X 4 5 6",
-                                "X 4 5 6"].join("\n");
+        let expected_content = "4
+Written by the chemfiles library
+X 1 2 3
+X 1 2 3
+X 1 2 3
+X 1 2 3";
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();

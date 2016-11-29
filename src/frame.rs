@@ -21,12 +21,11 @@ pub struct Frame {
 }
 
 impl Frame {
-    /// Create an empty frame with initial capacity of `natoms`. It will be
-    /// resized by the library as needed.
-    pub fn new(natoms: usize) -> Result<Frame> {
-        let handle : *const CHFL_FRAME;
+    /// Create an empty frame. It will be resized by the library as needed.
+    pub fn new() -> Result<Frame> {
+        let handle: *const CHFL_FRAME;
         unsafe {
-            handle = chfl_frame(natoms);
+            handle = chfl_frame();
         }
 
         if handle.is_null() {
@@ -37,8 +36,8 @@ impl Frame {
     }
 
     /// Get a specific `Atom` from a frame, given its `index` in the frame
-    pub fn atom(&self, index: usize) -> Result<Atom> {
-        let handle : *const CHFL_ATOM;
+    pub fn atom(&self, index: u64) -> Result<Atom> {
+        let handle: *const CHFL_ATOM;
         unsafe {
             handle = chfl_atom_from_frame(self.handle, index);
         }
@@ -53,18 +52,18 @@ impl Frame {
     }
 
     /// Get the current number of atoms in the `Frame`.
-    pub fn natoms(&self) -> Result<usize> {
+    pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_atoms_count(self.handle, &mut natoms)));
         }
-        return Ok(natoms as usize);
+        return Ok(natoms as u64);
     }
 
     /// Resize the positions and the velocities in frame, to make space for
     /// `natoms` atoms. Previous data is conserved, as well as the presence of
     /// absence of velocities.
-    pub fn resize(&mut self, natoms: usize) -> Result<()> {
+    pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_resize(self.handle as *mut CHFL_FRAME, natoms)));
         }
@@ -72,7 +71,7 @@ impl Frame {
     }
 
     /// Get a view into the positions of the `Frame`.
-    pub fn positions(&self) -> Result<&[[f32; 3]]> {
+    pub fn positions(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -83,13 +82,13 @@ impl Frame {
             )));
         }
         let res = unsafe {
-            slice::from_raw_parts(ptr, natoms)
+            slice::from_raw_parts(ptr, natoms as usize)
         };
         return Ok(res);
     }
 
     /// Get a mutable view into the positions of the `Frame`.
-    pub fn positions_mut(&mut self) -> Result<&mut [[f32; 3]]> {
+    pub fn positions_mut(&mut self) -> Result<&mut [[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -100,13 +99,13 @@ impl Frame {
             )));
         }
         let res = unsafe {
-            slice::from_raw_parts_mut(ptr, natoms)
+            slice::from_raw_parts_mut(ptr, natoms as usize)
         };
         return Ok(res);
     }
 
     /// Get a view into the velocities of the `Frame`.
-    pub fn velocities(&self) -> Result<&[[f32; 3]]> {
+    pub fn velocities(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -117,13 +116,13 @@ impl Frame {
             )));
         }
         let res = unsafe {
-            slice::from_raw_parts(ptr, natoms)
+            slice::from_raw_parts(ptr, natoms as usize)
         };
         return Ok(res);
     }
 
     /// Get a mutable view into the velocities of the `Frame`.
-    pub fn velocities_mut(&mut self) -> Result<&mut [[f32; 3]]> {
+    pub fn velocities_mut(&mut self) -> Result<&mut [[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -134,7 +133,7 @@ impl Frame {
             )));
         }
         let res = unsafe {
-            slice::from_raw_parts_mut(ptr, natoms)
+            slice::from_raw_parts_mut(ptr, natoms as usize)
         };
         return Ok(res);
     }
@@ -159,7 +158,7 @@ impl Frame {
 
     /// Get the `UnitCell` from the `Frame`
     pub fn cell(&self) -> Result<UnitCell> {
-        let handle : *const CHFL_CELL;
+        let handle: *const CHFL_CELL;
         unsafe {
             handle = chfl_cell_from_frame(self.handle);
         }
@@ -186,7 +185,7 @@ impl Frame {
 
     /// Get the `Topology` from the `Frame`
     pub fn topology(&self) -> Result<Topology> {
-        let handle : *const CHFL_TOPOLOGY;
+        let handle: *const CHFL_TOPOLOGY;
         unsafe {
             handle = chfl_topology_from_frame(self.handle);
         }
@@ -212,7 +211,7 @@ impl Frame {
     }
 
     /// Get the `Frame` step, i.e. the frame number in the trajectory
-    pub fn step(&self) -> Result<usize> {
+    pub fn step(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
             try!(check(chfl_frame_step(self.handle, &mut res)));
@@ -221,7 +220,7 @@ impl Frame {
     }
 
     /// Set the `Frame` step
-    pub fn set_step(&mut self, step: usize) -> Result<()> {
+    pub fn set_step(&mut self, step: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_step(self.handle as *mut CHFL_FRAME, step)));
         }
@@ -275,19 +274,17 @@ mod test {
 
     #[test]
     fn size() {
-        let mut frame = Frame::new(0).unwrap();
+        let mut frame = Frame::new().unwrap();
         assert_eq!(frame.natoms(), Ok(0));
 
         frame.resize(12).unwrap();
         assert_eq!(frame.natoms(), Ok(12));
-
-        let frame = Frame::new(4).unwrap();
-        assert_eq!(frame.natoms(), Ok(4));
     }
 
     #[test]
     fn positions() {
-        let mut frame = Frame::new(4).unwrap();
+        let mut frame = Frame::new().unwrap();
+        frame.resize(4).unwrap();
         let mut expected = [[1.0, 2.0, 3.0],
                             [4.0, 5.0, 6.0],
                             [7.0, 8.0, 9.0],
@@ -302,7 +299,8 @@ mod test {
 
     #[test]
     fn velocities() {
-        let mut frame = Frame::new(4).unwrap();
+        let mut frame = Frame::new().unwrap();
+        frame.resize(4).unwrap();
         assert_eq!(frame.has_velocities(), Ok(false));
         frame.add_velocities().unwrap();
         assert_eq!(frame.has_velocities(), Ok(true));
@@ -322,7 +320,7 @@ mod test {
 
     #[test]
     fn cell() {
-        let mut frame = Frame::new(0).unwrap();
+        let mut frame = Frame::new().unwrap();
         let cell = UnitCell::new(3.0, 4.0, 5.0).unwrap();
 
         assert!(frame.set_cell(&cell).is_ok());
@@ -333,7 +331,8 @@ mod test {
 
     #[test]
     fn topology() {
-        let mut frame = Frame::new(2).unwrap();
+        let mut frame = Frame::new().unwrap();
+        frame.resize(2).unwrap();
         let mut topology = Topology::new().unwrap();
 
         topology.push(&Atom::new("Zn").unwrap()).unwrap();
@@ -352,7 +351,7 @@ mod test {
 
     #[test]
     fn step() {
-        let mut frame = Frame::new(0).unwrap();
+        let mut frame = Frame::new().unwrap();
         assert_eq!(frame.step(), Ok(0));
 
         assert!(frame.set_step(42).is_ok());

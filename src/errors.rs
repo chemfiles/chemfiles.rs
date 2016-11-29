@@ -17,15 +17,17 @@ use Result;
 #[derive(Clone, Debug, PartialEq)]
 /// Error type for Chemfiles.
 pub struct Error {
-    /// The error kind
-    pub kind: ErrorKind,
+    /// The error status code
+    pub status: Status,
     /// A message describing the error cause
     pub message: String
 }
 
 #[derive(Clone, Debug, PartialEq)]
 /// Possible causes of error in chemfiles
-pub enum ErrorKind {
+pub enum Status {
+    /// No error
+    Success,
     /// Exception in the C++ standard library
     CppStdError,
     /// Exception in the C++ chemfiles library
@@ -44,19 +46,19 @@ pub enum ErrorKind {
     NullPtr,
 }
 
-impl From<CHFL_STATUS> for Error {
-    fn from(status: CHFL_STATUS) -> Error {
-        let kind = match status {
-            CHFL_CXX_ERROR => ErrorKind::CppStdError,
-            CHFL_GENERIC_ERROR => ErrorKind::ChemfilesCppError,
-            CHFL_MEMORY_ERROR => ErrorKind::MemoryError,
-            CHFL_FILE_ERROR => ErrorKind::FileError,
-            CHFL_FORMAT_ERROR => ErrorKind::FormatError,
-            CHFL_SELECTION_ERROR => ErrorKind::SelectionError,
-            _ => unreachable!()
+impl From<chfl_status> for Error {
+    fn from(status: chfl_status) -> Error {
+        let status = match status {
+            chfl_status::CHFL_SUCCESS => Status::Success,
+            chfl_status::CHFL_CXX_ERROR => Status::CppStdError,
+            chfl_status::CHFL_GENERIC_ERROR => Status::ChemfilesCppError,
+            chfl_status::CHFL_MEMORY_ERROR => Status::MemoryError,
+            chfl_status::CHFL_FILE_ERROR => Status::FileError,
+            chfl_status::CHFL_FORMAT_ERROR => Status::FormatError,
+            chfl_status::CHFL_SELECTION_ERROR => Status::SelectionError,
         };
         Error {
-            kind: kind,
+            status: status,
             message: Error::last_error()
         }
     }
@@ -67,7 +69,7 @@ impl Error {
     #[doc(hidden)]
     pub fn utf8_path_error(path: &Path) -> Error {
         Error {
-            kind: ErrorKind::UTF8PathError,
+            status: Status::UTF8PathError,
             message: format!("Could not convert '{}' to UTF8", path.display())
         }
     }
@@ -76,7 +78,7 @@ impl Error {
     #[doc(hidden)]
     pub fn null_ptr() -> Error {
         Error {
-            kind: ErrorKind::NullPtr,
+            status: Status::NullPtr,
             message: Error::last_error()
         }
     }
@@ -97,8 +99,8 @@ impl Error {
 }
 
 /// Check return value of a C function, and get the error if needed.
-pub fn check(status: CHFL_STATUS) -> Result<()> {
-    if status != CHFL_SUCCESS {
+pub fn check(status: chfl_status) -> Result<()> {
+    if status != chfl_status::CHFL_SUCCESS {
         return Err(Error::from(status));
     }
     return Ok(());
@@ -113,15 +115,16 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {
     fn description(&self) -> &str {
-        match self.kind {
-            ErrorKind::CppStdError => "Exception from the C++ standard library",
-            ErrorKind::ChemfilesCppError => "Exception from the chemfiles library",
-            ErrorKind::MemoryError => "Error in memory allocations",
-            ErrorKind::FileError => "Error while reading or writing a file",
-            ErrorKind::FormatError => "Error in file formatting, i.e. the file is invalid",
-	        ErrorKind::SelectionError => "Error in selection string syntax",
-	        ErrorKind::UTF8PathError => "The given path is not valid UTF8",
-            ErrorKind::NullPtr => "We got a NULL pointer from C++"
+        match self.status {
+            Status::Success => "Success",
+            Status::CppStdError => "Exception from the C++ standard library",
+            Status::ChemfilesCppError => "Exception from the chemfiles library",
+            Status::MemoryError => "Error in memory allocations",
+            Status::FileError => "Error while reading or writing a file",
+            Status::FormatError => "Error in file formatting, i.e. the file is invalid",
+	        Status::SelectionError => "Error in selection string syntax",
+	        Status::UTF8PathError => "The given path is not valid UTF8",
+            Status::NullPtr => "We got a NULL pointer from C++",
         }
     }
 }
@@ -131,40 +134,37 @@ impl error::Error for Error {
 mod test {
     use super::*;
     use Trajectory;
-    use Logger;
-    use chemfiles_sys::*;
     use std::error::Error as ErrorTrait;
 
     #[test]
     fn errors() {
-        let logger = Logger::get();
-        logger.log_silent().unwrap();
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
         assert!(Trajectory::open("nope").is_err());
         assert_eq!(Error::last_error(), "Can not find a format associated with the \"\" extension.");
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
-        logger.log_to_stderr().unwrap();
     }
 
     #[test]
     fn codes() {
-        assert_eq!(Error::from(CHFL_CXX_ERROR).kind, ErrorKind::CppStdError);
-        assert_eq!(Error::from(CHFL_GENERIC_ERROR).kind, ErrorKind::ChemfilesCppError);
-        assert_eq!(Error::from(CHFL_MEMORY_ERROR).kind, ErrorKind::MemoryError);
-        assert_eq!(Error::from(CHFL_FILE_ERROR).kind, ErrorKind::FileError);
-        assert_eq!(Error::from(CHFL_FORMAT_ERROR).kind, ErrorKind::FormatError);
-        assert_eq!(Error::from(CHFL_SELECTION_ERROR).kind, ErrorKind::SelectionError);
+        assert_eq!(Error::from(chfl_status::CHFL_SUCCESS).status, Status::Success);
+        assert_eq!(Error::from(chfl_status::CHFL_CXX_ERROR).status, Status::CppStdError);
+        assert_eq!(Error::from(chfl_status::CHFL_GENERIC_ERROR).status, Status::ChemfilesCppError);
+        assert_eq!(Error::from(chfl_status::CHFL_MEMORY_ERROR).status, Status::MemoryError);
+        assert_eq!(Error::from(chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
+        assert_eq!(Error::from(chfl_status::CHFL_FORMAT_ERROR).status, Status::FormatError);
+        assert_eq!(Error::from(chfl_status::CHFL_SELECTION_ERROR).status, Status::SelectionError);
     }
 
     #[test]
     fn messages() {
-        assert!(Error::from(CHFL_CXX_ERROR).description().contains("C++ standard library"));
-        assert!(Error::from(CHFL_GENERIC_ERROR).description().contains("chemfiles library"));
-        assert!(Error::from(CHFL_MEMORY_ERROR).description().contains("memory"));
-        assert!(Error::from(CHFL_FILE_ERROR).description().contains("file"));
-        assert!(Error::from(CHFL_FORMAT_ERROR).description().contains("format"));
-        assert!(Error::from(CHFL_SELECTION_ERROR).description().contains("selection"));
+        assert!(Error::from(chfl_status::CHFL_SUCCESS).description().contains("Success"));
+        assert!(Error::from(chfl_status::CHFL_CXX_ERROR).description().contains("C++ standard library"));
+        assert!(Error::from(chfl_status::CHFL_GENERIC_ERROR).description().contains("chemfiles library"));
+        assert!(Error::from(chfl_status::CHFL_MEMORY_ERROR).description().contains("memory"));
+        assert!(Error::from(chfl_status::CHFL_FILE_ERROR).description().contains("file"));
+        assert!(Error::from(chfl_status::CHFL_FORMAT_ERROR).description().contains("format"));
+        assert!(Error::from(chfl_status::CHFL_SELECTION_ERROR).description().contains("selection"));
     }
 }

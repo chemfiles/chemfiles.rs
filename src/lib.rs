@@ -40,21 +40,17 @@ use chemfiles_sys::chfl_version;
 mod string;
 
 mod errors;
-pub use errors::{Error, ErrorKind};
+pub use errors::{Error, Status};
 
 /// Custom result type for working with errors in chemfiles
 pub type Result<T> = std::result::Result<T, Error>;
 
-mod logging;
-pub use logging::{Logger, LogLevel};
-
 mod atom;
 pub use atom::Atom;
-pub use atom::AtomType;
 
 mod cell;
 pub use cell::UnitCell;
-pub use cell::CellType;
+pub use cell::CellShape;
 
 mod topology;
 pub use topology::Topology;

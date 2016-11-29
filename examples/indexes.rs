@@ -6,7 +6,7 @@ use chemfiles::*;
 
 fn main() {
     let mut traj = Trajectory::open("filename.xyz").unwrap();
-    let mut frame = Frame::new(0).unwrap();
+    let mut frame = Frame::new().unwrap();
 
     traj.read(&mut frame).unwrap();
     let positions = frame.positions().unwrap();

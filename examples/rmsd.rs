@@ -6,7 +6,7 @@ use chemfiles::*;
 
 fn main() {
     let mut traj = Trajectory::open("filename.nc").unwrap();
-    let mut frame = Frame::new(0).unwrap();
+    let mut frame = Frame::new().unwrap();
     let mut distances = Vec::new();
 
     // Accumulate the distances to the origin of the 10th atom throughtout the
@@ -15,9 +15,11 @@ fn main() {
         traj.read(&mut frame).unwrap();
         // Position of the 10th atom
         let position = frame.positions().unwrap()[9];
-        let distance = f32::sqrt(position[0]*position[0] +
-                                 position[1]*position[1] +
-                                 position[2]*position[2]);
+        let distance = f64::sqrt(
+            position[0] * position[0] +
+            position[1] * position[1] +
+            position[2] * position[2]
+        );
         distances.push(distance);
     }
 
@@ -27,8 +29,8 @@ fn main() {
     for distance in distances.iter() {
         rmsd += (mean - distance) * (mean - distance);
     }
-    rmsd /= distances.len() as f32;
-    rmsd = f32::sqrt(rmsd);
+    rmsd /= distances.len() as f64;
+    rmsd = f64::sqrt(rmsd);
 
     println!("Root-mean square displacement is: {}", rmsd);
 }
