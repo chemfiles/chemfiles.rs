@@ -26,8 +26,9 @@ impl Match {
         Match(chfl_match_t{size: 0, atoms: [0; 4]})
     }
 
-    fn len(&self) -> u64 {
-        self.0.size
+    #[allow(cast_possible_truncation)]
+    fn len(&self) -> usize {
+        self.0.size as usize
     }
 
     /// Create a new match containing the atoms in the `atoms` slice.
@@ -47,16 +48,17 @@ impl Match {
     }
 
     /// Iterate over the atomic indexes in the match.
-    pub fn iter<'a>(&'a self) -> Iter<'a, u64> {
-        self.0.atoms[..self.len() as usize].iter()
+    pub fn iter(&self) -> Iter<u64> {
+
+        self.0.atoms[..self.len()].iter()
     }
 }
 
-impl Index<u64> for Match {
+impl Index<usize> for Match {
     type Output = u64;
-    fn index(&self, i: u64) -> &u64 {
-        assert!(i < self.len(), "");
-        &self.0.atoms[i as usize]
+    fn index(&self, i: usize) -> &u64 {
+        assert!(i < self.len());
+        &self.0.atoms[i]
     }
 }
 
@@ -64,7 +66,7 @@ impl<'a> IntoIterator for &'a Match {
     type Item = &'a u64;
     type IntoIter = Iter<'a, u64>;
     fn into_iter(self) -> Iter<'a, u64> {
-        self.0.atoms[..self.len() as usize].into_iter()
+        self.0.atoms[..self.len()].into_iter()
     }
 }
 
@@ -87,7 +89,7 @@ impl Drop for Selection {
         unsafe {
             check(
                 chfl_selection_free(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            ).expect("Error while freeing memory!");
         }
     }
 }
@@ -263,13 +265,13 @@ mod tests {
         #[should_panic]
         fn out_of_bound() {
             let m = Match::new(&[1, 2]);
-            m[2];
+            let _ = m[2];
         }
 
         #[test]
         #[should_panic]
         fn too_big() {
-            Match::new(&[1, 2, 3, 5, 4]);
+            let _ = Match::new(&[1, 2, 3, 5, 4]);
         }
     }
 

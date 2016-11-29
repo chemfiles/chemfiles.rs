@@ -93,7 +93,8 @@ impl Error {
     /// Clear any error from the C++ library
     pub fn cleanup() {
         unsafe {
-            chfl_clear_errors();
+            // TODO check the status
+            let _ = chfl_clear_errors();
         }
     }
 }

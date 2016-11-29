@@ -42,6 +42,7 @@ impl From<CellShape> for chfl_cell_shape_t {
     }
 }
 
+#[allow(doc_markdown)]
 /// An `UnitCell` represent the box containing the atoms in the system, and its
 /// periodicity.
 ///
@@ -117,7 +118,7 @@ impl UnitCell {
 
     /// Get the three lenghts of an `UnitCell`, in Angstroms.
     pub fn lengths(&self) -> Result<(f64, f64, f64)> {
-        let mut lengths = [0.0f64; 3];
+        let mut lengths = [0.0_f64; 3];
         unsafe {
             try!(check(chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr())));
         }
@@ -135,7 +136,7 @@ impl UnitCell {
 
     /// Get the three angles of an `UnitCell`, in degrees.
     pub fn angles(&self) -> Result<(f64, f64, f64)> {
-        let mut angles = [0.0f64; 3];
+        let mut angles = [0.0_f64; 3];
         unsafe {
             try!(check(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr())));
         }
@@ -193,7 +194,7 @@ impl Drop for UnitCell {
         unsafe {
             check(
                 chfl_cell_free(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            ).expect("Error while freeing memory!");
         }
     }
 }

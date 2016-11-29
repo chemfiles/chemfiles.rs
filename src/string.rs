@@ -15,7 +15,6 @@ pub fn from_c(buffer: *const i8) -> String {
     unsafe {
         let c_string = CStr::from_ptr(buffer);
         let rust_str = str::from_utf8(c_string.to_bytes())
-                            .ok()
                             .expect("Got invalid UTF8 string from C!");
         res.push_str(rust_str);
     }
@@ -24,6 +23,6 @@ pub fn from_c(buffer: *const i8) -> String {
 
 
 /// Create a C string from a Rust string.
-pub fn to_c<'a>(string: &'a str) -> CString {
-    CString::new(string).ok().expect("Got invalid C string from Rust!")
+pub fn to_c(string: &str) -> CString {
+    CString::new(string).expect("Got invalid C string from Rust!")
 }

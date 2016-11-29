@@ -90,11 +90,11 @@ impl Atom {
 
     /// Get the `Atom` name
     pub fn name(&self) -> Result<String> {
-        let mut buffer = vec![0; 10];
+        let buffer = vec![0; 10];
         unsafe {
-            try!(check(chfl_atom_name(self.as_ptr(), &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_name(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(&buffer[0]));
+        return Ok(string::from_c(buffer.as_ptr()));
     }
 
     /// Set the `Atom` type
@@ -108,11 +108,11 @@ impl Atom {
 
     /// Get the `Atom` type
     pub fn atom_type(&self) -> Result<String> {
-        let mut buffer = vec![0; 10];
+        let buffer = vec![0; 10];
         unsafe {
-            try!(check(chfl_atom_type(self.as_ptr(), &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_type(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(&buffer[0]));
+        return Ok(string::from_c(buffer.as_ptr()));
     }
 
     /// Set the `Atom` name
@@ -130,9 +130,9 @@ impl Atom {
     pub fn full_name(&mut self) -> Result<String> {
         let mut buffer = vec![0; 10];
         unsafe {
-            try!(check(chfl_atom_full_name(self.as_ptr(), &mut buffer[0], buffer.len() as u64)));
+            try!(check(chfl_atom_full_name(self.as_ptr(), buffer.as_mut_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(&buffer[0]));
+        return Ok(string::from_c(buffer.as_ptr()));
     }
 
     /// Try to get the Van der Waals radius of the `Atom`. If the radius can not
@@ -171,7 +171,7 @@ impl Drop for Atom {
         unsafe {
             check(
                 chfl_atom_free(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            ).expect("Error while freeing memory!");
         }
     }
 }

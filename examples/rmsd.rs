@@ -26,7 +26,7 @@ fn main() {
     let mean = distances.iter().fold(0.0, |acc, &item| acc + item);
     let mut rmsd = 0.0;
 
-    for distance in distances.iter() {
+    for distance in &distances {
         rmsd += (mean - distance) * (mean - distance);
     }
     rmsd /= distances.len() as f64;

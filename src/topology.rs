@@ -214,7 +214,7 @@ impl Drop for Topology {
         unsafe {
             check(
                 chfl_topology_free(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            ).expect("Error while freeing memory!");
         }
     }
 }

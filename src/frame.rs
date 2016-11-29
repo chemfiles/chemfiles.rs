@@ -126,6 +126,7 @@ impl Frame {
             )));
         }
         let res = unsafe {
+            #[allow(cast_possible_truncation)]
             slice::from_raw_parts(ptr, natoms as usize)
         };
         return Ok(res);
@@ -143,6 +144,7 @@ impl Frame {
             )));
         }
         let res = unsafe {
+            #[allow(cast_possible_truncation)]
             slice::from_raw_parts_mut(ptr, natoms as usize)
         };
         return Ok(res);
@@ -162,6 +164,7 @@ impl Frame {
             )));
         }
         let res = unsafe {
+            #[allow(cast_possible_truncation)]
             slice::from_raw_parts(ptr, natoms as usize)
         };
         return Ok(res);
@@ -179,6 +182,7 @@ impl Frame {
             )));
         }
         let res = unsafe {
+            #[allow(cast_possible_truncation)]
             slice::from_raw_parts_mut(ptr, natoms as usize)
         };
         return Ok(res);
@@ -272,7 +276,7 @@ impl Drop for Frame {
         unsafe {
             check(
                 chfl_frame_free(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            ).expect("Error while freeing memory!");
         }
     }
 }

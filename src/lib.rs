@@ -30,6 +30,18 @@
 //! [selections]: https://chemfiles.github.io/chemfiles/latest/selections.html
 #![deny(missing_docs)]
 
+#![warn(
+    trivial_casts, unused_import_braces, variant_size_differences,
+    unused_qualifications, unused_results
+)]
+
+#![warn(clippy, clippy_pedantic)]
+#![allow(unknown_lints)]
+// List of Clippy lints we allow in this code
+#![allow(
+    needless_return, shadow_reuse, stutter, missing_docs_in_private_items,
+)]
+
 #[macro_use] extern crate lazy_static;
 
 extern crate chemfiles_sys;

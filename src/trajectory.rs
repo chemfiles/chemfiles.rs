@@ -49,16 +49,14 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in read mode.
-    pub fn open<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path>{
-        let filename = match filename.as_ref().to_str() {
-            Some(val) => val,
-            None => {
-                return Err(Error::utf8_path_error(filename.as_ref()))
-            }
-        };
+    pub fn open<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path> {
+        let filename = try!(filename.as_ref().to_str().ok_or(
+            Error::utf8_path_error(filename.as_ref())
+        ));
 
         let filename = string::to_c(filename);
         unsafe {
+            #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
             Trajectory::from_ptr(handle)
         }
@@ -66,15 +64,13 @@ impl Trajectory {
 
     /// Open a trajectory file in write mode.
     pub fn create<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path> {
-        let filename = match filename.as_ref().to_str() {
-            Some(val) => val,
-            None => {
-                return Err(Error::utf8_path_error(filename.as_ref()))
-            }
-        };
+        let filename = try!(filename.as_ref().to_str().ok_or(
+            Error::utf8_path_error(filename.as_ref())
+        ));
 
         let filename = string::to_c(filename);
         unsafe {
+            #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
             Trajectory::from_ptr(handle)
         }
@@ -82,16 +78,14 @@ impl Trajectory {
 
     /// Open a trajectory file in read mode using a specific `format`.
     pub fn open_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
-        let filename = match filename.as_ref().to_str() {
-            Some(val) => val,
-            None => {
-                return Err(Error::utf8_path_error(filename.as_ref()))
-            }
-        };
+        let filename = try!(filename.as_ref().to_str().ok_or(
+            Error::utf8_path_error(filename.as_ref())
+        ));
 
         let filename = string::to_c(filename);
         let format = string::to_c(format.into());
         unsafe {
+            #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
             Trajectory::from_ptr(handle)
         }
@@ -99,16 +93,14 @@ impl Trajectory {
 
     /// Open a trajectory file in write mode.
     pub fn create_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
-        let filename = match filename.as_ref().to_str() {
-            Some(val) => val,
-            None => {
-                return Err(Error::utf8_path_error(filename.as_ref()))
-            }
-        };
+        let filename = try!(filename.as_ref().to_str().ok_or(
+            Error::utf8_path_error(filename.as_ref())
+        ));
 
         let filename = string::to_c(filename);
         let format = string::to_c(format.into());
         unsafe {
+            #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
             Trajectory::from_ptr(handle)
         }
@@ -156,12 +148,9 @@ impl Trajectory {
     /// Set the topology associated with a trajectory by reading the first frame
     /// of `filename`; and extracting the topology of this frame.
     pub fn set_topology_file<P>(&mut self, filename: P) -> Result<()> where P: AsRef<Path> {
-        let filename = match filename.as_ref().to_str() {
-            Some(val) => val,
-            None => {
-                return Err(Error::utf8_path_error(filename.as_ref()))
-            }
-        };
+        let filename = try!(filename.as_ref().to_str().ok_or(
+            Error::utf8_path_error(filename.as_ref())
+        ));
 
         let filename = string::to_c(filename);
         unsafe {
@@ -220,7 +209,7 @@ impl Drop for Trajectory {
         unsafe {
             check(
                 chfl_trajectory_close(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            ).expect("Error while freeing memory!");
         }
     }
 }
@@ -334,7 +323,7 @@ X 1 2 3";
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();
-        file.read_to_string(&mut content).unwrap();
+        let _ = file.read_to_string(&mut content).unwrap();
 
         assert_eq!(expected_content, content.trim());
         fs::remove_file(filename).unwrap();
