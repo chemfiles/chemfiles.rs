@@ -53,6 +53,7 @@ mod string;
 
 mod errors;
 pub use errors::{Error, Status};
+pub use errors::set_warning_callback;
 
 /// Custom result type for working with errors in chemfiles
 pub type Result<T> = std::result::Result<T, Error>;

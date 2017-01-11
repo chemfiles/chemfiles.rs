@@ -5,10 +5,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/
 */
+extern crate libc;
+
 use std::error;
 use std::fmt;
+use std::sync::Mutex;
 use std::result;
 use std::path::Path;
+
+use self::libc::c_char;
 
 use chemfiles_sys::*;
 use string;
@@ -103,6 +108,43 @@ impl Error {
 pub fn check(status: chfl_status) -> Result<()> {
     if status != chfl_status::CHFL_SUCCESS {
         return Err(Error::from(status));
+    }
+    return Ok(());
+}
+
+// FIXME: there must be a better way to do this ...
+static mut LOGGING_CALLBACK: Option<*const Fn(&str)> = None;
+extern "C" fn warning_callback(message: *const c_char) {
+    unsafe {
+        let callback = LOGGING_CALLBACK.expect(
+            "No callback provided, this is an internal bug"
+        );
+        (*callback)(&string::from_c(message));
+    }
+}
+
+/// Use `callback` for every chemfiles warning. The callback will be passed
+/// the warning message.
+///
+/// # Caveats
+///
+/// This function will box and forget the callback, effectivelly leaking it.
+/// Calling this function multiple time will leak all callbacks.
+///
+/// This function hold a `Mutex` under the hood, and will block when called
+/// from multiple threads. You should really call this function once, at the
+/// beggining of your application.
+pub fn set_warning_callback<F>(callback: F) -> Result<()> where F: Fn(&str) + 'static {
+    // Grab a mutex to prevent concurent modifications of the warning callback
+    let mutex = Mutex::new(0);
+    let _guard = mutex.lock().expect("Could not get the mutex in set_warning_callback");
+
+    // Put the callback on the heap to be sure it survives long enough. This
+    // mean than we leak all the callbacks here.
+    let callback = Box::into_raw(Box::new(callback));
+    unsafe {
+        LOGGING_CALLBACK = Some(callback);
+        try!(check(chfl_set_warning_callback(warning_callback)));
     }
     return Ok(());
 }
