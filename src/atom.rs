@@ -19,6 +19,16 @@ pub struct Atom {
     handle: *const CHFL_ATOM
 }
 
+impl Clone for Atom {
+    fn clone(&self) -> Atom {
+        unsafe {
+            let new_handle = chfl_atom_copy(self.as_ptr());
+            Atom::from_ptr(new_handle)
+                 .expect("Out of memory when copying an Atom")
+        }
+    }
+}
+
 impl Atom {
     /// Create an `Atom` from a C pointer.
     ///
@@ -181,53 +191,66 @@ mod test {
     use super::*;
 
     #[test]
-    fn mass() {
-        let mut at = Atom::new("He").unwrap();
-        assert_approx_eq!(at.mass().unwrap(), 4.002602, 1e-6);
+    fn clone() {
+        let mut atom = Atom::new("He").unwrap();
+        assert_eq!(atom.name().unwrap(), "He");
 
-        assert!(at.set_mass(15.0).is_ok());
-        assert_eq!(at.mass(), Ok(15.0));
+        let copy = atom.clone();
+        assert_eq!(copy.name().unwrap(), "He");
+
+        atom.set_name("Na").unwrap();
+        assert_eq!(atom.name().unwrap(), "Na");
+        assert_eq!(copy.name().unwrap(), "He");
+    }
+
+    #[test]
+    fn mass() {
+        let mut atom = Atom::new("He").unwrap();
+        assert_approx_eq!(atom.mass().unwrap(), 4.002602, 1e-6);
+
+        assert!(atom.set_mass(15.0).is_ok());
+        assert_eq!(atom.mass(), Ok(15.0));
     }
 
     #[test]
     fn charge() {
-        let mut at = Atom::new("He").unwrap();
-        assert_eq!(at.charge(), Ok(0.0));
+        let mut atom = Atom::new("He").unwrap();
+        assert_eq!(atom.charge(), Ok(0.0));
 
-        assert!(at.set_charge(-1.5).is_ok());
-        assert_eq!(at.charge(), Ok(-1.5));
+        assert!(atom.set_charge(-1.5).is_ok());
+        assert_eq!(atom.charge(), Ok(-1.5));
     }
 
     #[test]
     fn name() {
-        let mut at = Atom::new("He").unwrap();
-        assert_eq!(at.name(), Ok(String::from("He")));
+        let mut atom = Atom::new("He").unwrap();
+        assert_eq!(atom.name(), Ok(String::from("He")));
 
-        assert!(at.set_name("Zn-12").is_ok());
-        assert_eq!(at.name(), Ok(String::from("Zn-12")));
+        assert!(atom.set_name("Zn-12").is_ok());
+        assert_eq!(atom.name(), Ok(String::from("Zn-12")));
     }
 
     #[test]
     fn atom_type() {
-        let mut at = Atom::new("He").unwrap();
-        assert_eq!(at.atom_type(), Ok(String::from("He")));
-        assert_eq!(at.full_name(), Ok(String::from("Helium")));
+        let mut atom = Atom::new("He").unwrap();
+        assert_eq!(atom.atom_type(), Ok(String::from("He")));
+        assert_eq!(atom.full_name(), Ok(String::from("Helium")));
 
-        assert!(at.set_atom_type("Zn").is_ok());
-        assert_eq!(at.atom_type(), Ok(String::from("Zn")));
-        assert_eq!(at.full_name(), Ok(String::from("Zinc")));
+        assert!(atom.set_atom_type("Zn").is_ok());
+        assert_eq!(atom.atom_type(), Ok(String::from("Zn")));
+        assert_eq!(atom.full_name(), Ok(String::from("Zinc")));
     }
 
     #[test]
     fn radii() {
-        let at = Atom::new("He").unwrap();
-        assert_approx_eq!(at.vdw_radius().unwrap(), 1.4, 1e-2);
-        assert_approx_eq!(at.covalent_radius().unwrap(), 0.32, 1e-3);
+        let atom = Atom::new("He").unwrap();
+        assert_approx_eq!(atom.vdw_radius().unwrap(), 1.4, 1e-2);
+        assert_approx_eq!(atom.covalent_radius().unwrap(), 0.32, 1e-3);
     }
 
     #[test]
     fn atomic_number() {
-        let at = Atom::new("He").unwrap();
-        assert_eq!(at.atomic_number(), Ok(2));
+        let atom = Atom::new("He").unwrap();
+        assert_eq!(atom.atomic_number(), Ok(2));
     }
 }

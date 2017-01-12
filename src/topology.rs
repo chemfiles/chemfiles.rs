@@ -22,6 +22,16 @@ pub struct Topology {
     handle: *const CHFL_TOPOLOGY
 }
 
+impl Clone for Topology {
+    fn clone(&self) -> Topology {
+        unsafe {
+            let new_handle = chfl_topology_copy(self.as_ptr());
+            Topology::from_ptr(new_handle)
+                    .expect("Out of memory when copying a Topology")
+        }
+    }
+}
+
 impl Topology {
     /// Create a `Topology` from a C pointer.
     ///
@@ -281,54 +291,67 @@ mod test {
     use {Atom, Residue};
 
     #[test]
-    fn topology() {
-        let mut top = Topology::new().unwrap();
+    fn clone() {
+        let mut topology = Topology::new().unwrap();
+        assert_eq!(topology.natoms(), Ok(0));
 
-        assert_eq!(top.natoms(), Ok(0));
+        let copy = topology.clone();
+        assert_eq!(copy.natoms(), Ok(0));
+
+        topology.push(&Atom::new("H").unwrap()).unwrap();
+        assert_eq!(topology.natoms(), Ok(1));
+        assert_eq!(copy.natoms(), Ok(0));
+    }
+
+    #[test]
+    fn topology() {
+        let mut topology = Topology::new().unwrap();
+
+        assert_eq!(topology.natoms(), Ok(0));
 
         let h = Atom::new("H").unwrap();
         let o = Atom::new("O").unwrap();
 
-        assert!(top.push(&h).is_ok());
-        assert!(top.push(&o).is_ok());
-        assert!(top.push(&o).is_ok());
-        assert!(top.push(&h).is_ok());
+        assert!(topology.push(&h).is_ok());
+        assert!(topology.push(&o).is_ok());
+        assert!(topology.push(&o).is_ok());
+        assert!(topology.push(&h).is_ok());
 
-        assert_eq!(top.natoms(), Ok(4));
+        assert_eq!(topology.natoms(), Ok(4));
 
-        assert_eq!(top.bonds_count(), Ok(0));
-        assert_eq!(top.angles_count(), Ok(0));
-        assert_eq!(top.dihedrals_count(), Ok(0));
+        assert_eq!(topology.bonds_count(), Ok(0));
+        assert_eq!(topology.angles_count(), Ok(0));
+        assert_eq!(topology.dihedrals_count(), Ok(0));
 
-        assert!(top.add_bond(0, 1).is_ok());
-        assert!(top.add_bond(1, 2).is_ok());
-        assert!(top.add_bond(2, 3).is_ok());
+        assert!(topology.add_bond(0, 1).is_ok());
+        assert!(topology.add_bond(1, 2).is_ok());
+        assert!(topology.add_bond(2, 3).is_ok());
 
-        assert_eq!(top.bonds_count().unwrap(), 3);
-        assert_eq!(top.angles_count().unwrap(), 2);
-        assert_eq!(top.dihedrals_count().unwrap(), 1);
+        assert_eq!(topology.bonds_count().unwrap(), 3);
+        assert_eq!(topology.angles_count().unwrap(), 2);
+        assert_eq!(topology.dihedrals_count().unwrap(), 1);
 
-        assert_eq!(top.is_bond(0, 1), Ok(true));
-        assert_eq!(top.is_bond(0, 3), Ok(false));
+        assert_eq!(topology.is_bond(0, 1), Ok(true));
+        assert_eq!(topology.is_bond(0, 3), Ok(false));
 
-        assert_eq!(top.is_angle(0, 1, 2), Ok(true));
-        assert_eq!(top.is_angle(0, 1, 3), Ok(false));
+        assert_eq!(topology.is_angle(0, 1, 2), Ok(true));
+        assert_eq!(topology.is_angle(0, 1, 3), Ok(false));
 
-        assert_eq!(top.is_dihedral(0, 1, 2, 3), Ok(true));
-        assert_eq!(top.is_dihedral(0, 1, 3, 2), Ok(false));
+        assert_eq!(topology.is_dihedral(0, 1, 2, 3), Ok(true));
+        assert_eq!(topology.is_dihedral(0, 1, 3, 2), Ok(false));
 
-        assert_eq!(top.bonds(), Ok(vec![[0, 1], [1, 2], [2, 3]]));
-        assert_eq!(top.angles(), Ok(vec![[0, 1, 2], [1, 2, 3]]));
-        assert_eq!(top.dihedrals(), Ok(vec![[0, 1, 2, 3]]));
+        assert_eq!(topology.bonds(), Ok(vec![[0, 1], [1, 2], [2, 3]]));
+        assert_eq!(topology.angles(), Ok(vec![[0, 1, 2], [1, 2, 3]]));
+        assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3]]));
 
-        assert!(top.remove_bond(2, 3).is_ok());
+        assert!(topology.remove_bond(2, 3).is_ok());
 
-        assert_eq!(top.bonds_count().unwrap(), 2);
-        assert_eq!(top.angles_count().unwrap(), 1);
-        assert_eq!(top.dihedrals_count().unwrap(), 0);
+        assert_eq!(topology.bonds_count().unwrap(), 2);
+        assert_eq!(topology.angles_count().unwrap(), 1);
+        assert_eq!(topology.dihedrals_count().unwrap(), 0);
 
-        assert!(top.remove(3).is_ok());
-        assert_eq!(top.natoms(), Ok(3));
+        assert!(topology.remove(3).is_ok());
+        assert_eq!(topology.natoms(), Ok(3));
     }
 
     #[test]

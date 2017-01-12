@@ -20,6 +20,16 @@ pub struct Frame {
     handle: *const CHFL_FRAME
 }
 
+impl Clone for Frame {
+    fn clone(&self) -> Frame {
+        unsafe {
+            let new_handle = chfl_frame_copy(self.as_ptr());
+            Frame::from_ptr(new_handle)
+                    .expect("Out of memory when copying a Frame")
+        }
+    }
+}
+
 impl Frame {
     /// Create a `Frame` from a C pointer.
     ///
@@ -285,6 +295,18 @@ impl Drop for Frame {
 mod test {
     use super::*;
     use ::{Atom, Topology, UnitCell};
+
+    #[test]
+    fn clone() {
+        let mut frame = Frame::new().unwrap();
+        assert_eq!(frame.natoms(), Ok(0));
+        let copy = frame.clone();
+        assert_eq!(copy.natoms(), Ok(0));
+
+        frame.resize(42).unwrap();
+        assert_eq!(frame.natoms(), Ok(42));
+        assert_eq!(copy.natoms(), Ok(0));
+    }
 
     #[test]
     fn size() {

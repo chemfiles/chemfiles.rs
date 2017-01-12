@@ -21,6 +21,16 @@ pub struct Residue {
     handle: *const CHFL_RESIDUE
 }
 
+impl Clone for Residue {
+    fn clone(&self) -> Residue {
+        unsafe {
+            let new_handle = chfl_residue_copy(self.as_ptr());
+            Residue::from_ptr(new_handle)
+                    .expect("Out of memory when copying a Residue")
+        }
+    }
+}
+
 impl Residue {
     /// Create a `Residue` from a C pointer.
     ///
@@ -126,6 +136,20 @@ impl Drop for Residue {
 mod tests {
     use super::*;
     use std::u64;
+
+    #[test]
+    fn clone() {
+        let mut residue = Residue::new("A").unwrap();
+        assert_eq!(residue.natoms(), Ok(0));
+
+        let copy = residue.clone();
+        assert_eq!(copy.natoms(), Ok(0));
+
+        residue.add_atom(3).unwrap();
+        residue.add_atom(7).unwrap();
+        assert_eq!(residue.natoms(), Ok(2));
+        assert_eq!(copy.natoms(), Ok(0));
+    }
 
     #[test]
     fn name() {

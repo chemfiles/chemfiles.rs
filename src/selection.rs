@@ -84,6 +84,16 @@ pub struct Selection {
     handle: *const CHFL_SELECTION
 }
 
+impl Clone for Selection {
+    fn clone(&self) -> Selection {
+        unsafe {
+            let new_handle = chfl_selection_copy(self.as_ptr());
+            Selection::from_ptr(new_handle)
+                    .expect("Out of memory when copying a Selection")
+        }
+    }
+}
+
 impl Drop for Selection {
     fn drop(&mut self) {
         unsafe {
@@ -203,6 +213,15 @@ mod tests {
     use Topology;
     use Atom;
 
+    #[test]
+    fn clone() {
+        let selection = Selection::new("name H").unwrap();
+
+        let copy = selection.clone();
+        assert_eq!(selection.size(), Ok(1));
+        assert_eq!(copy.size(), Ok(1));
+    }
+
     fn testing_frame() -> Frame {
         let mut topology = Topology::new().unwrap();
 
@@ -277,14 +296,14 @@ mod tests {
 
     #[test]
     fn size() {
-        let sel = Selection::new("name H").unwrap();
-        assert_eq!(sel.size(), Ok(1));
+        let selection = Selection::new("name H").unwrap();
+        assert_eq!(selection.size(), Ok(1));
 
-        let sel = Selection::new("angles: name(#1) H").unwrap();
-        assert_eq!(sel.size(), Ok(3));
+        let selection = Selection::new("angles: name(#1) H").unwrap();
+        assert_eq!(selection.size(), Ok(3));
 
-        let sel = Selection::new("four: name(#1) H").unwrap();
-        assert_eq!(sel.size(), Ok(4));
+        let selection = Selection::new("four: name(#1) H").unwrap();
+        assert_eq!(selection.size(), Ok(4));
     }
 
     #[test]
@@ -300,12 +319,12 @@ mod tests {
     fn evaluate() {
         let frame = testing_frame();
 
-        let mut sel = Selection::new("name H").unwrap();
-        let res = sel.evaluate(&frame).unwrap();
+        let mut selection = Selection::new("name H").unwrap();
+        let res = selection.evaluate(&frame).unwrap();
         assert_eq!(res, &[Match::new(&[0]), Match::new(&[3])]);
 
-        let mut sel = Selection::new("angles: all").unwrap();
-        let res = sel.evaluate(&frame).unwrap();
+        let mut selection = Selection::new("angles: all").unwrap();
+        let res = selection.evaluate(&frame).unwrap();
         for m in &[Match::new(&[0, 1, 2]), Match::new(&[1, 2, 3])] {
             assert!(res.iter().find(|&r| r == m).is_some())
         }
@@ -315,8 +334,8 @@ mod tests {
     fn list() {
         let frame = testing_frame();
 
-        let mut sel = Selection::new("name H").unwrap();
-        let res = sel.list(&frame).unwrap();
+        let mut selection = Selection::new("name H").unwrap();
+        let res = selection.list(&frame).unwrap();
         assert_eq!(res, vec![0, 3]);
     }
 }

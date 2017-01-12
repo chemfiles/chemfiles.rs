@@ -61,6 +61,16 @@ pub struct UnitCell {
     handle: *const CHFL_CELL
 }
 
+impl Clone for UnitCell {
+    fn clone(&self) -> UnitCell {
+        unsafe {
+            let new_handle = chfl_cell_copy(self.as_ptr());
+            UnitCell::from_ptr(new_handle)
+                    .expect("Out of memory when copying an UnitCell")
+        }
+    }
+}
+
 impl UnitCell {
     /// Create an `UnitCell` from a C pointer.
     ///
@@ -203,6 +213,19 @@ impl Drop for UnitCell {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn clone() {
+        let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        assert_eq!(cell.lengths(), Ok((2.0, 3.0, 4.0)));
+
+        let copy = cell.clone();
+        assert_eq!(copy.lengths(), Ok((2.0, 3.0, 4.0)));
+
+        assert!(cell.set_lengths(10.0, 12.0, 11.0).is_ok());
+        assert_eq!(cell.lengths(), Ok((10.0, 12.0, 11.0)));
+        assert_eq!(copy.lengths(), Ok((2.0, 3.0, 4.0)));
+    }
 
     #[test]
     fn lengths() {
