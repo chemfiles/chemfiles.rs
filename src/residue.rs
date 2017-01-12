@@ -10,7 +10,7 @@ use std::u64;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
-use string;
+use strings;
 use Result;
 
 /// A `Residue` is a group of atoms bonded together, which may or may not
@@ -65,7 +65,7 @@ impl Residue {
     /// Create a new residue with the given `name` and identifier.
     pub fn with_id<'a, S>(name: S, id: u64) -> Result<Residue> where S: Into<&'a str> {
         let handle: *const CHFL_RESIDUE;
-        let buffer = string::to_c(name.into());
+        let buffer = strings::to_c(name.into());
         unsafe {
             handle = chfl_residue(buffer.as_ptr(), id);
         }
@@ -101,7 +101,7 @@ impl Residue {
         unsafe {
             try!(check(chfl_residue_name(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(buffer.as_ptr()));
+        return Ok(strings::from_c(buffer.as_ptr()));
     }
 
     /// Add the atom at index `i` in the residue

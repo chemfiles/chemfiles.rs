@@ -9,7 +9,7 @@ use std::ops::Drop;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
-use string;
+use strings;
 use Result;
 
 /// An Atom is a particle in the current Frame. It can be used to store and
@@ -57,7 +57,7 @@ impl Atom {
 
     /// Create a new `Atom` from a `name`.
     pub fn new<'a, S>(name: S) -> Result<Atom> where S: Into<&'a str>{
-        let buffer = string::to_c(name.into());
+        let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_atom(buffer.as_ptr());
             Atom::from_ptr(handle)
@@ -104,12 +104,12 @@ impl Atom {
         unsafe {
             try!(check(chfl_atom_name(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(buffer.as_ptr()));
+        return Ok(strings::from_c(buffer.as_ptr()));
     }
 
     /// Set the `Atom` type
     pub fn set_atom_type<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
-        let buffer = string::to_c(name.into());
+        let buffer = strings::to_c(name.into());
         unsafe {
             try!(check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr())));
         }
@@ -122,12 +122,12 @@ impl Atom {
         unsafe {
             try!(check(chfl_atom_type(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(buffer.as_ptr()));
+        return Ok(strings::from_c(buffer.as_ptr()));
     }
 
     /// Set the `Atom` name
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
-        let buffer = string::to_c(name.into());
+        let buffer = strings::to_c(name.into());
         unsafe {
             try!(check(chfl_atom_set_name(self.as_mut_ptr(), buffer.as_ptr())));
         }
@@ -142,7 +142,7 @@ impl Atom {
         unsafe {
             try!(check(chfl_atom_full_name(self.as_ptr(), buffer.as_mut_ptr(), buffer.len() as u64)));
         }
-        return Ok(string::from_c(buffer.as_ptr()));
+        return Ok(strings::from_c(buffer.as_ptr()));
     }
 
     /// Try to get the Van der Waals radius of the `Atom`. If the radius can not

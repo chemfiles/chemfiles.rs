@@ -49,7 +49,7 @@ use chemfiles_sys::chfl_version;
 
 #[macro_use] mod testing;
 
-mod string;
+mod strings;
 
 mod errors;
 pub use errors::{Error, Status};
@@ -83,7 +83,7 @@ pub use selection::{Selection, Match};
 /// Get the version of the chemfiles library
 pub fn version() -> String {
     unsafe {
-        string::from_c(chfl_version())
+        strings::from_c(chfl_version())
     }
 }
 

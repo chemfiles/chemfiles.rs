@@ -12,7 +12,7 @@ use std::slice::Iter;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
-use string;
+use strings;
 use frame::Frame;
 use Result;
 
@@ -132,7 +132,7 @@ impl Selection {
 
     /// Create a new selection from the given selection string.
     pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
-        let buffer = string::to_c(selection.into());
+        let buffer = strings::to_c(selection.into());
         unsafe {
             let handle = chfl_selection(buffer.as_ptr());
             Selection::from_ptr(handle)
@@ -163,7 +163,7 @@ impl Selection {
                 buffer.len() as u64
             )));
         }
-        return Ok(string::from_c(buffer.as_ptr()));
+        return Ok(strings::from_c(buffer.as_ptr()));
     }
 
     /// Evaluate a selection for a given frame, and return the corresponding

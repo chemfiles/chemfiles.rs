@@ -16,7 +16,7 @@ use std::path::Path;
 use self::libc::c_char;
 
 use chemfiles_sys::*;
-use string;
+use strings;
 use Result;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -91,7 +91,7 @@ impl Error {
     /// Get the last error message from the C++ library.
     pub fn last_error() -> String {
         unsafe {
-            string::from_c(chfl_last_error())
+            strings::from_c(chfl_last_error())
         }
     }
 
@@ -119,7 +119,7 @@ extern "C" fn warning_callback(message: *const c_char) {
         let callback = LOGGING_CALLBACK.expect(
             "No callback provided, this is an internal bug"
         );
-        (*callback)(&string::from_c(message));
+        (*callback)(&strings::from_c(message));
     }
 }
 

@@ -11,7 +11,7 @@ use std::ptr;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
-use string;
+use strings;
 use Result;
 
 use {UnitCell, Topology, Frame};
@@ -54,7 +54,7 @@ impl Trajectory {
             Error::utf8_path_error(filename.as_ref())
         ));
 
-        let filename = string::to_c(filename);
+        let filename = strings::to_c(filename);
         unsafe {
             #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
@@ -68,7 +68,7 @@ impl Trajectory {
             Error::utf8_path_error(filename.as_ref())
         ));
 
-        let filename = string::to_c(filename);
+        let filename = strings::to_c(filename);
         unsafe {
             #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
@@ -82,8 +82,8 @@ impl Trajectory {
             Error::utf8_path_error(filename.as_ref())
         ));
 
-        let filename = string::to_c(filename);
-        let format = string::to_c(format.into());
+        let filename = strings::to_c(filename);
+        let format = strings::to_c(format.into());
         unsafe {
             #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
@@ -97,8 +97,8 @@ impl Trajectory {
             Error::utf8_path_error(filename.as_ref())
         ));
 
-        let filename = string::to_c(filename);
-        let format = string::to_c(format.into());
+        let filename = strings::to_c(filename);
+        let format = strings::to_c(format.into());
         unsafe {
             #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
@@ -152,7 +152,7 @@ impl Trajectory {
             Error::utf8_path_error(filename.as_ref())
         ));
 
-        let filename = string::to_c(filename);
+        let filename = strings::to_c(filename);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
@@ -172,8 +172,8 @@ impl Trajectory {
             Error::utf8_path_error(filename.as_ref())
         ));
 
-        let format = string::to_c(format.into());
-        let filename = string::to_c(filename);
+        let format = strings::to_c(format.into());
+        let filename = strings::to_c(filename);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
