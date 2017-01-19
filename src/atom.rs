@@ -100,11 +100,10 @@ impl Atom {
 
     /// Get the `Atom` name
     pub fn name(&self) -> Result<String> {
-        let buffer = vec![0; 10];
-        unsafe {
-            try!(check(chfl_atom_name(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
-        }
-        return Ok(strings::from_c(buffer.as_ptr()));
+        let name = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
+            chfl_atom_name(self.as_ptr(), ptr, len)
+        }));
+        return Ok(strings::from_c(name.as_ptr()));
     }
 
     /// Set the `Atom` type
@@ -118,10 +117,9 @@ impl Atom {
 
     /// Get the `Atom` type
     pub fn atom_type(&self) -> Result<String> {
-        let buffer = vec![0; 10];
-        unsafe {
-            try!(check(chfl_atom_type(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
-        }
+        let buffer = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
+            chfl_atom_type(self.as_ptr(), ptr, len)
+        }));
         return Ok(strings::from_c(buffer.as_ptr()));
     }
 
@@ -138,11 +136,10 @@ impl Atom {
     /// "Helium", and so on. If the name can not be found, returns the empty
     /// string.
     pub fn full_name(&mut self) -> Result<String> {
-        let mut buffer = vec![0; 10];
-        unsafe {
-            try!(check(chfl_atom_full_name(self.as_ptr(), buffer.as_mut_ptr(), buffer.len() as u64)));
-        }
-        return Ok(strings::from_c(buffer.as_ptr()));
+        let name = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
+            chfl_atom_full_name(self.as_ptr(), ptr, len)
+        }));
+        return Ok(strings::from_c(name.as_ptr()));
     }
 
     /// Try to get the Van der Waals radius of the `Atom`. If the radius can not

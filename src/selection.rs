@@ -155,15 +155,10 @@ impl Selection {
 
     /// Get the selection string used to create this selection
     pub fn string(&self) -> Result<String> {
-        let buffer = vec![0; 1024];
-        unsafe {
-            try!(check(chfl_selection_string(
-                self.as_ptr(),
-                buffer.as_ptr(),
-                buffer.len() as u64
-            )));
-        }
-        return Ok(strings::from_c(buffer.as_ptr()));
+        let selection = try!(strings::call_autogrow_buffer(1024, |ptr, len| unsafe {
+            chfl_selection_string(self.as_ptr(), ptr, len)
+        }));
+        return Ok(strings::from_c(selection.as_ptr()));
     }
 
     /// Evaluate a selection for a given frame, and return the corresponding

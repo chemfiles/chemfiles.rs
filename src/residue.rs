@@ -97,11 +97,10 @@ impl Residue {
 
     /// Get the name of a residue
     pub fn name(&self) -> Result<String> {
-        let buffer = vec![0; 64];
-        unsafe {
-            try!(check(chfl_residue_name(self.as_ptr(), buffer.as_ptr(), buffer.len() as u64)));
-        }
-        return Ok(strings::from_c(buffer.as_ptr()));
+        let name = try!(strings::call_autogrow_buffer(64, |ptr, len| unsafe {
+            chfl_residue_name(self.as_ptr(), ptr, len)
+        }));
+        return Ok(strings::from_c(name.as_ptr()));
     }
 
     /// Add the atom at index `i` in the residue
