@@ -14,16 +14,20 @@
 //!
 //! This crate expose the C API of chemfiles to Rust, and make all the
 //! functionalities accessibles. For more informations on the C++ library,
-//! please see its [documentation](http://chemfiles.rtfd.org). Specifically, the
-//! following pages are worth reading:
+//! please see its [documentation][cxx_doc]. Specifically, the following pages
+//! are worth reading:
 //!
-//! - The [overview](http://chemfiles.rtfd.io/en/latest/overview.html) of the
-//!   classes organisation;
-//! - The lisf of [supported formats](http://chemfiles.rtfd.io/en/latest/formats.html);
-//! - The documentation for the [selection language](http://chemfiles.rtfd.io/en/latest/selections.html);
+//! - The [overview][overview] of the classes organisation;
+//! - The lisf of [supported formats][formats];
+//! - The documentation for the [selection language][selections];
 //!
 //! As all the function call the underlying C library, they all can fail and
 //! thus all return a `Result<_, Error>` value.
+//!
+//! [cxx_doc]: https://chemfiles.github.io/chemfiles
+//! [overview]: https://chemfiles.github.io/chemfiles/latest/overview.html
+//! [formats]: https://chemfiles.github.io/chemfiles/latest/formats.html
+//! [selections]: https://chemfiles.github.io/chemfiles/latest/selections.html
 #![deny(missing_docs)]
 
 #[macro_use] extern crate lazy_static;
