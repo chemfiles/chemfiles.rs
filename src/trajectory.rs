@@ -207,9 +207,8 @@ impl Trajectory {
 impl Drop for Trajectory {
     fn drop(&mut self) {
         unsafe {
-            check(
-                chfl_trajectory_close(self.as_mut_ptr())
-            ).expect("Error while freeing memory!");
+            let status = chfl_trajectory_close(self.as_mut_ptr());
+            debug_assert!(status == chfl_status::CHFL_SUCCESS);
         }
     }
 }

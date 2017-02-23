@@ -202,9 +202,8 @@ impl UnitCell {
 impl Drop for UnitCell {
     fn drop(&mut self) {
         unsafe {
-            check(
-                chfl_cell_free(self.as_mut_ptr())
-            ).expect("Error while freeing memory!");
+            let status = chfl_cell_free(self.as_mut_ptr());
+            debug_assert!(status == chfl_status::CHFL_SUCCESS);
         }
     }
 }

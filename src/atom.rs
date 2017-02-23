@@ -176,9 +176,8 @@ impl Atom {
 impl Drop for Atom {
     fn drop(&mut self) {
         unsafe {
-            check(
-                chfl_atom_free(self.as_mut_ptr())
-            ).expect("Error while freeing memory!");
+            let status = chfl_atom_free(self.as_mut_ptr());
+            debug_assert!(status == chfl_status::CHFL_SUCCESS);
         }
     }
 }

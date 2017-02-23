@@ -124,9 +124,8 @@ impl Residue {
 impl Drop for Residue {
     fn drop(&mut self) {
         unsafe {
-            check(
-                chfl_residue_free(self.as_mut_ptr())
-            ).ok().expect("Error while freeing memory!");
+            let status = chfl_residue_free(self.as_mut_ptr());
+            debug_assert!(status == chfl_status::CHFL_SUCCESS);
         }
     }
 }

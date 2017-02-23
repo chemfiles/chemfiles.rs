@@ -97,9 +97,8 @@ impl Clone for Selection {
 impl Drop for Selection {
     fn drop(&mut self) {
         unsafe {
-            check(
-                chfl_selection_free(self.as_mut_ptr())
-            ).expect("Error while freeing memory!");
+            let status = chfl_selection_free(self.as_mut_ptr());
+            debug_assert!(status == chfl_status::CHFL_SUCCESS);
         }
     }
 }
