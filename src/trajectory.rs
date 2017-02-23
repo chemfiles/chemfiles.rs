@@ -16,8 +16,9 @@ use Result;
 
 use {UnitCell, Topology, Frame};
 
-/// A Trajectory is a chemistry file on the hard drive. It is the main entry
-/// point of chemfiles.
+/// The `Trajectory` type is the main entry point when using chemfiles. A
+/// `Trajectory` behave a bit like a file, allowing to read and/or write
+/// `Frame`.
 pub struct Trajectory {
     handle: *const CHFL_TRAJECTORY
 }
@@ -94,7 +95,7 @@ impl Trajectory {
         }
     }
 
-    /// Open a trajectory file in write mode.
+    /// Open a trajectory file in write mode using a specific `format`.
     pub fn create_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
         let filename = try!(filename.as_ref().to_str().ok_or(
             Error::utf8_path_error(filename.as_ref())
@@ -104,33 +105,34 @@ impl Trajectory {
         let format = strings::to_c(format.into());
         unsafe {
             #[allow(cast_possible_wrap)]
-            let handle = chfl_trajectory_with_format(filename.as_ptr(), b'w' as i8, format.as_ptr());
+            let handle = chfl_trajectory_with_format(
+                filename.as_ptr(), b'w' as i8, format.as_ptr()
+            );
             Trajectory::from_ptr(handle)
         }
     }
 
-    /// Read the next step of the trajectory into a frame
+    /// Read the next step of this trajectory into a `frame`.
     pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read(
-                self.as_mut_ptr(),
-                frame.as_mut_ptr())))
+                self.as_mut_ptr(), frame.as_mut_ptr()
+            )))
         }
         Ok(())
     }
 
-    /// Read a specific step of the trajectory in a frame
+    /// Read a specific `step` of this trajectory in a `frame`
     pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read_step(
-                self.as_mut_ptr(),
-                step,
-                frame.as_mut_ptr())))
+                self.as_mut_ptr(), step, frame.as_mut_ptr()
+            )))
         }
         Ok(())
     }
 
-    /// Write a frame to the trajectory.
+    /// Write a `frame` to this trajectory.
     pub fn write(&mut self, frame: &Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())))
@@ -138,10 +140,10 @@ impl Trajectory {
         Ok(())
     }
 
-    /// Set the topology associated with a trajectory. This topology will be
-    /// used when reading and writing the files, replacing any topology in the
-    /// frames or files.
-    pub fn set_topology(&mut self, topology: Topology) -> Result<()> {
+    /// Set the `topology` associated with this trajectory. This topology will
+    /// be used when reading and writing the files, replacing any topology in
+    /// the frames or files.
+    pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr())))
         }
@@ -166,9 +168,9 @@ impl Trajectory {
         Ok(())
     }
 
-    /// Set the topology associated with a trajectory by reading the first frame
-    /// of `filename` using the given `format`; and extracting the topology
-    /// from this frame.
+    /// Set the `topology` associated with a trajectory by reading the first
+    /// frame of `filename` using the given `format`; and extracting the
+    /// topology from this frame.
     pub fn set_topology_with_format<'a, P, S>(&mut self, filename: P, format: S) -> Result<()>
         where P: AsRef<Path>, S: Into<&'a str> {
         let filename = try!(filename.as_ref().to_str().ok_or(
@@ -187,12 +189,14 @@ impl Trajectory {
         Ok(())
     }
 
-    /// Set the unit cell associated with a trajectory. This cell will be used
+    /// Set the unit `cell` associated with a trajectory. This cell will be used
     /// when reading and writing the files, replacing any unit cell in the
     /// frames or files.
-    pub fn set_cell(&mut self, cell: UnitCell) -> Result<()> {
+    pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr())))
+            try!(check(chfl_trajectory_set_cell(
+                self.as_mut_ptr(), cell.as_ptr()
+            )))
         }
         Ok(())
     }
@@ -247,7 +251,7 @@ mod test {
 
         assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("O")));
 
-        assert!(file.set_cell(UnitCell::new(30.0, 30.0, 30.0).unwrap()).is_ok());
+        assert!(file.set_cell(&UnitCell::new(30.0, 30.0, 30.0).unwrap()).is_ok());
 
         assert!(file.read_step(41, &mut frame).is_ok());
         let cell = frame.cell().unwrap();
@@ -275,7 +279,7 @@ mod test {
             topology.push(&atom).unwrap();
         }
 
-        assert!(file.set_topology(topology).is_ok());
+        assert!(file.set_topology(&topology).is_ok());
         assert!(file.read_step(10, &mut frame).is_ok());
         assert_eq!(frame.atom(42).unwrap().name(), Ok(String::from("Cs")));
 

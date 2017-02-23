@@ -13,10 +13,9 @@ use errors::{check, Error};
 use strings;
 use Result;
 
-/// A `Residue` is a group of atoms bonded together, which may or may not
-/// correspond to molecules. When working with bio-molecules and specifically
-/// proteins from the PDB data bank, the residues should correspond to
-/// amino-acids in the protein.
+/// A `Residue` is a group of atoms belonging to the same logical unit. They
+/// can be small molecules, amino-acids in a protein, monomers in polymers,
+/// *etc.*
 pub struct Residue {
     handle: *const CHFL_RESIDUE
 }
@@ -25,8 +24,9 @@ impl Clone for Residue {
     fn clone(&self) -> Residue {
         unsafe {
             let new_handle = chfl_residue_copy(self.as_ptr());
-            Residue::from_ptr(new_handle)
-                    .expect("Out of memory when copying a Residue")
+            Residue::from_ptr(new_handle).expect(
+                "Out of memory when copying a Residue"
+            )
         }
     }
 }
@@ -65,7 +65,7 @@ impl Residue {
         return Residue::with_id(name, u64::MAX)
     }
 
-    /// Create a new residue with the given `name` and identifier.
+    /// Create a new residue with the given `name` and `id` as identifier.
     pub fn with_id<'a, S>(name: S, id: u64) -> Result<Residue> where S: Into<&'a str> {
         let handle: *const CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
@@ -80,7 +80,7 @@ impl Residue {
         }
     }
 
-    /// Get the number of atoms in a residue
+    /// Get the number of atoms in this residue.
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
@@ -89,7 +89,7 @@ impl Residue {
         return Ok(natoms);
     }
 
-    /// Get the identifier of a residue in the initial topology file
+    /// Get the identifier of this residue in the initial topology file.
     pub fn id(&self) -> Result<u64> {
         let mut resid = 0;
         unsafe {
@@ -98,7 +98,7 @@ impl Residue {
         return Ok(resid);
     }
 
-    /// Get the name of a residue
+    /// Get the name of this residue.
     pub fn name(&self) -> Result<String> {
         let name = try!(strings::call_autogrow_buffer(64, |ptr, len| unsafe {
             chfl_residue_name(self.as_ptr(), ptr, len)
@@ -106,7 +106,7 @@ impl Residue {
         return Ok(strings::from_c(name.as_ptr()));
     }
 
-    /// Add the atom at index `i` in the residue
+    /// Add the atom at index `i` in this residue
     pub fn add_atom(&mut self, atom: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_residue_add_atom(self.as_mut_ptr(), atom)));
@@ -114,7 +114,7 @@ impl Residue {
         return Ok(());
     }
 
-    /// Check if the atom at index `i` is in the residue
+    /// Check if the atom at index `i` is in this residue
     pub fn contains(&self, atom: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {

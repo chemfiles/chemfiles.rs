@@ -14,8 +14,10 @@ use errors::{check, Error};
 use {Atom, Topology, UnitCell};
 use Result;
 
-/// A `Frame` holds data from one step of a simulation: the current `Topology`,
-/// the positions, and maybe the velocities of the particles in the system.
+/// A `Frame` contains data from one simulation step: the current unit
+/// cell, the topology, the positions, and the velocities of the particles in
+/// the system. If some information is missing (topology or velocity or unit
+/// cell), the corresponding data is filled with a default value.
 pub struct Frame {
     handle: *const CHFL_FRAME
 }
@@ -24,8 +26,9 @@ impl Clone for Frame {
     fn clone(&self) -> Frame {
         unsafe {
             let new_handle = chfl_frame_copy(self.as_ptr());
-            Frame::from_ptr(new_handle)
-                    .expect("Out of memory when copying a Frame")
+            Frame::from_ptr(new_handle).expect(
+                "Out of memory when copying a Frame"
+            )
         }
     }
 }
@@ -73,7 +76,7 @@ impl Frame {
         }
     }
 
-    /// Get a specific `Atom` from a frame, given its `index` in the frame
+    /// Get a copy of the atom at index `index` in this frame.
     pub fn atom(&self, index: u64) -> Result<Atom> {
         unsafe {
             let handle = chfl_atom_from_frame(self.as_ptr(), index);
@@ -81,7 +84,7 @@ impl Frame {
         }
     }
 
-    /// Get the current number of atoms in the `Frame`.
+    /// Get the current number of atoms in this frame.
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
@@ -90,7 +93,7 @@ impl Frame {
         return Ok(natoms);
     }
 
-    /// Resize the positions and the velocities in frame, to make space for
+    /// Resize the positions and the velocities in this frame, to make space for
     /// `natoms` atoms. Previous data is conserved, as well as the presence of
     /// absence of velocities.
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
@@ -100,7 +103,8 @@ impl Frame {
         return Ok(());
     }
 
-    /// Add an `Atom` and the corresponding position and optionally velocity data to a `Frame`.
+    /// Add an `Atom` and the corresponding position and optionally velocity
+    /// data to this frame.
     pub fn add_atom<V>(&mut self, atom: Atom, position: (f64, f64, f64), velocity: V) -> Result<()>
         where V: Into<Option<(f64, f64, f64)>> {
         let position = [position.0, position.1, position.2];
@@ -125,14 +129,14 @@ impl Frame {
         return Ok(());
     }
 
-    /// Get a view into the positions of the `Frame`.
+    /// Get a view into the positions of this frame.
     pub fn positions(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_positions(
-                // not using .as_ptr() because the C function uses a *mut pointer
-                // and we are re-creating the shared/mut by ourselve here
+                // not using .as_ptr() because the C function uses a *mut
+                // pointer and we are re-creating the shared/mut by ourselve
                 self.handle as *mut CHFL_FRAME,
                 &mut ptr,
                 &mut natoms
@@ -145,7 +149,7 @@ impl Frame {
         return Ok(res);
     }
 
-    /// Get a mutable view into the positions of the `Frame`.
+    /// Get a mutable view into the positions of this frame.
     pub fn positions_mut(&mut self) -> Result<&mut [[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
@@ -163,14 +167,14 @@ impl Frame {
         return Ok(res);
     }
 
-    /// Get a view into the velocities of the `Frame`.
+    /// Get a view into the velocities of this frame.
     pub fn velocities(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_velocities(
-                // not using .as_ptr() because the C function uses a *mut pointer
-                // and we are re-creating the shared/mut by ourselve here
+                // not using .as_ptr() because the C function uses a *mut
+                // pointer and we are re-creating the shared/mut by ourselve
                 self.handle as *mut CHFL_FRAME,
                 &mut ptr,
                 &mut natoms
@@ -183,7 +187,7 @@ impl Frame {
         return Ok(res);
     }
 
-    /// Get a mutable view into the velocities of the `Frame`.
+    /// Get a mutable view into the velocities of this frame.
     pub fn velocities_mut(&mut self) -> Result<&mut [[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
@@ -201,7 +205,7 @@ impl Frame {
         return Ok(res);
     }
 
-    /// Check if the `Frame` has velocity information.
+    /// Check if this frame contains velocity data.
     pub fn has_velocities(&self) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -210,8 +214,8 @@ impl Frame {
         return Ok(res != 0);
     }
 
-    /// Add velocity storage to this frame for `Frame::natoms` atoms. If the
-    /// frame already have velocities, this does nothing.
+    /// Add velocity data to this frame. If the frame already have velocities,
+    /// this does nothing.
     pub fn add_velocities(&mut self) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_add_velocities(self.as_mut_ptr())));
@@ -219,7 +223,7 @@ impl Frame {
         return Ok(());
     }
 
-    /// Get the `UnitCell` from the `Frame`
+    /// Get a copy of the `UnitCell` from this frame.
     pub fn cell(&self) -> Result<UnitCell> {
         unsafe {
             let handle = chfl_cell_from_frame(self.as_ptr());
@@ -227,7 +231,7 @@ impl Frame {
         }
     }
 
-    /// Set the `UnitCell` of the `Frame`
+    /// Set the `UnitCell` of this frame to `cell`.
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_cell(
@@ -238,7 +242,7 @@ impl Frame {
         return Ok(());
     }
 
-    /// Get the `Topology` from the `Frame`
+    /// Get a copy of the `Topology` from this frame.
     pub fn topology(&self) -> Result<Topology> {
         unsafe {
             let handle = chfl_topology_from_frame(self.as_ptr());
@@ -246,7 +250,7 @@ impl Frame {
         }
     }
 
-    /// Set the `Topology` of the `Frame`
+    /// Set the `Topology` of this frame to `topology`.
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_topology(
@@ -257,7 +261,7 @@ impl Frame {
         return Ok(());
     }
 
-    /// Get the `Frame` step, i.e. the frame number in the trajectory
+    /// Get this frame step, i.e. the frame number in the trajectory
     pub fn step(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -266,7 +270,7 @@ impl Frame {
         return Ok(res);
     }
 
-    /// Set the `Frame` step
+    /// Set this frame step to `step`.
     pub fn set_step(&mut self, step: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_step(self.as_mut_ptr(), step)));
@@ -274,8 +278,10 @@ impl Frame {
         return Ok(());
     }
 
-    /// Guess the bonds, angles and dihedrals in the system using an atomic
-    /// distance criteria
+    /// Guess the bonds, angles and dihedrals in this `frame`.
+    ///
+    /// The bonds are guessed using a distance-based algorithm, and then angles
+    /// and dihedrals are guessed from the bonds.
     pub fn guess_topology(&mut self) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_guess_topology(self.as_mut_ptr())));

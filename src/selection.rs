@@ -49,7 +49,6 @@ impl Match {
 
     /// Iterate over the atomic indexes in the match.
     pub fn iter(&self) -> Iter<u64> {
-
         self.0.atoms[..self.len()].iter()
     }
 }
@@ -72,14 +71,11 @@ impl<'a> IntoIterator for &'a Match {
 
 /******************************************************************************/
 
-/// Select atoms in a `Frame` with a selection language.
-///
-/// The selection language is built by combining basic operations. Each basic
-/// operation follows the `<selector>[(<variable>)] <operator> <value>`
-/// structure, where `<operator>` is a comparison operator in `== != < <= > >=`.
-/// Refer to the [full
-/// documentation](http://chemfiles.rtfd.io/en/latest/selections.html) to know
-/// the allowed selectors and how to use them.
+/// A `Selection` allow to select atoms in a `Frame`, from a selection
+/// language. The selection language is built by combining basic operations.
+/// Each basic operation follows the `<selector>[(<variable>)] <operator>
+/// <value>` structure, where `<operator>` is a comparison operator in
+/// `== != < <= > >=`.
 pub struct Selection {
     handle: *const CHFL_SELECTION
 }
@@ -88,8 +84,9 @@ impl Clone for Selection {
     fn clone(&self) -> Selection {
         unsafe {
             let new_handle = chfl_selection_copy(self.as_ptr());
-            Selection::from_ptr(new_handle)
-                    .expect("Out of memory when copying a Selection")
+            Selection::from_ptr(new_handle).expect(
+                "Out of memory when copying a Selection"
+            )
         }
     }
 }

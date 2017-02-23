@@ -13,11 +13,9 @@ use errors::{check, Error};
 use {Atom, Residue};
 use Result;
 
-/// A `Topology` contains the definition of all the particles in the system, and
-/// the liaisons between the particles (bonds, angles, dihedrals, ...).
-///
-/// Only the atoms and the bonds are stored, the angles and the dihedrals are
-/// computed automaticaly.
+/// A `Topology` contains the definition of all the atoms in the system, and
+/// the liaisons between the atoms (bonds, angles, dihedrals, ...). It will
+/// also contain all the residues information if it is available.
 pub struct Topology {
     handle: *const CHFL_TOPOLOGY
 }
@@ -26,8 +24,9 @@ impl Clone for Topology {
     fn clone(&self) -> Topology {
         unsafe {
             let new_handle = chfl_topology_copy(self.as_ptr());
-            Topology::from_ptr(new_handle)
-                    .expect("Out of memory when copying a Topology")
+            Topology::from_ptr(new_handle).expect(
+                "Out of memory when copying a Topology"
+            )
         }
     }
 }
@@ -61,7 +60,7 @@ impl Topology {
         self.handle as *mut CHFL_TOPOLOGY
     }
 
-    /// Create a new empty topology
+    /// Create a new empty topology.
     pub fn new() -> Result<Topology> {
         unsafe {
             let handle = chfl_topology();
@@ -69,7 +68,7 @@ impl Topology {
         }
     }
 
-    /// Get a specific `Atom` from a topology, given its `index` in the topology
+    /// Get a copy of the atom at index `index` from this topology.
     pub fn atom(&self, index: u64) -> Result<Atom> {
         unsafe {
             let handle = chfl_atom_from_topology(self.as_ptr(), index);
@@ -77,7 +76,7 @@ impl Topology {
         }
     }
 
-    /// Get the current number of atoms in the topology.
+    /// Get the current number of atoms in this topology.
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
@@ -86,16 +85,16 @@ impl Topology {
         return Ok(natoms);
     }
 
-    /// Resize the topology to hold `natoms` atoms, inserting dummy atoms if
+    /// Resize this topology to hold `natoms` atoms, inserting dummy atoms if
     /// the new size if bigger than the old one.
-    pub fn resize(&mut self, size: u64) -> Result<()> {
+    pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_resize(self.as_mut_ptr(), size)));
+            try!(check(chfl_topology_resize(self.as_mut_ptr(), natoms)));
         }
         return Ok(());
     }
 
-    /// Add an `Atom` at the end of a topology
+    /// Add an `Atom` at the end of this topology
     pub fn push(&mut self, atom: &Atom) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_atom(
@@ -106,7 +105,7 @@ impl Topology {
         return Ok(());
     }
 
-    /// Remove an `Atom` from a topology by index. This modify all the other
+    /// Remove an `Atom` from this topology by index. This modify all the other
     /// atoms indexes.
     pub fn remove(&mut self, index: u64) -> Result<()> {
         unsafe {
@@ -115,7 +114,7 @@ impl Topology {
         return Ok(());
     }
 
-    /// Tell if the atoms at indexes `i` and `j` are bonded together
+    /// Tell if the atoms at indexes `i` and `j` are bonded together.
     pub fn is_bond(&self, i: u64, j: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -124,7 +123,7 @@ impl Topology {
         return Ok(res != 0);
     }
 
-    /// Tell if the atoms at indexes `i`, `j` and `k` constitues an angle
+    /// Tell if the atoms at indexes `i`, `j` and `k` constitues an angle.
     pub fn is_angle(&self, i: u64, j: u64, k: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -133,8 +132,8 @@ impl Topology {
         return Ok(res != 0);
     }
 
-    /// Tell if the atoms at indexes `i`, `j`, `k` and `m` constitues a dihedral
-    /// angle
+    /// Tell if the atoms at indexes `i`, `j`, `k` and `m` constitues a
+    /// dihedral angle.
     pub fn is_dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -143,7 +142,7 @@ impl Topology {
         return Ok(res != 0);
     }
 
-    /// Get the number of bonds in the system
+    /// Get the number of bonds in the system.
     pub fn bonds_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -152,7 +151,7 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the number of angles in the system
+    /// Get the number of angles in the system.
     pub fn angles_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -161,7 +160,7 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the number of dihedral angles in the system
+    /// Get the number of dihedral angles in the system.
     pub fn dihedrals_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -170,7 +169,7 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the list of bonds in the system
+    /// Get the list of bonds in the system.
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>> {
         let nbonds = try!(self.bonds_count());
         let mut res = vec![[u64::MAX; 2]; nbonds as usize];
@@ -184,7 +183,7 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the list of angles in the system
+    /// Get the list of angles in the system.
     pub fn angles(&self) -> Result<Vec<[u64; 3]>> {
         let nangles = try!(self.angles_count());
         let mut res = vec![[u64::MAX; 3]; nangles as usize];
@@ -194,7 +193,7 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the list of dihedral angles in the system
+    /// Get the list of dihedral angles in the system.
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>> {
         let ndihedrals = try!(self.dihedrals_count());
         let mut res = vec![[u64::MAX; 4]; ndihedrals as usize];
@@ -204,7 +203,7 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Add a bond between the atoms at indexes `i` and `j` in the system
+    /// Add a bond between the atoms at indexes `i` and `j` in the system.
     pub fn add_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_bond(self.as_mut_ptr(), i, j)));
@@ -213,7 +212,9 @@ impl Topology {
     }
 
     /// Remove any existing bond between the atoms at indexes `i` and `j` in
-    /// the system
+    /// this topology.
+    ///
+    /// This function does nothing if there is no bond between `i` and `j`.
     pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_remove_bond(self.as_mut_ptr(), i, j)));
@@ -221,8 +222,10 @@ impl Topology {
         Ok(())
     }
 
-    /// Get a specific `Residue` from a topology, given its `index` in the
-    /// topology
+    /// Get a copy of the residue at index `index` from this topology.
+    ///
+    /// The residue index in the topology is not always the same as the residue
+    /// `id`.
     pub fn residue(&self, index: u64) -> Result<Residue> {
         unsafe {
             let handle = chfl_residue_from_topology(self.as_ptr(), index);
@@ -230,12 +233,14 @@ impl Topology {
         }
     }
 
-    /// Get the `Residue` containing the atom at the given index, if there is
-    /// one.
+    /// Get a copy of the residue containing the atom at index `index` in this
+    /// topology, if any.
     pub fn residue_for_atom(&self, index: u64) -> Result<Option<Residue>> {
         let handle = unsafe {
             chfl_residue_for_atom(self.as_ptr(), index)
         };
+        // TODO: make the difference between errors, out-of-bounds and missing
+        // residue.
         if handle.is_null() {
             Ok(None)
         } else {
@@ -246,7 +251,7 @@ impl Topology {
         }
     }
 
-    /// Get the number of residues in the system
+    /// Get the number of residues in this topology.
     pub fn residues_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -255,7 +260,10 @@ impl Topology {
         Ok(res)
     }
 
-    /// Add a residue to this topology
+    /// Add a residue to this topology.
+    ///
+    /// The residue `id` must not already be in the topology, and the residue
+    /// must contain only atoms that are not already in another residue.
     pub fn add_residue(&mut self, residue: Residue) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())));
@@ -263,7 +271,9 @@ impl Topology {
         Ok(())
     }
 
-    /// Add a residue to this topology
+    /// Check if the two residues `first` and `second` from the `topology` are
+    /// linked together, *i.e.* if there is a bond between one atom in the
+    /// first residue and one atom in the second one.
     pub fn are_linked(&self, first: &Residue, second: &Residue) -> Result<bool> {
         let mut res = 0;
         unsafe {

@@ -12,9 +12,17 @@ use errors::{check, Error};
 use strings;
 use Result;
 
-/// An Atom is a particle in the current Frame. It can be used to store and
-/// retrieve informations about a particle, such as mass, name, atomic number,
-/// *etc.*
+/// An `Atom` is a particle in the current `Frame`. It stores the following
+/// atomic properties:
+///
+/// - atom name;
+/// - atom type;
+/// - atom mass;
+/// - atom charge.
+///
+/// The atom name is usually an unique identifier (`H1`, `C_a`) while the
+/// atom type will be shared between all particles of the same type: `H`,
+/// `Ow`, `CH3`.
 pub struct Atom {
     handle: *const CHFL_ATOM
 }
@@ -23,8 +31,9 @@ impl Clone for Atom {
     fn clone(&self) -> Atom {
         unsafe {
             let new_handle = chfl_atom_copy(self.as_ptr());
-            Atom::from_ptr(new_handle)
-                 .expect("Out of memory when copying an Atom")
+            Atom::from_ptr(new_handle).expect(
+                "Out of memory when copying an Atom"
+            )
         }
     }
 }
@@ -32,8 +41,8 @@ impl Clone for Atom {
 impl Atom {
     /// Create an `Atom` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer,
-    /// except for it being non-null.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null.
     #[inline]
     #[doc(hidden)]
     pub unsafe fn from_ptr(ptr: *const CHFL_ATOM) -> Result<Atom> {
@@ -58,7 +67,7 @@ impl Atom {
         self.handle as *mut CHFL_ATOM
     }
 
-    /// Create a new `Atom` from a `name`.
+    /// Create an atom with the given `name`, and set the atom type to `name`.
     pub fn new<'a, S>(name: S) -> Result<Atom> where S: Into<&'a str>{
         let buffer = strings::to_c(name.into());
         unsafe {
@@ -67,7 +76,7 @@ impl Atom {
         }
     }
 
-    /// Get the `Atom` mass, in atomic mass units
+    /// Get the atom mass, in atomic mass units.
     pub fn mass(&self) -> Result<f64> {
         let mut mass = 0.0;
         unsafe {
@@ -76,7 +85,7 @@ impl Atom {
         return Ok(mass);
     }
 
-    /// Set the `Atom` mass, in atomic mass units
+    /// Set the atom mass to `mass`, in atomic mass units.
     pub fn set_mass(&mut self, mass: f64) -> Result<()> {
         unsafe {
             try!(check(chfl_atom_set_mass(self.as_mut_ptr(), mass)));
@@ -84,7 +93,7 @@ impl Atom {
         return Ok(());
     }
 
-    /// Get the `Atom` charge, in number of the electron charge *e*
+    /// Get the atom charge, in number of the electron charge *e*.
     pub fn charge(&self) -> Result<f64> {
         let mut charge = 0.0;
         unsafe {
@@ -93,7 +102,7 @@ impl Atom {
         return Ok(charge);
     }
 
-    /// Set the `Atom` charge, in number of the electron charge *e*
+    /// Set the atom charge to `charge`, in number of the electron charge *e*.
     pub fn set_charge(&mut self, charge: f64) -> Result<()> {
         unsafe {
             try!(check(chfl_atom_set_charge(self.as_mut_ptr(), charge)));
@@ -101,7 +110,7 @@ impl Atom {
         return Ok(());
     }
 
-    /// Get the `Atom` name
+    /// Get the atom name.
     pub fn name(&self) -> Result<String> {
         let name = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
             chfl_atom_name(self.as_ptr(), ptr, len)
@@ -109,24 +118,15 @@ impl Atom {
         return Ok(strings::from_c(name.as_ptr()));
     }
 
-    /// Set the `Atom` type
-    pub fn set_atom_type<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
-        let buffer = strings::to_c(name.into());
-        unsafe {
-            try!(check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr())));
-        }
-        return Ok(());
-    }
-
-    /// Get the `Atom` type
-    pub fn atom_type(&self) -> Result<String> {
+    /// Get the atom type.
+    pub fn atomic_type(&self) -> Result<String> {
         let buffer = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
             chfl_atom_type(self.as_ptr(), ptr, len)
         }));
         return Ok(strings::from_c(buffer.as_ptr()));
     }
 
-    /// Set the `Atom` name
+    /// Set the atom name to `name`.
     pub fn set_name<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
         let buffer = strings::to_c(name.into());
         unsafe {
@@ -135,9 +135,18 @@ impl Atom {
         return Ok(());
     }
 
-    /// Try to get the full name of the `Atom`. The full name of "He" is
-    /// "Helium", and so on. If the name can not be found, returns the empty
-    /// string.
+    /// Set the atom type to `atomic_type`.
+    pub fn set_atomic_type<'a, S>(&mut self, atomic_type: S) -> Result<()> where S: Into<&'a str>{
+        let buffer = strings::to_c(atomic_type.into());
+        unsafe {
+            try!(check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr())));
+        }
+        return Ok(());
+    }
+
+    /// Try to get the full name of the atom from the atomic type. For example,
+    /// the full name of "He" is "Helium", and so on. If the name can not be
+    /// found, this function returns the empty string.
     pub fn full_name(&mut self) -> Result<String> {
         let name = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
             chfl_atom_full_name(self.as_ptr(), ptr, len)
@@ -145,8 +154,8 @@ impl Atom {
         return Ok(strings::from_c(name.as_ptr()));
     }
 
-    /// Try to get the Van der Waals radius of the `Atom`. If the radius can not
-    /// be found, returns -1.
+    /// Try to get the Van der Waals radius of the atom from the atomic type.
+    /// If the radius can not be found, returns -1.
     pub fn vdw_radius(&self) -> Result<f64> {
         let mut radius: f64 = 0.0;
         unsafe {
@@ -155,8 +164,8 @@ impl Atom {
         return Ok(radius);
     }
 
-    /// Try to get the covalent radius of the `Atom`. If the radius can not be
-    /// found, returns -1.
+    /// Try to get the covalent radius of the atom from the atomic type. If the
+    /// radius can not be found, returns -1.
     pub fn covalent_radius(&self) -> Result<f64> {
         let mut radius: f64 = 0.0;
         unsafe {
@@ -165,8 +174,8 @@ impl Atom {
         return Ok(radius);
     }
 
-    /// Try to get the atomic number of the `Atom`. If the number can not be
-    /// found, returns -1.
+    /// Try to get the atomic number of the atom from the atomic type. If the
+    /// number can not be found, returns -1.
     pub fn atomic_number(&self) -> Result<i64> {
         let mut number = 0;
         unsafe {
@@ -230,13 +239,13 @@ mod test {
     }
 
     #[test]
-    fn atom_type() {
+    fn atomic_type() {
         let mut atom = Atom::new("He").unwrap();
-        assert_eq!(atom.atom_type(), Ok(String::from("He")));
+        assert_eq!(atom.atomic_type(), Ok(String::from("He")));
         assert_eq!(atom.full_name(), Ok(String::from("Helium")));
 
-        assert!(atom.set_atom_type("Zn").is_ok());
-        assert_eq!(atom.atom_type(), Ok(String::from("Zn")));
+        assert!(atom.set_atomic_type("Zn").is_ok());
+        assert_eq!(atom.atomic_type(), Ok(String::from("Zn")));
         assert_eq!(atom.full_name(), Ok(String::from("Zinc")));
     }
 

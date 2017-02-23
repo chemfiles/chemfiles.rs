@@ -43,20 +43,21 @@ impl From<CellShape> for chfl_cell_shape_t {
 }
 
 #[allow(doc_markdown)]
-/// An `UnitCell` represent the box containing the atoms in the system, and its
-/// periodicity.
+/// An `UnitCell` represent the box containing the atoms, and its periodicity.
 ///
-/// A unit cell is fully represented by three lenghts (a, b, c); and three
+/// An unit cell is fully represented by three lenghts (a, b, c); and three
 /// angles (alpha, beta, gamma). The angles are stored in degrees, and the
-/// lenghts in Angstroms. A cell also has a matricial representation, by
-/// projecting the three base vector into an orthonormal base. We choose to
-/// represent such matrix as an upper triangular matrix:
+/// lenghts in Angstroms.
 ///
-///             | a_x   b_x   c_x |
-///             |  0    b_y   c_y |
-///             |  0     0    c_z |
+/// A cell also has a matricial representation, by projecting the three base
+/// vector into an orthonormal base. We choose to represent such matrix as an
+/// upper triangular matrix:
 ///
-/// An unit cell also have a cell type, represented by the `CellType` enum.
+/// ```
+/// | a_x   b_x   c_x |
+/// |  0    b_y   c_y |
+/// |  0     0    c_z |
+/// ```
 pub struct UnitCell {
     handle: *const CHFL_CELL
 }
@@ -65,8 +66,9 @@ impl Clone for UnitCell {
     fn clone(&self) -> UnitCell {
         unsafe {
             let new_handle = chfl_cell_copy(self.as_ptr());
-            UnitCell::from_ptr(new_handle)
-                    .expect("Out of memory when copying an UnitCell")
+            UnitCell::from_ptr(new_handle).expect(
+                "Out of memory when copying an UnitCell"
+            )
         }
     }
 }
@@ -129,7 +131,7 @@ impl UnitCell {
         }
     }
 
-    /// Get the three lenghts of an `UnitCell`, in Angstroms.
+    /// Get the three lenghts of the cell, in Angstroms.
     pub fn lengths(&self) -> Result<(f64, f64, f64)> {
         let mut lengths = [0.0_f64; 3];
         unsafe {
@@ -138,8 +140,8 @@ impl UnitCell {
         Ok((lengths[0], lengths[1], lengths[2]))
     }
 
-    /// Set the three lenghts of an `UnitCell`, in Angstroms.
-    pub fn set_lengths(&mut self, a:f64, b:f64, c:f64) -> Result<()> {
+    /// Set the three lenghts of the cell, in Angstroms.
+    pub fn set_lengths(&mut self, a: f64, b: f64, c: f64) -> Result<()> {
         let lengths = [a, b, c];
         unsafe {
             try!(check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())));
@@ -147,7 +149,7 @@ impl UnitCell {
         Ok(())
     }
 
-    /// Get the three angles of an `UnitCell`, in degrees.
+    /// Get the three angles of the cell, in degrees.
     pub fn angles(&self) -> Result<(f64, f64, f64)> {
         let mut angles = [0.0_f64; 3];
         unsafe {
@@ -156,9 +158,9 @@ impl UnitCell {
         Ok((angles[0], angles[1], angles[2]))
     }
 
-    /// Set the three angles of an `UnitCell`, in degrees. This is only possible
+    /// Set the three angles of the cell, in degrees. This is only possible
     /// with `Triclinic` cells.
-    pub fn set_angles(&mut self, alpha:f64, beta:f64, gamma:f64) -> Result<()> {
+    pub fn set_angles(&mut self, alpha: f64, beta: f64, gamma: f64) -> Result<()> {
         let angles = [alpha, beta, gamma];
         unsafe {
             try!(check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())));
@@ -167,6 +169,16 @@ impl UnitCell {
     }
 
     /// Get the unit cell matricial representation.
+    ///
+    /// The unit cell representation is obtained by aligning the a vector along
+    /// the *x* axis and putting the b vector in the *xy* plane. This make the
+    /// matrix an upper triangular matrix:
+    ///
+    /// ```
+    /// | a_x   b_x   c_x |
+    /// |  0    b_y   c_y |
+    /// |  0     0    c_z |
+    /// ```
     pub fn matrix(&self) -> Result<[[f64; 3]; 3]> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
@@ -175,7 +187,7 @@ impl UnitCell {
         Ok(res)
     }
 
-    /// Get the shape of the unit cell
+    /// Get the shape of the unit cell.
     pub fn shape(&self) -> Result<CellShape> {
         let mut shape = chfl_cell_shape_t::CHFL_CELL_INFINITE;
         unsafe {
@@ -184,7 +196,7 @@ impl UnitCell {
         Ok(CellShape::from(shape))
     }
 
-    /// Set the shape of the unit cell
+    /// Set the shape of the unit cell to `shape`.
     pub fn set_shape(&mut self, shape: CellShape) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into())));
@@ -192,7 +204,7 @@ impl UnitCell {
         Ok(())
     }
 
-    /// Get the volume of the unit cell
+    /// Get the volume of the unit cell.
     pub fn volume(&self) -> Result<f64> {
         let mut res = 0.0;
         unsafe {
