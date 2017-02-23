@@ -37,6 +37,7 @@ impl Residue {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
+    #[doc(hidden)]
     pub unsafe fn from_ptr(ptr: *const CHFL_RESIDUE) -> Result<Residue> {
         if ptr.is_null() {
             Err(Error::null_ptr())
@@ -47,12 +48,14 @@ impl Residue {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
+    #[doc(hidden)]
     pub fn as_ptr(&self) -> *const CHFL_RESIDUE {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
+    #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_RESIDUE {
         self.handle as *mut CHFL_RESIDUE
     }
