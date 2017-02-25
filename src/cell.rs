@@ -11,10 +11,10 @@ use chemfiles_sys::*;
 use errors::{check, Error};
 use Result;
 
-/// Available unit cell shapes
+/// Available unit cell shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CellShape {
-    /// Orthorombic cell, with the three angles equals to 90°
+    /// Orthorhombic cell, with the three angles equals to 90°.
     Orthorhombic,
     /// Triclinic cell, with any values for the angles.
     Triclinic,
@@ -42,18 +42,17 @@ impl From<CellShape> for chfl_cell_shape_t {
     }
 }
 
-#[allow(doc_markdown)]
 /// An `UnitCell` represent the box containing the atoms, and its periodicity.
 ///
-/// An unit cell is fully represented by three lenghts (a, b, c); and three
+/// An unit cell is fully represented by three lengths (a, b, c); and three
 /// angles (alpha, beta, gamma). The angles are stored in degrees, and the
-/// lenghts in Angstroms.
+/// lengths in Angstroms.
 ///
 /// A cell also has a matricial representation, by projecting the three base
 /// vector into an orthonormal base. We choose to represent such matrix as an
 /// upper triangular matrix:
 ///
-/// ```
+/// ```text
 /// | a_x   b_x   c_x |
 /// |  0    b_y   c_y |
 /// |  0     0    c_z |
@@ -102,36 +101,73 @@ impl UnitCell {
         self.handle as *mut CHFL_CELL
     }
 
-    /// Create an `Orthorombic` `UnitCell` from the three lenghts, in Angstroms.
+    /// Create an `Orthorhombic` `UnitCell` from the three lengths, in Angstroms.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{UnitCell, CellShape};
+    /// let cell = UnitCell::new(30.0, 30.0, 23.0).unwrap();
+    ///
+    /// assert_eq!(cell.lengths(), Ok((30.0, 30.0, 23.0)));
+    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
+    /// ```
     pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell> {
-        let lenghts = [a, b, c];
+        let lengths = [a, b, c];
         unsafe {
-            let handle = chfl_cell(lenghts.as_ptr());
+            let handle = chfl_cell(lengths.as_ptr());
             UnitCell::from_ptr(handle)
         }
     }
 
-    /// Create an `Infinite` `UnitCell`
+    /// Create an `Infinite` `UnitCell`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{UnitCell, CellShape};
+    /// let cell = UnitCell::infinite().unwrap();
+    ///
+    /// assert_eq!(cell.lengths(), Ok((0.0, 0.0, 0.0)));
+    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
+    /// ```
     pub fn infinite() -> Result<UnitCell> {
         let mut cell = try!(UnitCell::new(0.0, 0.0, 0.0));
         try!(cell.set_shape(CellShape::Infinite));
         Ok(cell)
     }
 
-    /// Create an `Triclinic` `UnitCell` from the three lenghts (in Angstroms)
+    /// Create an `Triclinic` `UnitCell` from the three lengths (in Angstroms)
     /// and three angles (in degree). `alpha` is the angle between the vectors
     /// `b` and `c`; `beta` is the between the vectors `a` and `c` and `gamma`
     /// is the angle between the vectors `a` and `b`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{UnitCell, CellShape};
+    /// let cell = UnitCell::triclinic(10.0, 10.0, 10.0, 98.0, 99.0, 90.0).unwrap();
+    ///
+    /// assert_eq!(cell.lengths(), Ok((10.0, 10.0, 10.0)));
+    /// assert_eq!(cell.angles(), Ok((98.0, 99.0, 90.0)));
+    /// assert_eq!(cell.shape(), Ok(CellShape::Triclinic));
+    /// ```
     pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell> {
-        let lenghts = [a, b, c];
+        let lengths = [a, b, c];
         let angles = [alpha, beta, gamma];
         unsafe {
-            let handle = chfl_cell_triclinic(lenghts.as_ptr(), angles.as_ptr());
+            let handle = chfl_cell_triclinic(lengths.as_ptr(), angles.as_ptr());
             UnitCell::from_ptr(handle)
         }
     }
 
-    /// Get the three lenghts of the cell, in Angstroms.
+    /// Get the three lengths of the cell, in Angstroms.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let cell = UnitCell::new(30.0, 30.0, 23.0).unwrap();
+    /// assert_eq!(cell.lengths(), Ok((30.0, 30.0, 23.0)));
+    /// ```
     pub fn lengths(&self) -> Result<(f64, f64, f64)> {
         let mut lengths = [0.0_f64; 3];
         unsafe {
@@ -140,7 +176,16 @@ impl UnitCell {
         Ok((lengths[0], lengths[1], lengths[2]))
     }
 
-    /// Set the three lenghts of the cell, in Angstroms.
+    /// Set the three lengths of the cell, in Angstroms.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let mut cell = UnitCell::new(30.0, 30.0, 23.0).unwrap();
+    ///
+    /// cell.set_lengths(10.0, 30.0, 42.0).unwrap();
+    /// assert_eq!(cell.lengths(), Ok((10.0, 30.0, 42.0)));
+    /// ```
     pub fn set_lengths(&mut self, a: f64, b: f64, c: f64) -> Result<()> {
         let lengths = [a, b, c];
         unsafe {
@@ -150,6 +195,16 @@ impl UnitCell {
     }
 
     /// Get the three angles of the cell, in degrees.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let cell = UnitCell::new(20.0, 20.0, 20.0).unwrap();
+    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    ///
+    /// let cell = UnitCell::triclinic(20.0, 20.0, 20.0, 100.0, 120.0, 90.0).unwrap();
+    /// assert_eq!(cell.angles(), Ok((100.0, 120.0, 90.0)));
+    /// ```
     pub fn angles(&self) -> Result<(f64, f64, f64)> {
         let mut angles = [0.0_f64; 3];
         unsafe {
@@ -160,6 +215,16 @@ impl UnitCell {
 
     /// Set the three angles of the cell, in degrees. This is only possible
     /// with `Triclinic` cells.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let mut cell = UnitCell::triclinic(20.0, 20.0, 20.0, 100.0, 120.0, 90.0).unwrap();
+    /// assert_eq!(cell.angles(), Ok((100.0, 120.0, 90.0)));
+    ///
+    /// cell.set_angles(90.0, 90.0, 90.0).unwrap();
+    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// ```
     pub fn set_angles(&mut self, alpha: f64, beta: f64, gamma: f64) -> Result<()> {
         let angles = [alpha, beta, gamma];
         unsafe {
@@ -174,10 +239,24 @@ impl UnitCell {
     /// the *x* axis and putting the b vector in the *xy* plane. This make the
     /// matrix an upper triangular matrix:
     ///
-    /// ```
+    /// ```text
     /// | a_x   b_x   c_x |
     /// |  0    b_y   c_y |
     /// |  0     0    c_z |
+    /// ```
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let mut cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    ///
+    /// let matrix = cell.matrix().unwrap();
+    ///
+    /// assert_eq!(matrix[0][0], 10.0);
+    /// assert_eq!(matrix[1][1], 20.0);
+    /// assert_eq!(matrix[2][2], 30.0);
+    ///
+    /// assert!(matrix[1][2].abs() < 1e-9);
     /// ```
     pub fn matrix(&self) -> Result<[[f64; 3]; 3]> {
         let mut res = [[0.0; 3]; 3];
@@ -188,6 +267,13 @@ impl UnitCell {
     }
 
     /// Get the shape of the unit cell.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{UnitCell, CellShape};
+    /// let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
+    /// ```
     pub fn shape(&self) -> Result<CellShape> {
         let mut shape = chfl_cell_shape_t::CHFL_CELL_INFINITE;
         unsafe {
@@ -197,6 +283,16 @@ impl UnitCell {
     }
 
     /// Set the shape of the unit cell to `shape`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{UnitCell, CellShape};
+    /// let mut cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
+    ///
+    /// cell.set_shape(CellShape::Infinite).unwrap();
+    /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
+    /// ```
     pub fn set_shape(&mut self, shape: CellShape) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into())));
@@ -205,6 +301,13 @@ impl UnitCell {
     }
 
     /// Get the volume of the unit cell.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// assert_eq!(cell.volume(), Ok(10.0 * 20.0 * 30.0));
+    /// ```
     pub fn volume(&self) -> Result<f64> {
         let mut res = 0.0;
         unsafe {
