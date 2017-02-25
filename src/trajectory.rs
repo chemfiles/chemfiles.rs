@@ -1,10 +1,9 @@
-/* Chemfiles, an efficient IO library for chemistry file formats
- * Copyright (C) 2015 Guillaume Fraux
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/
-*/
+// Chemfiles, a modern library for chemistry file reading and writing
+// Copyright (C) 2015-2017 Guillaume Fraux
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
 use std::ops::Drop;
 use std::path::Path;
 use std::ptr;
