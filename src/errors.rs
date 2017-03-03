@@ -135,7 +135,7 @@ extern "C" fn warning_callback(message: *const c_char) {
 /// beggining of your application.
 pub fn set_warning_callback<F>(callback: F) -> Result<()> where F: Fn(&str) + 'static {
     // Grab a mutex to prevent concurent modifications of the warning callback
-    let mutex = Mutex::new(0);
+    let mutex = Mutex::new(());
     let _guard = mutex.lock().expect("Could not get the mutex in set_warning_callback");
 
     // Put the callback on the heap to be sure it survives long enough. This

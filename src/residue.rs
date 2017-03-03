@@ -127,7 +127,7 @@ impl Drop for Residue {
     fn drop(&mut self) {
         unsafe {
             let status = chfl_residue_free(self.as_mut_ptr());
-            debug_assert!(status == chfl_status::CHFL_SUCCESS);
+            debug_assert_eq!(status, chfl_status::CHFL_SUCCESS);
         }
     }
 }

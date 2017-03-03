@@ -38,7 +38,7 @@ fn buffer_was_big_enough(buffer: &[i8]) -> bool {
         false
     } else {
         // The C code should always set the last element to 0
-        debug_assert!(buffer[len - 1] == 0);
+        debug_assert_eq!(buffer[len - 1], 0);
         buffer[len - 2] == 0
     }
 }

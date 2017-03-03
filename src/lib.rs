@@ -39,9 +39,8 @@
 // List of Clippy lints we allow in this code
 #![allow(
     needless_return, shadow_reuse, stutter, missing_docs_in_private_items,
+    zero_ptr
 )]
-
-#[macro_use] extern crate lazy_static;
 
 extern crate chemfiles_sys;
 use chemfiles_sys::chfl_version;
