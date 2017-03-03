@@ -20,13 +20,23 @@ use Result;
 /// be used like a `&[u64]`.
 pub struct Match(chfl_match_t);
 
+#[allow(len_without_is_empty)]
 impl Match {
     fn zero() -> Match {
         Match(chfl_match_t{size: 0, atoms: [0; 4]})
     }
 
+    /// Get the length of the Match.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use chemfiles::Match;
+    /// let atomic_match = Match::new(&[3, 4, 5]);
+    /// assert_eq!(atomic_match.len(), 3);
+    /// ```
     #[allow(cast_possible_truncation)]
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.size as usize
     }
 
@@ -36,6 +46,17 @@ impl Match {
     ///
     /// If the slice contains more than 4 elements, which is the maximal size
     /// of a match.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use chemfiles::Match;
+    /// let atomic_match = Match::new(&[3, 4, 5]);
+    /// assert_eq!(atomic_match.len(), 3);
+    /// assert_eq!(atomic_match[0], 3);
+    /// assert_eq!(atomic_match[1], 4);
+    /// assert_eq!(atomic_match[2], 5);
+    /// ```
     pub fn new(atoms: &[u64]) -> Match {
         assert!(atoms.len() <= 4);
         let size = atoms.len();
@@ -47,6 +68,19 @@ impl Match {
     }
 
     /// Iterate over the atomic indexes in the match.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use chemfiles::Match;
+    /// let atomic_match = Match::new(&[3, 4, 5]);
+    /// let mut iter = atomic_match.iter();
+    ///
+    /// assert_eq!(iter.next(), Some(&3));
+    /// assert_eq!(iter.next(), Some(&4));
+    /// assert_eq!(iter.next(), Some(&5));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     pub fn iter(&self) -> Iter<u64> {
         self.0.atoms[..self.len()].iter()
     }
@@ -129,6 +163,12 @@ impl Selection {
     }
 
     /// Create a new selection from the given selection string.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Selection;
+    /// let selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
+    /// ```
     pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
         let buffer = strings::to_c(selection.into());
         unsafe {
@@ -143,6 +183,13 @@ impl Selection {
     /// This value is 1 for the 'atom' context, 2 for the 'pair' and 'bond'
     /// context, 3 for the 'three' and 'angles' contextes and 4 for the 'four'
     /// and 'dihedral' contextes.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Selection;
+    /// let selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
+    /// assert_eq!(selection.size(), Ok(2));
+    /// ```
     pub fn size(&self) -> Result<u64> {
         let mut size = 0;
         unsafe {
@@ -151,7 +198,14 @@ impl Selection {
         return Ok(size);
     }
 
-    /// Get the selection string used to create this selection
+    /// Get the selection string used to create this selection.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Selection;
+    /// let selection = Selection::new("name H").unwrap();
+    /// assert_eq!(selection.string(), Ok(String::from("name H")));
+    /// ```
     pub fn string(&self) -> Result<String> {
         let selection = try!(strings::call_autogrow_buffer(1024, |ptr, len| unsafe {
             chfl_selection_string(self.as_ptr(), ptr, len)
@@ -161,6 +215,28 @@ impl Selection {
 
     /// Evaluate a selection for a given frame, and return the corresponding
     /// matches.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Selection, Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(Atom::new("H").unwrap(), (1.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(Atom::new("O").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(Atom::new("H").unwrap(), (-1.0, 0.0, 0.0), None).unwrap();
+    ///
+    /// let mut selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
+    /// let matches = selection.evaluate(&frame).unwrap();
+    ///
+    /// assert_eq!(matches.len(), 2);
+    ///
+    /// assert_eq!(matches[0].len(), 2);
+    /// assert_eq!(matches[0][0], 0);
+    /// assert_eq!(matches[0][1], 1);
+    ///
+    /// assert_eq!(matches[1].len(), 2);
+    /// assert_eq!(matches[1][0], 2);
+    /// assert_eq!(matches[1][1], 1);
+    /// ```
     pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
         let mut matches_count = 0;
         unsafe {
@@ -188,6 +264,22 @@ impl Selection {
     /// # Panics
     ///
     /// If the selection size is not 1.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Selection, Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(Atom::new("H").unwrap(), (1.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(Atom::new("O").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(Atom::new("H").unwrap(), (-1.0, 0.0, 0.0), None).unwrap();
+    ///
+    /// let mut selection = Selection::new("name H").unwrap();
+    /// let matches = selection.list(&frame).unwrap();
+    ///
+    /// assert_eq!(matches.len(), 2);
+    /// assert_eq!(matches[0], 0);
+    /// assert_eq!(matches[1], 2);
+    /// ```
     pub fn list(&mut self, frame: &Frame) -> Result<Vec<u64>> {
         let matches = try!(self.evaluate(frame));
         let mut list = vec![0; matches.len()];
@@ -200,8 +292,7 @@ impl Selection {
 
 #[cfg(test)]
 mod tests {
-    pub use super::*;
-    pub use chemfiles_sys::chfl_match_t;
+    use super::*;
     use Frame;
     use Topology;
     use Atom;
