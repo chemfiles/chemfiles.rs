@@ -60,11 +60,26 @@ impl Residue {
     }
 
     /// Create a new residue with the given `name`
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let residue = Residue::new("ALA").unwrap();
+    /// assert_eq!(residue.name(), Ok(String::from("ALA")));
+    /// ```
     pub fn new<'a, S>(name: S) -> Result<Residue> where S: Into<&'a str> {
         return Residue::with_id(name, u64::MAX)
     }
 
     /// Create a new residue with the given `name` and `id` as identifier.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let residue = Residue::with_id("ALA", 67).unwrap();
+    /// assert_eq!(residue.name(), Ok(String::from("ALA")));
+    /// assert_eq!(residue.id(), Ok(67));
+    /// ```
     pub fn with_id<'a, S>(name: S, id: u64) -> Result<Residue> where S: Into<&'a str> {
         let handle: *const CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
@@ -80,6 +95,18 @@ impl Residue {
     }
 
     /// Get the number of atoms in this residue.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let mut residue = Residue::new("water").unwrap();
+    /// assert_eq!(residue.natoms(), Ok(0));
+    ///
+    /// residue.add_atom(0);
+    /// residue.add_atom(1);
+    /// residue.add_atom(2);
+    /// assert_eq!(residue.natoms(), Ok(3));
+    /// ```
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
@@ -89,6 +116,13 @@ impl Residue {
     }
 
     /// Get the identifier of this residue in the initial topology file.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let residue = Residue::with_id("", 42).unwrap();
+    /// assert_eq!(residue.id(), Ok(42));
+    /// ```
     pub fn id(&self) -> Result<u64> {
         let mut resid = 0;
         unsafe {
@@ -98,6 +132,13 @@ impl Residue {
     }
 
     /// Get the name of this residue.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let residue = Residue::new("water").unwrap();
+    /// assert_eq!(residue.name(), Ok(String::from("water")));
+    /// ```
     pub fn name(&self) -> Result<String> {
         let name = try!(strings::call_autogrow_buffer(64, |ptr, len| unsafe {
             chfl_residue_name(self.as_ptr(), ptr, len)
@@ -105,7 +146,17 @@ impl Residue {
         return Ok(strings::from_c(name.as_ptr()));
     }
 
-    /// Add the atom at index `i` in this residue
+    /// Add the atom at index `i` in this residue.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let mut residue = Residue::new("water").unwrap();
+    /// assert_eq!(residue.contains(56), Ok(false));
+    ///
+    /// residue.add_atom(56).unwrap();
+    /// assert_eq!(residue.contains(56), Ok(true));
+    /// ```
     pub fn add_atom(&mut self, atom: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_residue_add_atom(self.as_mut_ptr(), atom)));
@@ -114,6 +165,16 @@ impl Residue {
     }
 
     /// Check if the atom at index `i` is in this residue
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let mut residue = Residue::new("water").unwrap();
+    /// assert_eq!(residue.contains(56), Ok(false));
+    ///
+    /// residue.add_atom(56).unwrap();
+    /// assert_eq!(residue.contains(56), Ok(true));
+    /// ```
     pub fn contains(&self, atom: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
