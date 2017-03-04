@@ -238,10 +238,20 @@ impl Topology {
         let handle = unsafe {
             chfl_residue_for_atom(self.as_ptr(), index)
         };
-        // TODO: make the difference between errors, out-of-bounds and missing
-        // residue.
         if handle.is_null() {
-            Ok(None)
+            let natoms = self.natoms().expect(
+                "Getting the number of atoms failed, everything is on fire!"
+            );
+            if index >= natoms {
+                let result = unsafe {
+                    Residue::from_ptr(handle).map(Some)
+                };
+                assert!(result.is_err());
+                result
+            } else {
+                // Not out of bounds, there is no residue for this atom
+                Ok(None)
+            }
         } else {
             let residue = unsafe {
                 try!(Residue::from_ptr(handle))
@@ -396,5 +406,9 @@ mod test {
         let first = topology.residue(0).unwrap();
         let second = topology.residue(0).unwrap();
         assert_eq!(topology.are_linked(&first, &second), Ok(true));
+
+        let missing = topology.residue_for_atom(1).unwrap();
+        assert!(missing.is_none());
+        assert!(topology.residue_for_atom(67).is_err());
     }
 }
