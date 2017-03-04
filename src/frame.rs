@@ -62,6 +62,12 @@ impl Frame {
     }
 
     /// Create an empty frame. It will be resized by the library as needed.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let frame = Frame::new().unwrap();
+    /// ```
     pub fn new() -> Result<Frame> {
         let handle: *const CHFL_FRAME;
         unsafe {
@@ -76,6 +82,16 @@ impl Frame {
     }
 
     /// Get a copy of the atom at index `index` in this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
+    ///
+    /// let atom = frame.atom(0).unwrap();
+    /// assert_eq!(atom.name(), Ok(String::from("Zn")));
+    /// ```
     pub fn atom(&self, index: u64) -> Result<Atom> {
         unsafe {
             let handle = chfl_atom_from_frame(self.as_ptr(), index);
@@ -84,6 +100,16 @@ impl Frame {
     }
 
     /// Get the current number of atoms in this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// assert_eq!(frame.natoms(), Ok(0));
+    ///
+    /// frame.resize(67).unwrap();
+    /// assert_eq!(frame.natoms(), Ok(67));
+    /// ```
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
@@ -95,6 +121,14 @@ impl Frame {
     /// Resize the positions and the velocities in this frame, to make space for
     /// `natoms` atoms. Previous data is conserved, as well as the presence of
     /// absence of velocities.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(67).unwrap();
+    /// assert_eq!(frame.natoms(), Ok(67));
+    /// ```
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_resize(self.as_mut_ptr(), natoms)));
@@ -104,7 +138,17 @@ impl Frame {
 
     /// Add an `Atom` and the corresponding position and optionally velocity
     /// data to this frame.
-    pub fn add_atom<V>(&mut self, atom: Atom, position: (f64, f64, f64), velocity: V) -> Result<()>
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), (1.0, 1.0, 2.0), None).unwrap();
+    ///
+    /// frame.add_velocities().unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), (-1.0, 1.0, 2.0), (0.2, 0.1, 0.0)).unwrap();
+    /// ```
+    pub fn add_atom<V>(&mut self, atom: &Atom, position: (f64, f64, f64), velocity: V) -> Result<()>
         where V: Into<Option<(f64, f64, f64)>> {
         let position = [position.0, position.1, position.2];
         let velocity_data;
@@ -129,6 +173,17 @@ impl Frame {
     }
 
     /// Get a view into the positions of this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(67).unwrap();
+    ///
+    /// let positions = frame.positions().unwrap();
+    /// assert_eq!(positions.len(), 67);
+    /// assert_eq!(positions[0], [0.0, 0.0, 0.0]);
+    /// ```
     pub fn positions(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
@@ -149,6 +204,21 @@ impl Frame {
     }
 
     /// Get a mutable view into the positions of this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(67).unwrap();
+    /// {
+    ///     let positions = frame.positions_mut().unwrap();
+    ///     assert_eq!(positions[0], [0.0, 0.0, 0.0]);
+    ///     positions[0] = [1.0, 2.0, 3.0];
+    /// }
+    ///
+    /// let positions = frame.positions().unwrap();
+    /// assert_eq!(positions[0], [1.0, 2.0, 3.0]);
+    /// ```
     pub fn positions_mut(&mut self) -> Result<&mut [[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
@@ -167,6 +237,18 @@ impl Frame {
     }
 
     /// Get a view into the velocities of this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(67).unwrap();
+    /// frame.add_velocities().unwrap();
+    ///
+    /// let velocities = frame.velocities().unwrap();
+    /// assert_eq!(velocities.len(), 67);
+    /// assert_eq!(velocities[0], [0.0, 0.0, 0.0]);
+    /// ```
     pub fn velocities(&self) -> Result<&[[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
@@ -187,6 +269,22 @@ impl Frame {
     }
 
     /// Get a mutable view into the velocities of this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(67).unwrap();
+    /// frame.add_velocities().unwrap();
+    /// {
+    ///     let velocities = frame.velocities_mut().unwrap();
+    ///     assert_eq!(velocities[0], [0.0, 0.0, 0.0]);
+    ///     velocities[0] = [1.0, 2.0, 3.0];
+    /// }
+    ///
+    /// let velocities = frame.velocities().unwrap();
+    /// assert_eq!(velocities[0], [1.0, 2.0, 3.0]);
+    /// ```
     pub fn velocities_mut(&mut self) -> Result<&mut [[f64; 3]]> {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
@@ -205,6 +303,16 @@ impl Frame {
     }
 
     /// Check if this frame contains velocity data.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// assert_eq!(frame.has_velocities(), Ok(false));
+    ///
+    /// frame.add_velocities().unwrap();
+    /// assert_eq!(frame.has_velocities(), Ok(true));
+    /// ```
     pub fn has_velocities(&self) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -215,6 +323,16 @@ impl Frame {
 
     /// Add velocity data to this frame. If the frame already have velocities,
     /// this does nothing.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// assert_eq!(frame.has_velocities(), Ok(false));
+    ///
+    /// frame.add_velocities().unwrap();
+    /// assert_eq!(frame.has_velocities(), Ok(true));
+    /// ```
     pub fn add_velocities(&mut self) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_add_velocities(self.as_mut_ptr())));
@@ -223,6 +341,15 @@ impl Frame {
     }
 
     /// Get a copy of the `UnitCell` from this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, CellShape};
+    /// let frame = Frame::new().unwrap();
+    ///
+    /// let cell = frame.cell().unwrap();
+    /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
+    /// ```
     pub fn cell(&self) -> Result<UnitCell> {
         unsafe {
             let handle = chfl_cell_from_frame(self.as_ptr());
@@ -231,6 +358,18 @@ impl Frame {
     }
 
     /// Set the `UnitCell` of this frame to `cell`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, UnitCell, CellShape};
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// frame.set_cell(&UnitCell::new(10.0, 10.0, 10.0).unwrap()).unwrap();
+    ///
+    /// let cell = frame.cell().unwrap();
+    /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
+    /// assert_eq!(cell.lengths(), Ok((10.0, 10.0, 10.0)));
+    /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_cell(
@@ -242,6 +381,16 @@ impl Frame {
     }
 
     /// Get a copy of the `Topology` from this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(42).unwrap();
+    ///
+    /// let topology = frame.topology().unwrap();
+    /// assert_eq!(topology.natoms(), Ok(42));
+    /// ```
     pub fn topology(&self) -> Result<Topology> {
         unsafe {
             let handle = chfl_topology_from_frame(self.as_ptr());
@@ -249,7 +398,23 @@ impl Frame {
         }
     }
 
-    /// Set the `Topology` of this frame to `topology`.
+    /// Set the `Topology` of this frame to `topology`. The topology must
+    /// contain the same number of atoms that this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Topology, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.resize(2).unwrap();
+    ///
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_atom(&Atom::new("Cl").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("Cl").unwrap()).unwrap();
+    /// topology.add_bond(0, 1);
+    ///
+    /// frame.set_topology(&topology);
+    /// assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("Cl")));
+    /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_topology(
@@ -261,6 +426,13 @@ impl Frame {
     }
 
     /// Get this frame step, i.e. the frame number in the trajectory
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let frame = Frame::new().unwrap();
+    /// assert_eq!(frame.step(), Ok(0));
+    /// ```
     pub fn step(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -270,6 +442,16 @@ impl Frame {
     }
 
     /// Set this frame step to `step`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Frame;
+    /// let mut frame = Frame::new().unwrap();
+    /// assert_eq!(frame.step(), Ok(0));
+    ///
+    /// frame.set_step(10).unwrap();
+    /// assert_eq!(frame.step(), Ok(10));
+    /// ```
     pub fn set_step(&mut self, step: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_set_step(self.as_mut_ptr(), step)));
@@ -281,6 +463,19 @@ impl Frame {
     ///
     /// The bonds are guessed using a distance-based algorithm, and then angles
     /// and dihedrals are guessed from the bonds.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// frame.add_atom(&Atom::new("Cl").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(&Atom::new("Cl").unwrap(), (1.5, 0.0, 0.0), None).unwrap();
+    /// assert_eq!(frame.topology().unwrap().bonds_count(), Ok(0));
+    ///
+    /// frame.guess_topology().unwrap();
+    /// assert_eq!(frame.topology().unwrap().bonds_count(), Ok(1));
+    /// ```
     pub fn guess_topology(&mut self) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_guess_topology(self.as_mut_ptr())));
@@ -329,7 +524,7 @@ mod test {
         let atom = Atom::new("U").unwrap();
         let mut frame = Frame::new().unwrap();
 
-        frame.add_atom(atom, (1.0, 1.0, 2.0), None).unwrap();
+        frame.add_atom(&atom, (1.0, 1.0, 2.0), None).unwrap();
         assert_eq!(frame.natoms(), Ok(1));
         assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
 
@@ -339,7 +534,7 @@ mod test {
         frame.add_velocities().unwrap();
 
         let atom = Atom::new("F").unwrap();
-        frame.add_atom(atom, (1.0, 1.0, 2.0), (4.0, 3.0, 2.0)).unwrap();
+        frame.add_atom(&atom, (1.0, 1.0, 2.0), (4.0, 3.0, 2.0)).unwrap();
         assert_eq!(frame.natoms(), Ok(2));
         assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
         assert_eq!(frame.atom(1).unwrap().name(), Ok("F".into()));
