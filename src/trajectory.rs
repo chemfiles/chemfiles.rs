@@ -275,7 +275,7 @@ mod test {
         let mut topology = Topology::new().unwrap();
         let atom = Atom::new("Cs").unwrap();
         for _ in 0..297 {
-            topology.push(&atom).unwrap();
+            topology.add_atom(&atom).unwrap();
         }
 
         assert!(file.set_topology(&topology).is_ok());
@@ -308,7 +308,7 @@ mod test {
         let mut topology = Topology::new().unwrap();
         let atom = Atom::new("X").unwrap();
         for _ in 0..4 {
-            topology.push(&atom).unwrap();
+            topology.add_atom(&atom).unwrap();
         }
         frame.set_topology(&topology).unwrap();
         assert!(file.write(&frame).is_ok());

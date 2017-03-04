@@ -309,10 +309,10 @@ mod tests {
     fn testing_frame() -> Frame {
         let mut topology = Topology::new().unwrap();
 
-        topology.push(&Atom::new("H").unwrap()).unwrap();
-        topology.push(&Atom::new("O").unwrap()).unwrap();
-        topology.push(&Atom::new("O").unwrap()).unwrap();
-        topology.push(&Atom::new("H").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("H").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("O").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("O").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("H").unwrap()).unwrap();
 
         topology.add_bond(0, 1).unwrap();
         topology.add_bond(1, 2).unwrap();

@@ -404,8 +404,8 @@ mod test {
         frame.resize(2).unwrap();
         let mut topology = Topology::new().unwrap();
 
-        topology.push(&Atom::new("Zn").unwrap()).unwrap();
-        topology.push(&Atom::new("Ar").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("Zn").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("Ar").unwrap()).unwrap();
 
         assert!(frame.set_topology(&topology).is_ok());
 

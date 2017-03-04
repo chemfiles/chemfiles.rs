@@ -94,7 +94,7 @@ impl Topology {
     }
 
     /// Add an `Atom` at the end of this topology
-    pub fn push(&mut self, atom: &Atom) -> Result<()> {
+    pub fn add_atom(&mut self, atom: &Atom) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_atom(
                 self.as_mut_ptr(),
@@ -309,7 +309,7 @@ mod test {
         let copy = topology.clone();
         assert_eq!(copy.natoms(), Ok(0));
 
-        topology.push(&Atom::new("H").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("H").unwrap()).unwrap();
         assert_eq!(topology.natoms(), Ok(1));
         assert_eq!(copy.natoms(), Ok(0));
     }
@@ -323,10 +323,10 @@ mod test {
         let h = Atom::new("H").unwrap();
         let o = Atom::new("O").unwrap();
 
-        assert!(topology.push(&h).is_ok());
-        assert!(topology.push(&o).is_ok());
-        assert!(topology.push(&o).is_ok());
-        assert!(topology.push(&h).is_ok());
+        assert!(topology.add_atom(&h).is_ok());
+        assert!(topology.add_atom(&o).is_ok());
+        assert!(topology.add_atom(&o).is_ok());
+        assert!(topology.add_atom(&h).is_ok());
 
         assert_eq!(topology.natoms(), Ok(4));
 
@@ -372,10 +372,10 @@ mod test {
         let h = Atom::new("H").unwrap();
         let o = Atom::new("O").unwrap();
 
-        topology.push(&h).unwrap();
-        topology.push(&o).unwrap();
-        topology.push(&o).unwrap();
-        topology.push(&h).unwrap();
+        topology.add_atom(&h).unwrap();
+        topology.add_atom(&o).unwrap();
+        topology.add_atom(&o).unwrap();
+        topology.add_atom(&h).unwrap();
 
         let mut residue = Residue::new("Foo").unwrap();
         residue.add_atom(0).unwrap();
