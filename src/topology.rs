@@ -273,7 +273,7 @@ impl Topology {
     ///
     /// The residue `id` must not already be in the topology, and the residue
     /// must contain only atoms that are not already in another residue.
-    pub fn add_residue(&mut self, residue: Residue) -> Result<()> {
+    pub fn add_residue(&mut self, residue: &Residue) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())));
         }
@@ -319,79 +319,107 @@ mod test {
         let copy = topology.clone();
         assert_eq!(copy.natoms(), Ok(0));
 
-        topology.add_atom(&Atom::new("H").unwrap()).unwrap();
-        assert_eq!(topology.natoms(), Ok(1));
+        topology.resize(10).unwrap();
+        assert_eq!(topology.natoms(), Ok(10));
         assert_eq!(copy.natoms(), Ok(0));
     }
 
     #[test]
-    fn topology() {
+    fn size() {
         let mut topology = Topology::new().unwrap();
-
         assert_eq!(topology.natoms(), Ok(0));
 
-        let h = Atom::new("H").unwrap();
-        let o = Atom::new("O").unwrap();
+        topology.resize(10).unwrap();
+        assert_eq!(topology.natoms(), Ok(10));
 
-        assert!(topology.add_atom(&h).is_ok());
-        assert!(topology.add_atom(&o).is_ok());
-        assert!(topology.add_atom(&o).is_ok());
-        assert!(topology.add_atom(&h).is_ok());
+        topology.remove(7).unwrap();
+        assert_eq!(topology.natoms(), Ok(9));
 
-        assert_eq!(topology.natoms(), Ok(4));
+        topology.add_atom(&Atom::new("Hg").unwrap()).unwrap();
+        assert_eq!(topology.natoms(), Ok(10));
+    }
 
+    #[test]
+    fn atoms() {
+        let mut topology = Topology::new().unwrap();
+
+        topology.add_atom(&Atom::new("Hg").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("Mn").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("W").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("Fe").unwrap()).unwrap();
+
+        assert_eq!(topology.atom(0).unwrap().name(), Ok(String::from("Hg")));
+        assert_eq!(topology.atom(3).unwrap().name(), Ok(String::from("Fe")));
+    }
+
+    #[test]
+    fn bonds() {
+        let mut topology = Topology::new().unwrap();
         assert_eq!(topology.bonds_count(), Ok(0));
-        assert_eq!(topology.angles_count(), Ok(0));
-        assert_eq!(topology.dihedrals_count(), Ok(0));
 
-        assert!(topology.add_bond(0, 1).is_ok());
-        assert!(topology.add_bond(1, 2).is_ok());
-        assert!(topology.add_bond(2, 3).is_ok());
-
-        assert_eq!(topology.bonds_count().unwrap(), 3);
-        assert_eq!(topology.angles_count().unwrap(), 2);
-        assert_eq!(topology.dihedrals_count().unwrap(), 1);
+        topology.add_bond(0, 1).unwrap();
+        topology.add_bond(9, 2).unwrap();
+        topology.add_bond(3, 7).unwrap();
+        assert_eq!(topology.bonds_count(), Ok(3));
 
         assert_eq!(topology.is_bond(0, 1), Ok(true));
-        assert_eq!(topology.is_bond(0, 3), Ok(false));
+        assert_eq!(topology.is_bond(0, 2), Ok(false));
+
+        assert_eq!(topology.bonds(), Ok(vec![[0, 1], [2, 9], [3, 7]]));
+
+        topology.remove_bond(3, 7).unwrap();
+        // Removing unexisting bond is OK
+        topology.remove_bond(37, 7).unwrap();
+        assert_eq!(topology.bonds_count(), Ok(2));
+    }
+
+    #[test]
+    fn angles() {
+        let mut topology = Topology::new().unwrap();
+        assert_eq!(topology.angles_count(), Ok(0));
+
+        topology.add_bond(0, 1).unwrap();
+        topology.add_bond(1, 2).unwrap();
+        topology.add_bond(3, 7).unwrap();
+        topology.add_bond(3, 5).unwrap();
+        assert_eq!(topology.angles_count(), Ok(2));
 
         assert_eq!(topology.is_angle(0, 1, 2), Ok(true));
-        assert_eq!(topology.is_angle(0, 1, 3), Ok(false));
+        assert_eq!(topology.is_angle(0, 2, 1), Ok(false));
+
+        assert_eq!(topology.angles(), Ok(vec![[0, 1, 2], [5, 3, 7]]));
+    }
+
+    #[test]
+    fn dihedrals() {
+        let mut topology = Topology::new().unwrap();
+        assert_eq!(topology.dihedrals_count(), Ok(0));
+
+        topology.add_bond(0, 1).unwrap();
+        topology.add_bond(1, 2).unwrap();
+        topology.add_bond(3, 2).unwrap();
+        topology.add_bond(4, 7).unwrap();
+        topology.add_bond(4, 5).unwrap();
+        topology.add_bond(7, 10).unwrap();
+        assert_eq!(topology.dihedrals_count(), Ok(2));
 
         assert_eq!(topology.is_dihedral(0, 1, 2, 3), Ok(true));
-        assert_eq!(topology.is_dihedral(0, 1, 3, 2), Ok(false));
+        assert_eq!(topology.is_dihedral(0, 2, 1, 3), Ok(false));
 
-        assert_eq!(topology.bonds(), Ok(vec![[0, 1], [1, 2], [2, 3]]));
-        assert_eq!(topology.angles(), Ok(vec![[0, 1, 2], [1, 2, 3]]));
-        assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3]]));
-
-        assert!(topology.remove_bond(2, 3).is_ok());
-
-        assert_eq!(topology.bonds_count().unwrap(), 2);
-        assert_eq!(topology.angles_count().unwrap(), 1);
-        assert_eq!(topology.dihedrals_count().unwrap(), 0);
-
-        assert!(topology.remove(3).is_ok());
-        assert_eq!(topology.natoms(), Ok(3));
+        assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3], [5, 4, 7, 10]]));
     }
 
     #[test]
     fn residues() {
         let mut topology = Topology::new().unwrap();
+        topology.resize(4).unwrap();
         assert_eq!(topology.residues_count(), Ok(0));
-        let h = Atom::new("H").unwrap();
-        let o = Atom::new("O").unwrap();
-
-        topology.add_atom(&h).unwrap();
-        topology.add_atom(&o).unwrap();
-        topology.add_atom(&o).unwrap();
-        topology.add_atom(&h).unwrap();
 
         let mut residue = Residue::new("Foo").unwrap();
         residue.add_atom(0).unwrap();
         residue.add_atom(2).unwrap();
 
-        topology.add_residue(residue).unwrap();
+        topology.add_residue(&residue).unwrap();
         assert_eq!(topology.residues_count(), Ok(1));
 
         assert_eq!(topology.residue(0).unwrap().name(), Ok("Foo".into()));
@@ -400,7 +428,7 @@ mod test {
 
         let mut residue = Residue::new("Bar").unwrap();
         residue.add_atom(3).unwrap();
-        topology.add_residue(residue).unwrap();
+        topology.add_residue(&residue).unwrap();
         assert_eq!(topology.residues_count(), Ok(2));
 
         let first = topology.residue(0).unwrap();
