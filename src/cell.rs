@@ -384,7 +384,7 @@ mod test {
 
         for i in 0..3 {
             for j in 0..3 {
-                assert_approx_eq!(matrix[i][j], result[i][j], 1e-9);
+                assert_ulps_eq!(matrix[i][j], result[i][j], epsilon=1e-12);
             }
         }
     }

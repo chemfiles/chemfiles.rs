@@ -42,10 +42,12 @@
     zero_ptr
 )]
 
+#[cfg(test)]
+#[macro_use]
+extern crate approx;
+
 extern crate chemfiles_sys;
 use chemfiles_sys::chfl_version;
-
-#[macro_use] mod testing;
 
 mod strings;
 

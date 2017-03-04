@@ -312,7 +312,7 @@ mod test {
     #[test]
     fn mass() {
         let mut atom = Atom::new("He").unwrap();
-        assert_approx_eq!(atom.mass().unwrap(), 4.002602, 1e-6);
+        assert_ulps_eq!(atom.mass().unwrap(), 4.002602);
 
         assert!(atom.set_mass(15.0).is_ok());
         assert_eq!(atom.mass(), Ok(15.0));
@@ -350,8 +350,8 @@ mod test {
     #[test]
     fn radii() {
         let atom = Atom::new("He").unwrap();
-        assert_approx_eq!(atom.vdw_radius().unwrap(), 1.4, 1e-2);
-        assert_approx_eq!(atom.covalent_radius().unwrap(), 0.32, 1e-3);
+        assert_ulps_eq!(atom.vdw_radius().unwrap(), 1.4);
+        assert_ulps_eq!(atom.covalent_radius().unwrap(), 0.32);
     }
 
     #[test]
