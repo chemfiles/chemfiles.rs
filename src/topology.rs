@@ -60,6 +60,13 @@ impl Topology {
     }
 
     /// Create a new empty topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let topology = Topology::new().unwrap();
+    /// assert_eq!(topology.natoms(), Ok(0));
+    /// ```
     pub fn new() -> Result<Topology> {
         unsafe {
             let handle = chfl_topology();
@@ -68,6 +75,16 @@ impl Topology {
     }
 
     /// Get a copy of the atom at index `index` from this topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.resize(6).unwrap();
+    ///
+    /// let atom = topology.atom(4).unwrap();
+    /// assert_eq!(atom.name(), Ok(String::new()));
+    /// ```
     pub fn atom(&self, index: u64) -> Result<Atom> {
         unsafe {
             let handle = chfl_atom_from_topology(self.as_ptr(), index);
@@ -76,6 +93,16 @@ impl Topology {
     }
 
     /// Get the current number of atoms in this topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.natoms(), Ok(0));
+    ///
+    /// topology.resize(6).unwrap();
+    /// assert_eq!(topology.natoms(), Ok(6));
+    /// ```
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
@@ -86,6 +113,16 @@ impl Topology {
 
     /// Resize this topology to hold `natoms` atoms, inserting dummy atoms if
     /// the new size if bigger than the old one.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.natoms(), Ok(0));
+    ///
+    /// topology.resize(6).unwrap();
+    /// assert_eq!(topology.natoms(), Ok(6));
+    /// ```
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_resize(self.as_mut_ptr(), natoms)));
@@ -94,6 +131,16 @@ impl Topology {
     }
 
     /// Add an `Atom` at the end of this topology
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Atom};
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_atom(&Atom::new("Mg").unwrap()).unwrap();
+    ///
+    /// let atom = topology.atom(0).unwrap();
+    /// assert_eq!(atom.name(), Ok(String::from("Mg")));
+    /// ```
     pub fn add_atom(&mut self, atom: &Atom) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_atom(
@@ -106,6 +153,17 @@ impl Topology {
 
     /// Remove an `Atom` from this topology by index. This modify all the other
     /// atoms indexes.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.resize(9).unwrap();
+    /// assert_eq!(topology.natoms(), Ok(9));
+    ///
+    /// topology.remove(7).unwrap();
+    /// assert_eq!(topology.natoms(), Ok(8));
+    /// ```
     pub fn remove(&mut self, index: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_remove(self.as_mut_ptr(), index)));
@@ -114,6 +172,16 @@ impl Topology {
     }
 
     /// Tell if the atoms at indexes `i` and `j` are bonded together.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.is_bond(9, 8), Ok(false));
+    ///
+    /// topology.add_bond(9, 8).unwrap();
+    /// assert_eq!(topology.is_bond(9, 8), Ok(true));
+    /// ```
     pub fn is_bond(&self, i: u64, j: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -123,6 +191,17 @@ impl Topology {
     }
 
     /// Tell if the atoms at indexes `i`, `j` and `k` constitues an angle.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.is_angle(9, 8, 6), Ok(false));
+    ///
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    /// assert_eq!(topology.is_angle(9, 8, 6), Ok(true));
+    /// ```
     pub fn is_angle(&self, i: u64, j: u64, k: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -133,6 +212,18 @@ impl Topology {
 
     /// Tell if the atoms at indexes `i`, `j`, `k` and `m` constitues a
     /// dihedral angle.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.is_dihedral(2, 9, 8, 6), Ok(false));
+    ///
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    /// assert_eq!(topology.is_dihedral(2, 9, 8, 6), Ok(true));
+    /// ```
     pub fn is_dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
@@ -141,7 +232,19 @@ impl Topology {
         return Ok(res != 0);
     }
 
-    /// Get the number of bonds in the system.
+    /// Get the number of bonds in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(0));
+    ///
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(3));
+    /// ```
     pub fn bonds_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -150,7 +253,19 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the number of angles in the system.
+    /// Get the number of angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.angles_count(), Ok(0));
+    ///
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    /// assert_eq!(topology.angles_count(), Ok(2));
+    /// ```
     pub fn angles_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -159,7 +274,19 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the number of dihedral angles in the system.
+    /// Get the number of dihedral angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.dihedrals_count(), Ok(0));
+    ///
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    /// assert_eq!(topology.dihedrals_count(), Ok(1));
+    /// ```
     pub fn dihedrals_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -168,7 +295,18 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the list of bonds in the system.
+    /// Get the list of bonds in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    ///
+    /// assert_eq!(topology.bonds(), Ok(vec![[2, 9], [6, 8], [8, 9]]));
+    /// ```
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>> {
         let nbonds = try!(self.bonds_count());
         let mut res = vec![[u64::MAX; 2]; nbonds as usize];
@@ -182,7 +320,18 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the list of angles in the system.
+    /// Get the list of angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    ///
+    /// assert_eq!(topology.angles(), Ok(vec![[2, 9, 8], [6, 8, 9]]));
+    /// ```
     pub fn angles(&self) -> Result<Vec<[u64; 3]>> {
         let nangles = try!(self.angles_count());
         let mut res = vec![[u64::MAX; 3]; nangles as usize];
@@ -192,7 +341,18 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Get the list of dihedral angles in the system.
+    /// Get the list of dihedral angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_bond(2, 9).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(6, 8).unwrap();
+    ///
+    /// assert_eq!(topology.dihedrals(), Ok(vec![[6, 8, 9, 2]]));
+    /// ```
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>> {
         let ndihedrals = try!(self.dihedrals_count());
         let mut res = vec![[u64::MAX; 4]; ndihedrals as usize];
@@ -202,7 +362,18 @@ impl Topology {
         return Ok(res);
     }
 
-    /// Add a bond between the atoms at indexes `i` and `j` in the system.
+    /// Add a bond between the atoms at indexes `i` and `j` in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(0));
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(2));
+    /// ```
     pub fn add_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_bond(self.as_mut_ptr(), i, j)));
@@ -214,6 +385,23 @@ impl Topology {
     /// this topology.
     ///
     /// This function does nothing if there is no bond between `i` and `j`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(0));
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(9, 8).unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(2));
+    ///
+    /// topology.remove_bond(0, 1).unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(1));
+    ///
+    /// topology.remove_bond(10, 1).unwrap();
+    /// assert_eq!(topology.bonds_count(), Ok(1));
+    /// ```
     pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_remove_bond(self.as_mut_ptr(), i, j)));
@@ -225,6 +413,16 @@ impl Topology {
     ///
     /// The residue index in the topology is not always the same as the residue
     /// `id`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Residue};
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_residue(&Residue::new("water").unwrap()).unwrap();
+    ///
+    /// let residue = topology.residue(0).unwrap();
+    /// assert_eq!(residue.name(), Ok(String::from("water")));
+    /// ```
     pub fn residue(&self, index: u64) -> Result<Residue> {
         unsafe {
             let handle = chfl_residue_from_topology(self.as_ptr(), index);
@@ -234,6 +432,25 @@ impl Topology {
 
     /// Get a copy of the residue containing the atom at index `index` in this
     /// topology, if any.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Residue};
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.resize(8).unwrap();
+    ///
+    /// let mut residue = Residue::new("water").unwrap();
+    /// residue.add_atom(0).unwrap();
+    /// residue.add_atom(1).unwrap();
+    /// residue.add_atom(2).unwrap();
+    /// topology.add_residue(&residue).unwrap();
+    ///
+    /// let residue = topology.residue_for_atom(0).unwrap().unwrap();
+    /// assert_eq!(residue.name(), Ok(String::from("water")));
+    ///
+    /// let residue = topology.residue_for_atom(6).unwrap();
+    /// assert!(residue.is_none());
+    /// ```
     pub fn residue_for_atom(&self, index: u64) -> Result<Option<Residue>> {
         let handle = unsafe {
             chfl_residue_for_atom(self.as_ptr(), index)
@@ -261,6 +478,17 @@ impl Topology {
     }
 
     /// Get the number of residues in this topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Residue};
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.residues_count(), Ok(0));
+    ///
+    /// topology.add_residue(&Residue::with_id("water", 0).unwrap()).unwrap();
+    /// topology.add_residue(&Residue::with_id("protein", 1).unwrap()).unwrap();
+    /// assert_eq!(topology.residues_count(), Ok(2));
+    /// ```
     pub fn residues_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
@@ -273,6 +501,16 @@ impl Topology {
     ///
     /// The residue `id` must not already be in the topology, and the residue
     /// must contain only atoms that are not already in another residue.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Residue};
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_residue(&Residue::new("water").unwrap()).unwrap();
+    ///
+    /// let residue = topology.residue(0).unwrap();
+    /// assert_eq!(residue.name(), Ok(String::from("water")));
+    /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<()> {
         unsafe {
             try!(check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())));
@@ -283,6 +521,19 @@ impl Topology {
     /// Check if the two residues `first` and `second` from the `topology` are
     /// linked together, *i.e.* if there is a bond between one atom in the
     /// first residue and one atom in the second one.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Residue};
+    /// let mut topology = Topology::new().unwrap();
+    ///
+    /// topology.add_residue(&Residue::with_id("water", 0).unwrap()).unwrap();
+    /// topology.add_residue(&Residue::with_id("protein", 1).unwrap()).unwrap();
+    ///
+    /// let first = topology.residue(0).unwrap();
+    /// let second = topology.residue(1).unwrap();
+    /// assert_eq!(topology.are_linked(&first, &second), Ok(false));
+    /// ```
     pub fn are_linked(&self, first: &Residue, second: &Residue) -> Result<bool> {
         let mut res = 0;
         unsafe {
