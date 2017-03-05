@@ -5,7 +5,7 @@ extern crate chemfiles;
 use chemfiles::*;
 
 fn main() {
-    let mut input = Trajectory::open("water.xyz").unwrap();
+    let mut input = Trajectory::open("water.xyz", 'r').unwrap();
     let mut frame = Frame::new().unwrap();
     let mut topology = Topology::new().unwrap();
     // Orthorombic UnitCell with lengths of 20, 15 and 35 A
@@ -26,7 +26,7 @@ fn main() {
     input.set_cell(&cell).unwrap();
     input.set_topology(&topology).unwrap();
 
-    let mut output = Trajectory::create("water.pdb").unwrap();
+    let mut output = Trajectory::open("water.pdb", 'w').unwrap();
 
     for _ in 0..input.nsteps().unwrap() {
         input.read(&mut frame).unwrap();

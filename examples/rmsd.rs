@@ -5,7 +5,7 @@ extern crate chemfiles;
 use chemfiles::*;
 
 fn main() {
-    let mut traj = Trajectory::open("filename.nc").unwrap();
+    let mut traj = Trajectory::open("filename.nc", 'r').unwrap();
     let mut frame = Frame::new().unwrap();
     let mut distances = Vec::new();
 

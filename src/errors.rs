@@ -182,7 +182,7 @@ mod test {
     fn errors() {
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
-        assert!(Trajectory::open("nope").is_err());
+        assert!(Trajectory::open("nope", 'r').is_err());
         assert_eq!(Error::last_error(), "Can not find a format associated with the \"\" extension.");
         Error::cleanup();
         assert_eq!(Error::last_error(), "");

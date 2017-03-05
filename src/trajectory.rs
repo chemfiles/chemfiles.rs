@@ -52,50 +52,22 @@ impl Trajectory {
     }
 
     /// Open a trajectory file in read mode.
-    pub fn open<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path> {
+    pub fn open<P>(filename: P, mode: char) -> Result<Trajectory> where P: AsRef<Path> {
         let filename = try!(filename.as_ref().to_str().ok_or(
             Error::utf8_path_error(filename.as_ref())
         ));
 
         let filename = strings::to_c(filename);
+        let mode = mode as i8;
         unsafe {
             #[allow(cast_possible_wrap)]
-            let handle = chfl_trajectory_open(filename.as_ptr(), b'r' as i8);
-            Trajectory::from_ptr(handle)
-        }
-    }
-
-    /// Open a trajectory file in write mode.
-    pub fn create<P>(filename: P) -> Result<Trajectory> where P: AsRef<Path> {
-        let filename = try!(filename.as_ref().to_str().ok_or(
-            Error::utf8_path_error(filename.as_ref())
-        ));
-
-        let filename = strings::to_c(filename);
-        unsafe {
-            #[allow(cast_possible_wrap)]
-            let handle = chfl_trajectory_open(filename.as_ptr(), b'w' as i8);
+            let handle = chfl_trajectory_open(filename.as_ptr(), mode);
             Trajectory::from_ptr(handle)
         }
     }
 
     /// Open a trajectory file in read mode using a specific `format`.
-    pub fn open_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
-        let filename = try!(filename.as_ref().to_str().ok_or(
-            Error::utf8_path_error(filename.as_ref())
-        ));
-
-        let filename = strings::to_c(filename);
-        let format = strings::to_c(format.into());
-        unsafe {
-            #[allow(cast_possible_wrap)]
-            let handle = chfl_trajectory_with_format(filename.as_ptr(), b'r' as i8, format.as_ptr());
-            Trajectory::from_ptr(handle)
-        }
-    }
-
-    /// Open a trajectory file in write mode using a specific `format`.
-    pub fn create_with_format<'a, P, S>(filename: P, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
+    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
         let filename = try!(filename.as_ref().to_str().ok_or(
             Error::utf8_path_error(filename.as_ref())
         ));
@@ -105,7 +77,9 @@ impl Trajectory {
         unsafe {
             #[allow(cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(
-                filename.as_ptr(), b'w' as i8, format.as_ptr()
+                filename.as_ptr(),
+                mode as i8,
+                format.as_ptr()
             );
             Trajectory::from_ptr(handle)
         }
@@ -233,7 +207,7 @@ mod test {
     fn read() {
         let root = Path::new(file!()).parent().unwrap().join("..");
         let filename = root.join("data").join("water.xyz");
-        let mut file = Trajectory::open(filename.to_str().unwrap()).unwrap();
+        let mut file = Trajectory::open(filename.to_str().unwrap(), 'r').unwrap();
 
         assert_eq!(file.nsteps(), Ok(100));
 
@@ -288,13 +262,15 @@ mod test {
         assert_eq!(frame.atom(100).unwrap().name(), Ok(String::from("Rd")));
 
         let filename = root.join("data").join("helium.xyz.but.not.really");
-        let mut file = Trajectory::open_with_format(filename.to_str().unwrap(), "XYZ").unwrap();
+        let mut file = Trajectory::open_with_format(
+            filename.to_str().unwrap(), 'r', "XYZ"
+        ).unwrap();
         assert!(file.read(&mut frame).is_ok());
         assert_eq!(frame.natoms(), Ok(125));
     }
 
     fn write_file(path: &str) {
-        let mut file = Trajectory::create(path).unwrap();
+        let mut file = Trajectory::open(path, 'w').unwrap();
         let mut frame = Frame::new().unwrap();
         frame.resize(4).unwrap();
 
