@@ -51,22 +51,43 @@ impl Trajectory {
         self.handle as *mut CHFL_TRAJECTORY
     }
 
-    /// Open a trajectory file in read mode.
-    pub fn open<P>(filename: P, mode: char) -> Result<Trajectory> where P: AsRef<Path> {
-        let filename = try!(filename.as_ref().to_str().ok_or(
-            Error::utf8_path_error(filename.as_ref())
+    /// Open the file at the given `path` in the given `mode`.
+    ///
+    /// Valid modes are `'r'` for read, `'w'` for write and `'a'` for append.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::Trajectory;
+    /// let trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    /// ```
+    pub fn open<P>(path: P, mode: char) -> Result<Trajectory> where P: AsRef<Path> {
+        let path = try!(path.as_ref().to_str().ok_or(
+            Error::utf8_path_error(path.as_ref())
         ));
 
-        let filename = strings::to_c(filename);
-        let mode = mode as i8;
+        let path = strings::to_c(path);
         unsafe {
             #[allow(cast_possible_wrap)]
-            let handle = chfl_trajectory_open(filename.as_ptr(), mode);
+            let handle = chfl_trajectory_open(path.as_ptr(), mode as i8);
             Trajectory::from_ptr(handle)
         }
     }
 
-    /// Open a trajectory file in read mode using a specific `format`.
+    /// Open the file at the given `path` using a specific file `format` and
+    /// the given `mode`.
+    ///
+    /// Valid modes are `'r'` for read, `'w'` for write and `'a'` for append.
+    ///
+    /// Specifying a format is needed when the file format does not match the
+    /// extension, or when there is not standard extension for this format. If
+    /// `format` is an empty string, the format will be guessed from the
+    /// extension.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::Trajectory;
+    /// let trajectory = Trajectory::open_with_format("water.zeo", 'r', "XYZ").unwrap();
+    /// ```
     pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
         let filename = try!(filename.as_ref().to_str().ok_or(
             Error::utf8_path_error(filename.as_ref())
@@ -86,6 +107,18 @@ impl Trajectory {
     }
 
     /// Read the next step of this trajectory into a `frame`.
+    ///
+    /// If the number of atoms in frame does not correspond to the number of atom
+    /// in the next step, the frame is resized.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::{Trajectory, Frame};
+    /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// trajectory.read(&mut frame).unwrap();
+    /// ```
     pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read(
@@ -95,7 +128,19 @@ impl Trajectory {
         Ok(())
     }
 
-    /// Read a specific `step` of this trajectory in a `frame`
+    /// Read a specific `step` of this trajectory into a `frame`.
+    ///
+    /// If the number of atoms in frame does not correspond to the number of
+    /// atom at this step, the frame is resized.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::{Trajectory, Frame};
+    /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// trajectory.read_step(10, &mut frame).unwrap();
+    /// ```
     pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_read_step(
@@ -106,6 +151,15 @@ impl Trajectory {
     }
 
     /// Write a `frame` to this trajectory.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::{Trajectory, Frame};
+    /// let mut trajectory = Trajectory::open("water.pdb", 'w').unwrap();
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// trajectory.write(&mut frame).unwrap();
+    /// ```
     pub fn write(&mut self, frame: &Frame) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())))
@@ -116,6 +170,20 @@ impl Trajectory {
     /// Set the `topology` associated with this trajectory. This topology will
     /// be used when reading and writing the files, replacing any topology in
     /// the frames or files.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::{Trajectory, Atom, Topology};
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_atom(&Atom::new("H").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("O").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("H").unwrap()).unwrap();
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(1, 2).unwrap();
+    ///
+    /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    /// trajectory.set_topology(&topology).unwrap();
+    /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr())))
@@ -123,48 +191,73 @@ impl Trajectory {
         Ok(())
     }
 
-    /// Set the topology associated with a trajectory by reading the first frame
-    /// of `filename`; and extracting the topology of this frame.
-    pub fn set_topology_file<P>(&mut self, filename: P) -> Result<()> where P: AsRef<Path> {
-        let filename = try!(filename.as_ref().to_str().ok_or(
-            Error::utf8_path_error(filename.as_ref())
+    /// Set the topology associated with this trajectory by reading the first
+    /// frame of the file at the given `path` using the file format in
+    /// `format`; and extracting the topology of this frame.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::Trajectory;
+    /// let mut trajectory = Trajectory::open("water.nc", 'r').unwrap();
+    /// trajectory.set_topology_file("topology.pdb").unwrap();
+    /// ```
+    pub fn set_topology_file<P>(&mut self, path: P) -> Result<()> where P: AsRef<Path> {
+        let path = try!(path.as_ref().to_str().ok_or(
+            Error::utf8_path_error(path.as_ref())
         ));
 
-        let filename = strings::to_c(filename);
+        let path = strings::to_c(path);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
-                filename.as_ptr(),
+                path.as_ptr(),
                 ptr::null()
             )))
         }
         Ok(())
     }
 
-    /// Set the `topology` associated with a trajectory by reading the first
-    /// frame of `filename` using the given `format`; and extracting the
-    /// topology from this frame.
-    pub fn set_topology_with_format<'a, P, S>(&mut self, filename: P, format: S) -> Result<()>
+    /// Set the topology associated with this trajectory by reading the first
+    /// frame of the file at the given `path` using the file format in
+    /// `format`; and extracting the topology of this frame.
+    ///
+    /// If `format` is an empty string or `NULL`, the format will be guessed
+    /// from the path extension.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::Trajectory;
+    /// let mut trajectory = Trajectory::open("water.nc", 'r').unwrap();
+    /// trajectory.set_topology_with_format("topology.mol", "PDB").unwrap();
+    /// ```
+    pub fn set_topology_with_format<'a, P, S>(&mut self, path: P, format: S) -> Result<()>
         where P: AsRef<Path>, S: Into<&'a str> {
-        let filename = try!(filename.as_ref().to_str().ok_or(
-            Error::utf8_path_error(filename.as_ref())
+        let path = try!(path.as_ref().to_str().ok_or(
+            Error::utf8_path_error(path.as_ref())
         ));
 
         let format = strings::to_c(format.into());
-        let filename = strings::to_c(filename);
+        let path = strings::to_c(path);
         unsafe {
             try!(check(chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
-                filename.as_ptr(),
+                path.as_ptr(),
                 format.as_ptr()
             )))
         }
         Ok(())
     }
 
-    /// Set the unit `cell` associated with a trajectory. This cell will be used
-    /// when reading and writing the files, replacing any unit cell in the
+    /// Set the unit `cell` associated with a trajectory. This cell will be
+    /// used when reading and writing the files, replacing any unit cell in the
     /// frames or files.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::{Trajectory, UnitCell};
+    /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    /// trajectory.set_cell(&UnitCell::new(10.0, 11.0, 12.5).unwrap()).unwrap();
+    /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
             try!(check(chfl_trajectory_set_cell(
@@ -175,6 +268,17 @@ impl Trajectory {
     }
 
     /// Get the number of steps (the number of frames) in a trajectory.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::Trajectory;
+    /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    /// let steps = trajectory.nsteps().unwrap();
+    ///
+    /// println!("This trajectory contains {} steps", steps);
+    /// ```
+    // FIXME should this take &self instead? The file can be modified by this
+    // function, but the format should reset the state.
     pub fn nsteps(&mut self) -> Result<u64> {
         let mut res = 0;
         unsafe {
