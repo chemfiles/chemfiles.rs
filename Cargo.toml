@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles"
-version = "0.7.2"
+version = "0.7.3"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 documentation = "https://chemfiles.github.io/chemfiles.rs/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
@@ -14,7 +14,7 @@ license = "MPL-2.0"
 name = "chemfiles"
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.7.2"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.7.3"}
 libc = "0.2"
 
 [dev-dependencies]
