@@ -30,9 +30,12 @@ fn main() {
     let mut content = String::new();
     libs_file.read_to_string(&mut content).unwrap();
     for lib in content.lines() {
-        // Workaround a libclang_rt.osx.a not found error. This library is not
-        // necessary for chemfiles, so let's just ignore it.
-        if !lib.contains("libclang_rt.osx.a") {
+        /// Exclude bogus libraries: libclang_rt.osx.a is not found by the
+        /// linker, and to_library is a bug with cmake
+        fn exclude(name: &str) -> bool {
+            name.contains("libclang_rt.osx.a") || name == "to_library"
+        }
+        if !exclude(&lib) {
             println!("cargo:rustc-link-lib={}", lib);
         }
     }
