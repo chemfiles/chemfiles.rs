@@ -19,11 +19,16 @@ rust:
     - beta
 install:
     - |
-      if test "${TRAVIS_OS_NAME}" == "linux"; then
+      if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
           pip install --user travis-cargo codecov
           export PATH=$PATH:$HOME/.local/bin
           export CC=gcc-4.9
           export CXX=g++-4.9
+      fi
+    - |
+      if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+          # Workaround https://github.com/rust-lang/cargo/issues/3366
+          brew unlink libtiff jpeg libpng giflib
       fi
 script:
     - cargo test
