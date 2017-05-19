@@ -1,8 +1,8 @@
 [package]
 name = "chemfiles"
-version = "0.7.3"
+version = "0.7.4"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
-documentation = "https://chemfiles.github.io/chemfiles.rs/"
+documentation = "https://chemfiles.org/chemfiles.rs/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
 homepage = "https://github.com/chemfiles/chemfiles.rs"
 description = "Modern library for chemistry trajectories reading and writing"
@@ -14,7 +14,7 @@ license = "MPL-2.0"
 name = "chemfiles"
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.7.3"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.7.4"}
 libc = "0.2"
 
 [dev-dependencies]

@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles-sys"
-version = "0.7.3"
+version = "0.7.4"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 links = "chemfiles"
 build = "build.rs"
