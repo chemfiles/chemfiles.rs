@@ -12,8 +12,8 @@ addons:
     - libelf-dev
     - libdw-dev
 os:
-  - linux
-  - osx
+    - linux
+    - osx
 rust:
     - stable
     - beta
@@ -32,14 +32,21 @@ install:
       fi
 script:
     - cargo test
+    - ./scripts/build-docs.sh
 after_script:
     - |
       if test "${TRAVIS_OS_NAME}" == "linux" && test "${TRAVIS_RUST_VERSION}" == "stable" ; then
           travis-cargo coverage --no-sudo
           codecov --file target/kcov/kcov-merged/cobertura.xml
-          git clone https://${GH_TOKEN}@github.com/chemfiles/chemfiles.rs gh-pages
-          ./scripts/deploy-docs.sh
       fi
-env:
-  global:
-    secure: "zHBqtl7IP6jxctzM/NAJx+Bw+P0uifcaRMsZ6QiJAaZxgPmJo2YpvrENrNg4Lb+nSh5EI8vx/GFR0zGvP+gvyK+RqS+Vr62ioNxPrFq8uLudatRtH5m5NORshCjQscZSRqDgqPXZbMs9EZUx++mRqqB6xGbulWgxyL6KAnVg7/Db9aT2wsBG4Llp5kQcGyLl5bK1cOWyTrFgl6GaWk132vRGup3Zp3iCFtCJUqJHZqBpo1DJk+rVz/oXGgmZsaBtyiICM+bBV/g0gqwGe1n4cHLtlYzazljKIHXUcG9DZ5evSAtpdUe1UaSXxlNygbzAQvcMAqo9U8QBsH5epG0zwIj1V2UNiZnpl5RZGN5jGM0SVf4skt/AnwtG2XCPCEixBoqV79zhI2wsce/Pbh2IrcHEHMh5fpBt6fRKQb+zplVk1qSrsmS88q1ra4jtHW0F2j4xcXX5DSKyOMsSXaftpO8Ri6oahFJMm8kCXE3ysJQvEZlnTlAFQyZbBR82VP02WmCF/L4cFcPar6FQCTcyFhB53Xfj6+MAtW3PEVliXsOZOScKvh5EKmdmQDJZweFhOL2QPaZnk1vTp48J3Zue6yH9FbQuuiJVSDAsOuVv4+zCJsH2GzoevM3CaYaVml+0SiHQiVuykelGQRmYbSydTL41spO6W5K40juKu0v7Evc="
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GH_TOKEN
+  local_dir: gh-pages
+  on:
+    branch: master
+    tags: true
+    os: linux
+    rust: stable
