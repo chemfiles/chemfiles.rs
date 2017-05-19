@@ -23,10 +23,10 @@
 //! As all the function call the underlying C library, they all can fail and
 //! thus all return a `Result<_, Error>` value.
 //!
-//! [cxx_doc]: https://chemfiles.github.io/chemfiles
-//! [overview]: https://chemfiles.github.io/chemfiles/latest/overview.html
-//! [formats]: https://chemfiles.github.io/chemfiles/latest/formats.html
-//! [selections]: https://chemfiles.github.io/chemfiles/latest/selections.html
+//! [cxx_doc]: https://chemfiles.org/chemfiles
+//! [overview]: https://chemfiles.org/chemfiles/latest/overview.html
+//! [formats]: https://chemfiles.org/chemfiles/latest/formats.html
+//! [selections]: https://chemfiles.org/chemfiles/latest/selections.html
 #![deny(missing_docs)]
 
 #![warn(
