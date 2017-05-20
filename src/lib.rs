@@ -39,7 +39,7 @@
 // List of Clippy lints we allow in this code
 #![allow(
     needless_return, shadow_reuse, stutter, missing_docs_in_private_items,
-    zero_ptr
+    zero_ptr, cast_possible_truncation, or_fun_call
 )]
 
 #[cfg(test)]
