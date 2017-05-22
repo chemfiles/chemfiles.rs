@@ -20,6 +20,12 @@ rust:
 install:
     - export PATH=$PATH:$HOME/.local/bin:$HOME/local/bin
     - |
+      if [[ ${TRAVIS_OS_NAME} == 'linux' && ${TRAVIS_RUST_VERSION} == 'stable' ]]; then
+          export EXTRA_WORK=true
+      else
+          export EXTRA_WORK=false
+      fi
+    - |
       if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
           export CC=gcc-4.9
           export CXX=g++-4.9
@@ -31,7 +37,7 @@ install:
       fi
     # Build and cache kcov
     - |
-      if [[ "${TRAVIS_OS_NAME}" == "linux" && -f $HOME/local/bin/kcov ]]; then
+      if $EXTRA_WORK; then
           echo "Using cached kcov from ~/local/bin/kcov"
       else
           mkdir -p $HOME/local
@@ -47,21 +53,28 @@ script:
     - cargo test
     - ./scripts/build-docs.sh
     - |
-      if [[ "${TRAVIS_OS_NAME}" == "linux" && "${TRAVIS_RUST_VERSION}" == "stable" ]]; then
+      if $EXTRA_WORK; then
           kcov --include-pattern=$(pwd) --exclude-pattern=target target/kcov target/debug/deps/chemfiles-*
           bash <(curl -s https://codecov.io/bash) -s target/kcov
       fi
 
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GH_TOKEN
-  local_dir: gh-pages
-  on:
-    branch: master
-    tags: true
-    os: linux
-    rust: stable
+  # Deploy nighlty doc from master
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GH_TOKEN
+    local_dir: gh-pages
+    on:
+        branch: master
+        condition: $EXTRA_WORK
+  # Deploy release doc from tag build
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GH_TOKEN
+    local_dir: gh-pages
+    on:
+        tags: true
+        condition: $EXTRA_WORK
 
 cache:
   cargo: true
