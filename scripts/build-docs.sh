@@ -1,7 +1,7 @@
 #!/bin/bash -xe
 
 # Build documentation
-cargo doc
+cargo doc --no-deps
 
 # Get previous documentation
 git clone https://github.com/$TRAVIS_REPO_SLUG --branch gh-pages gh-pages
