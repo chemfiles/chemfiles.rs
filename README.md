@@ -5,7 +5,9 @@
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](http://chemfiles.org/chemfiles.rs/)
 
 Rust binding for the [chemfiles](https://github.com/chemfiles/chemfiles)
-library. Documentation is available [here](http://chemfiles.org/chemfiles.rs/).
+library.
+
+## [Documentation](http://chemfiles.org/chemfiles.rs/)
 
 ## Usage
 
@@ -13,7 +15,7 @@ Add this to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-chemfiles = "0.6"
+chemfiles = "0.7"
 ```
 
 And then use `chemfiles` in your project:
@@ -22,7 +24,8 @@ And then use `chemfiles` in your project:
 extern crate chemfiles;
 ```
 
-Here is a simple usage example. Please see the `examples` folder for more examples.
+Here is a simple usage example. See the `examples` folder for additional
+examples.
 
 ```rust
 extern crate chemfiles;
@@ -44,5 +47,6 @@ fn main() {
 
 ## Bug reports, feature requests
 
-Please report any bug you find and any feature you may want as a [github
-issue](https://github.com/chemfiles/chemfiles.rs/issues/new).
+Please report any bug you find and any feature you may want as a Github [issue].
+
+[issue]: https://github.com/chemfiles/chemfiles.rs/issues/new
