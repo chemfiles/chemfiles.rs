@@ -1,10 +1,10 @@
 [package]
 name = "chemfiles"
 version = "0.7.4"
-authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
-documentation = "https://chemfiles.org/chemfiles.rs/"
+authors = ["Guillaume Fraux <guillaume.fraux@chimie-paristech.fr>"]
+documentation = "http://chemfiles.org/chemfiles.rs/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
-homepage = "https://github.com/chemfiles/chemfiles.rs"
+homepage = "http://chemfiles.org/"
 description = "Modern library for chemistry trajectories reading and writing"
 keywords = ["computational", "theoretical", "chemistry", "file", "trajectory"]
 readme = "README.md"
