@@ -404,13 +404,13 @@ Written by the chemfiles library
 X 1 2 3
 X 1 2 3
 X 1 2 3
-X 1 2 3";
+X 1 2 3".lines().collect::<Vec<_>>();
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();
         let _ = file.read_to_string(&mut content).unwrap();
 
-        assert_eq!(expected_content, content.trim());
+        assert_eq!(expected_content, content.lines().collect::<Vec<_>>());
         fs::remove_file(filename).unwrap();
     }
 }
