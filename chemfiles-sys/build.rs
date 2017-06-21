@@ -2,6 +2,7 @@ extern crate cmake;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
+use std::env;
 
 fn main() {
     let path = Path::new("chemfiles").join("CMakeLists.txt");
@@ -16,7 +17,13 @@ fn main() {
 
     // Building the chemfiles C++ library
     let dst = cfg.build().join("build");
-    println!("cargo:rustc-link-search=native={}/chemfiles", dst.display());
+    let mut chemfiles_lib_path = dst.join("chemfiles");
+    let target = env::var("TARGET").expect("TARGET is not set");
+    if target.contains("-windows-msvc") {
+        let profile = env::var("PROFILE").expect("PROFILE is not set");
+        chemfiles_lib_path = chemfiles_lib_path.join(profile);
+    }
+    println!("cargo:rustc-link-search=native={}", chemfiles_lib_path.display());
 
     // Getting the list of needed C++ libraries
     let mut dirs_file = File::open(dst.join("cxx_link_dirs.cmake")).unwrap();
