@@ -50,9 +50,11 @@ install:
               cd $TRAVIS_BUILD_DIR
           fi
       fi
+    - rm -rf target/debug/deps/chemfiles-*
 
 script:
     - cargo test
+    - cargo test --release
     - ./scripts/build-docs.sh
     - |
       if $EXTRA_WORK; then
