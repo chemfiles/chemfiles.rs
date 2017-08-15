@@ -221,8 +221,8 @@ impl Trajectory {
     /// frame of the file at the given `path` using the file format in
     /// `format`; and extracting the topology of this frame.
     ///
-    /// If `format` is an empty string or `NULL`, the format will be guessed
-    /// from the path extension.
+    /// If `format` is an empty string, the format will be guessed from the
+    /// `path` extension.
     ///
     /// # Example
     /// ```no_run
