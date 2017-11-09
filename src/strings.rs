@@ -48,17 +48,17 @@ fn buffer_was_big_enough(buffer: &[i8]) -> bool {
 /// result truncated by the C library, grow the buffer and try again until we
 /// get all the data. Then return the filled buffer to the caller.
 pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<i8>>
-    where F: Fn(*const i8, u64) -> chfl_status {
+    where F: Fn(*mut i8, u64) -> chfl_status {
 
     let mut size = initial;
     let mut buffer = vec![0; size];
-    try!(check(callback(buffer.as_ptr(), buffer.len() as u64)));
+    try!(check(callback(buffer.as_mut_ptr(), buffer.len() as u64)));
 
     while !buffer_was_big_enough(&buffer) {
         // Grow the buffer and retry
         size *= 2;
         buffer.resize(size, 0);
-        try!(check(callback(buffer.as_ptr(), buffer.len() as u64)));
+        try!(check(callback(buffer.as_mut_ptr(), buffer.len() as u64)));
     }
 
     Ok(buffer)

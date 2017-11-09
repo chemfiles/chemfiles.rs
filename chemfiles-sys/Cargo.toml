@@ -17,3 +17,8 @@ libc = "0.2"
 
 [build-dependencies]
 cmake = "0.1"
+ctest = "0.1"
+
+[[test]]
+name = "ctest"
+harness = false

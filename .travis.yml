@@ -53,7 +53,7 @@ install:
     - rm -rf target/debug/deps/chemfiles-*
 
 script:
-    - cargo test
+    - cargo test --all
     - cargo test --release
     - ./scripts/build-docs.sh
     - |

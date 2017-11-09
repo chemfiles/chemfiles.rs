@@ -1,9 +1,17 @@
 extern crate cmake;
+extern crate ctest;
+
 use std::io::prelude::*;
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn main() {
+    let out_dir = build_chemfiles();
+    list_cxx_libs(&out_dir.join("build"));
+    generate_ctests(&out_dir.join("include"));
+}
+
+fn build_chemfiles() -> PathBuf {
     let path = Path::new("chemfiles").join("CMakeLists.txt");
     if !path.exists() {
         panic!("The git submodule for chemfiles is not initalized.\n\
@@ -12,11 +20,12 @@ fn main() {
 
     let out_dir = cmake::Config::new(".").build();
     let lib = out_dir.join("lib");
-    let build = out_dir.join("build");
-
     println!("cargo:rustc-link-search=native={}", lib.display());
 
-    // Getting the list of needed C++ libraries
+    return out_dir;
+}
+
+fn list_cxx_libs(build: &Path) {
     let mut dirs_file = File::open(build.join("cxx_link_dirs.cmake")).unwrap();
     let mut content = String::new();
     dirs_file.read_to_string(&mut content).unwrap();
@@ -37,4 +46,26 @@ fn main() {
             println!("cargo:rustc-link-lib={}", lib);
         }
     }
+}
+
+fn generate_ctests(include: &Path) {
+    let mut cfg = ctest::TestGenerator::new();
+    cfg.header("chemfiles.h");
+    cfg.include(include);
+
+    cfg.skip_signededness(|s| {
+        s == "chfl_warning_callback"
+    });
+
+    // ctest does not know what to do with pointers to double[N] data.
+    const SKIPED_FNS: &[&str] = &[
+        "chfl_topology_bonds", "chfl_topology_angles", "chfl_topology_dihedrals",
+        "chfl_cell_matrix", "chfl_frame_positions", "chfl_frame_velocities",
+    ];
+
+    cfg.skip_fn(|name| {
+        SKIPED_FNS.contains(&name)
+    });
+
+    cfg.generate("lib.rs", "ctest.rs");
 }

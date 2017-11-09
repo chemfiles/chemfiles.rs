@@ -70,11 +70,11 @@ extern "C" {
     pub fn chfl_atom_set_mass(atom: *mut CHFL_ATOM, mass: c_double) -> chfl_status;
     pub fn chfl_atom_charge(atom: *const CHFL_ATOM, charge: *mut c_double) -> chfl_status;
     pub fn chfl_atom_set_charge(atom: *mut CHFL_ATOM, charge: c_double) -> chfl_status;
-    pub fn chfl_atom_type(atom: *const CHFL_ATOM, _type: *const c_char, buffsize: uint64_t) -> chfl_status;
+    pub fn chfl_atom_type(atom: *const CHFL_ATOM, _type: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_atom_set_type(atom: *mut CHFL_ATOM, _type: *const c_char) -> chfl_status;
-    pub fn chfl_atom_name(atom: *const CHFL_ATOM, name: *const c_char, buffsize: uint64_t) -> chfl_status;
+    pub fn chfl_atom_name(atom: *const CHFL_ATOM, name: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_atom_set_name(atom: *mut CHFL_ATOM, name: *const c_char) -> chfl_status;
-    pub fn chfl_atom_full_name(atom: *const CHFL_ATOM, name: *const c_char, buffsize: uint64_t) -> chfl_status;
+    pub fn chfl_atom_full_name(atom: *const CHFL_ATOM, name: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_atom_vdw_radius(atom: *const CHFL_ATOM, radius: *mut c_double) -> chfl_status;
     pub fn chfl_atom_covalent_radius(atom: *const CHFL_ATOM, radius: *mut c_double) -> chfl_status;
     pub fn chfl_atom_atomic_number(atom: *const CHFL_ATOM, number: *mut int64_t) -> chfl_status;
@@ -85,7 +85,7 @@ extern "C" {
     pub fn chfl_residue_copy(residue: *const CHFL_RESIDUE) -> *mut CHFL_RESIDUE;
     pub fn chfl_residue_atoms_count(residue: *const CHFL_RESIDUE, size: *mut uint64_t) -> chfl_status;
     pub fn chfl_residue_id(residue: *const CHFL_RESIDUE, id: *mut uint64_t) -> chfl_status;
-    pub fn chfl_residue_name(residue: *const CHFL_RESIDUE, name: *const c_char, buffsize: uint64_t) -> chfl_status;
+    pub fn chfl_residue_name(residue: *const CHFL_RESIDUE, name: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_residue_add_atom(residue: *mut CHFL_RESIDUE, i: uint64_t) -> chfl_status;
     pub fn chfl_residue_contains(residue: *const CHFL_RESIDUE, i: uint64_t, result: *mut c_bool) -> chfl_status;
     pub fn chfl_residue_free(residue: *mut CHFL_RESIDUE) -> chfl_status;
@@ -153,7 +153,7 @@ extern "C" {
     pub fn chfl_selection(selection: *const c_char) -> *mut CHFL_SELECTION;
     pub fn chfl_selection_copy(selection: *const CHFL_SELECTION) -> *mut CHFL_SELECTION;
     pub fn chfl_selection_size(selection: *const CHFL_SELECTION, size: *mut uint64_t) -> chfl_status;
-    pub fn chfl_selection_string(selection: *const CHFL_SELECTION, string: *const c_char, buffsize: uint64_t) -> chfl_status;
+    pub fn chfl_selection_string(selection: *const CHFL_SELECTION, string: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_selection_evaluate(selection: *mut CHFL_SELECTION, frame: *const CHFL_FRAME, nmatches: *mut uint64_t) -> chfl_status;
     pub fn chfl_selection_matches(selection: *const CHFL_SELECTION, matches: *mut chfl_match_t, nmatches: uint64_t) -> chfl_status;
     pub fn chfl_selection_free(selection: *mut CHFL_SELECTION) -> chfl_status;
