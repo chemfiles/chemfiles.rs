@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(chemfiles)
 
 # Get default C++ libraries to link
