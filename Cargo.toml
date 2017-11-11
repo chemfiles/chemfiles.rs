@@ -21,4 +21,7 @@ libc = "0.2"
 approx = "0.1"
 
 [workspace]
-members = ["chemfiles-sys"]
+members = [
+    "chemfiles-sys",
+    "chemfiles-sys-tests"
+]

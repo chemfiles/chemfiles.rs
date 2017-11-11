@@ -1,0 +1,17 @@
+[package]
+name = "chemfiles-sys-tests"
+version = "0.0.0"
+authors = ["Guillaume Fraux <guillaume@fraux.fr>"]
+repository = "https://github.com/chemfiles/chemfiles.rs"
+publish = false
+
+[[bin]]
+name = "chfl_sys_tests"
+path = "main.rs"
+
+[dependencies]
+libc = "0.2"
+chemfiles-sys = {path = "../chemfiles-sys"}
+
+[build-dependencies]
+ctest = "0.1"

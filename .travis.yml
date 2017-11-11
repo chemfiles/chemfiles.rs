@@ -48,8 +48,9 @@ install:
     - rm -rf target/debug/deps/chemfiles-*
 
 script:
-    - cargo test --all
+    - cargo test
     - cargo test --release
+    - cargo run -p chemfiles-sys-tests
     - ./scripts/build-docs.sh
     - |
       if $EXTRA_WORK; then

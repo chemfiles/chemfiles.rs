@@ -1,5 +1,4 @@
 extern crate cmake;
-extern crate ctest;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -8,7 +7,6 @@ use std::path::{Path, PathBuf};
 fn main() {
     let out_dir = build_chemfiles();
     list_cxx_libs(&out_dir.join("build"));
-    generate_ctests(&out_dir.join("include"));
 }
 
 fn build_chemfiles() -> PathBuf {
@@ -46,26 +44,4 @@ fn list_cxx_libs(build: &Path) {
             println!("cargo:rustc-link-lib={}", lib);
         }
     }
-}
-
-fn generate_ctests(include: &Path) {
-    let mut cfg = ctest::TestGenerator::new();
-    cfg.header("chemfiles.h");
-    cfg.include(include);
-
-    cfg.skip_signededness(|s| {
-        s == "chfl_warning_callback"
-    });
-
-    // ctest does not know what to do with pointers to double[N] data.
-    const SKIPED_FNS: &[&str] = &[
-        "chfl_topology_bonds", "chfl_topology_angles", "chfl_topology_dihedrals",
-        "chfl_cell_matrix", "chfl_frame_positions", "chfl_frame_velocities",
-    ];
-
-    cfg.skip_fn(|name| {
-        SKIPED_FNS.contains(&name)
-    });
-
-    cfg.generate("lib.rs", "ctest.rs");
 }
