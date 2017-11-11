@@ -66,9 +66,20 @@ impl Residue {
     /// # use chemfiles::Residue;
     /// let residue = Residue::new("ALA").unwrap();
     /// assert_eq!(residue.name(), Ok(String::from("ALA")));
+    /// assert_eq!(residue.id(), Ok(None));
     /// ```
     pub fn new<'a, S>(name: S) -> Result<Residue> where S: Into<&'a str> {
-        return Residue::with_id(name, u64::MAX)
+        let handle: *const CHFL_RESIDUE;
+        let buffer = strings::to_c(name.into());
+        unsafe {
+            handle = chfl_residue(buffer.as_ptr());
+        }
+
+        if handle.is_null() {
+            Err(Error::null_ptr())
+        } else {
+            Ok(Residue{handle: handle})
+        }
     }
 
     /// Create a new residue with the given `name` and `id` as identifier.
@@ -78,13 +89,13 @@ impl Residue {
     /// # use chemfiles::Residue;
     /// let residue = Residue::with_id("ALA", 67).unwrap();
     /// assert_eq!(residue.name(), Ok(String::from("ALA")));
-    /// assert_eq!(residue.id(), Ok(67));
+    /// assert_eq!(residue.id(), Ok(Some(67)));
     /// ```
     pub fn with_id<'a, S>(name: S, id: u64) -> Result<Residue> where S: Into<&'a str> {
         let handle: *const CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
         unsafe {
-            handle = chfl_residue(buffer.as_ptr(), id);
+            handle = chfl_residue_with_id(buffer.as_ptr(), id);
         }
 
         if handle.is_null() {
@@ -121,14 +132,21 @@ impl Residue {
     /// ```
     /// # use chemfiles::Residue;
     /// let residue = Residue::with_id("", 42).unwrap();
-    /// assert_eq!(residue.id(), Ok(42));
+    /// assert_eq!(residue.id(), Ok(Some(42)));
     /// ```
-    pub fn id(&self) -> Result<u64> {
+    pub fn id(&self) -> Result<Option<u64>> {
         let mut resid = 0;
+        let status;
         unsafe {
-            try!(check(chfl_residue_id(self.as_ptr(), &mut resid)));
+            status = chfl_residue_id(self.as_ptr(), &mut resid);
         }
-        return Ok(resid);
+        if status == chfl_status::CHFL_SUCCESS {
+            return Ok(Some(resid));
+        } else if status == chfl_status::CHFL_GENERIC_ERROR {
+            return Ok(None);
+        } else {
+            return Err(Error::from(status))
+        }
     }
 
     /// Get the name of this residue.
@@ -196,7 +214,6 @@ impl Drop for Residue {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::u64;
 
     #[test]
     fn clone() {
@@ -221,10 +238,10 @@ mod tests {
     #[test]
     fn id() {
         let residue = Residue::new("A").unwrap();
-        assert_eq!(residue.id(), Ok(u64::MAX));
+        assert_eq!(residue.id(), Ok(None));
 
         let residue = Residue::with_id("A", 42).unwrap();
-        assert_eq!(residue.id(), Ok(42));
+        assert_eq!(residue.id(), Ok(Some(42)));
     }
 
     #[test]

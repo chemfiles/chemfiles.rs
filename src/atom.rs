@@ -274,7 +274,7 @@ impl Atom {
     /// let atom = Atom::new("He").unwrap();
     /// assert_eq!(atom.atomic_number(), Ok(2));
     /// ```
-    pub fn atomic_number(&self) -> Result<i64> {
+    pub fn atomic_number(&self) -> Result<u64> {
         let mut number = 0;
         unsafe {
             try!(check(chfl_atom_atomic_number(self.as_ptr(), &mut number)));

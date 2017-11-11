@@ -16,14 +16,17 @@ use frame::Frame;
 use Result;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// A `Match` is a set of atomic indexes matching a given selection. It should
-/// be used like a `&[u64]`.
-pub struct Match(chfl_match_t);
+/// A `Match` is a set of atomic indexes matching a given selection. It can
+/// mostly be used like a `&[u64]`.
+pub struct Match(chfl_match);
 
 #[allow(len_without_is_empty)]
 impl Match {
     fn zero() -> Match {
-        Match(chfl_match_t{size: 0, atoms: [0; 4]})
+        Match(chfl_match {
+            size: 0,
+            atoms: [0; 4]
+        })
     }
 
     /// Get the length of the Match.
@@ -64,7 +67,10 @@ impl Match {
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Match(chfl_match_t{size: size as u64, atoms: matches})
+        Match(chfl_match {
+            size: size as u64,
+            atoms: matches}
+        )
     }
 
     /// Iterate over the atomic indexes in the match.
@@ -330,7 +336,7 @@ mod tests {
         #[test]
         fn size_of() {
             assert_eq!(
-                ::std::mem::size_of::<chfl_match_t>(),
+                ::std::mem::size_of::<chfl_match>(),
                 ::std::mem::size_of::<Match>()
             )
         }

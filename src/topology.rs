@@ -171,78 +171,22 @@ impl Topology {
         return Ok(());
     }
 
-    /// Tell if the atoms at indexes `i` and `j` are bonded together.
-    ///
-    /// # Example
-    /// ```
-    /// # use chemfiles::Topology;
-    /// let mut topology = Topology::new().unwrap();
-    /// assert_eq!(topology.is_bond(9, 8), Ok(false));
-    ///
-    /// topology.add_bond(9, 8).unwrap();
-    /// assert_eq!(topology.is_bond(9, 8), Ok(true));
-    /// ```
-    pub fn is_bond(&self, i: u64, j: u64) -> Result<bool> {
-        let mut res = 0;
-        unsafe {
-            try!(check(chfl_topology_isbond(self.as_ptr(), i, j, &mut res)));
-        }
-        return Ok(res != 0);
-    }
-
-    /// Tell if the atoms at indexes `i`, `j` and `k` constitues an angle.
-    ///
-    /// # Example
-    /// ```
-    /// # use chemfiles::Topology;
-    /// let mut topology = Topology::new().unwrap();
-    /// assert_eq!(topology.is_angle(9, 8, 6), Ok(false));
-    ///
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
-    /// assert_eq!(topology.is_angle(9, 8, 6), Ok(true));
-    /// ```
-    pub fn is_angle(&self, i: u64, j: u64, k: u64) -> Result<bool> {
-        let mut res = 0;
-        unsafe {
-            try!(check(chfl_topology_isangle(self.as_ptr(), i, j, k, &mut res)));
-        }
-        return Ok(res != 0);
-    }
-
-    /// Tell if the atoms at indexes `i`, `j`, `k` and `m` constitues a
-    /// dihedral angle.
-    ///
-    /// # Example
-    /// ```
-    /// # use chemfiles::Topology;
-    /// let mut topology = Topology::new().unwrap();
-    /// assert_eq!(topology.is_dihedral(2, 9, 8, 6), Ok(false));
-    ///
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
-    /// assert_eq!(topology.is_dihedral(2, 9, 8, 6), Ok(true));
-    /// ```
-    pub fn is_dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> Result<bool> {
-        let mut res = 0;
-        unsafe {
-            try!(check(chfl_topology_isdihedral(self.as_ptr(), i, j, k, m, &mut res)));
-        }
-        return Ok(res != 0);
-    }
-
     /// Get the number of bonds in the topology.
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(0));
     ///
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(2, 1).unwrap();
+    /// topology.add_bond(2, 3).unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(3));
     /// ```
     pub fn bonds_count(&self) -> Result<u64> {
@@ -257,13 +201,18 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
     /// assert_eq!(topology.angles_count(), Ok(0));
     ///
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(2, 1).unwrap();
+    /// topology.add_bond(2, 3).unwrap();
     /// assert_eq!(topology.angles_count(), Ok(2));
     /// ```
     pub fn angles_count(&self) -> Result<u64> {
@@ -278,13 +227,18 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
     /// assert_eq!(topology.dihedrals_count(), Ok(0));
     ///
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(2, 1).unwrap();
+    /// topology.add_bond(2, 3).unwrap();
     /// assert_eq!(topology.dihedrals_count(), Ok(1));
     /// ```
     pub fn dihedrals_count(&self) -> Result<u64> {
@@ -299,13 +253,17 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
     ///
-    /// assert_eq!(topology.bonds(), Ok(vec![[2, 9], [6, 8], [8, 9]]));
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(2, 1).unwrap();
+    /// topology.add_bond(2, 3).unwrap();
+    /// assert_eq!(topology.bonds(), Ok(vec![[0, 1], [1, 2], [2, 3]]));
     /// ```
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>> {
         let nbonds = try!(self.bonds_count());
@@ -324,13 +282,17 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
     ///
-    /// assert_eq!(topology.angles(), Ok(vec![[2, 9, 8], [6, 8, 9]]));
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(2, 1).unwrap();
+    /// topology.add_bond(2, 3).unwrap();
+    /// assert_eq!(topology.angles(), Ok(vec![[0, 1, 2], [1, 2, 3]]));
     /// ```
     pub fn angles(&self) -> Result<Vec<[u64; 3]>> {
         let nangles = try!(self.angles_count());
@@ -345,13 +307,18 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
-    /// topology.add_bond(2, 9).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
-    /// topology.add_bond(6, 8).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
     ///
-    /// assert_eq!(topology.dihedrals(), Ok(vec![[6, 8, 9, 2]]));
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(2, 1).unwrap();
+    /// topology.add_bond(2, 3).unwrap();
+    ///
+    /// assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3]]));
     /// ```
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>> {
         let ndihedrals = try!(self.dihedrals_count());
@@ -366,12 +333,16 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(0));
     ///
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
     /// topology.add_bond(0, 1).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(0, 2).unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(2));
     /// ```
     pub fn add_bond(&mut self, i: u64, j: u64) -> Result<()> {
@@ -388,18 +359,23 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, Atom};
     /// let mut topology = Topology::new().unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(0));
     ///
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
     /// topology.add_bond(0, 1).unwrap();
-    /// topology.add_bond(9, 8).unwrap();
+    /// topology.add_bond(1, 2).unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(2));
     ///
     /// topology.remove_bond(0, 1).unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(1));
     ///
-    /// topology.remove_bond(10, 1).unwrap();
+    /// // Removing a bond that does not exists
+    /// topology.remove_bond(0, 2).unwrap();
     /// assert_eq!(topology.bonds_count(), Ok(1));
     /// ```
     pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<()> {
@@ -606,6 +582,10 @@ mod test {
     #[test]
     fn bonds() {
         let mut topology = Topology::new().unwrap();
+        for _ in 0..12 {
+            topology.add_atom(&Atom::new("S").unwrap()).unwrap();
+        }
+
         assert_eq!(topology.bonds_count(), Ok(0));
 
         topology.add_bond(0, 1).unwrap();
@@ -613,20 +593,21 @@ mod test {
         topology.add_bond(3, 7).unwrap();
         assert_eq!(topology.bonds_count(), Ok(3));
 
-        assert_eq!(topology.is_bond(0, 1), Ok(true));
-        assert_eq!(topology.is_bond(0, 2), Ok(false));
-
         assert_eq!(topology.bonds(), Ok(vec![[0, 1], [2, 9], [3, 7]]));
 
         topology.remove_bond(3, 7).unwrap();
         // Removing unexisting bond is OK
-        topology.remove_bond(37, 7).unwrap();
+        topology.remove_bond(8, 7).unwrap();
         assert_eq!(topology.bonds_count(), Ok(2));
     }
 
     #[test]
     fn angles() {
         let mut topology = Topology::new().unwrap();
+        for _ in 0..12 {
+            topology.add_atom(&Atom::new("S").unwrap()).unwrap();
+        }
+
         assert_eq!(topology.angles_count(), Ok(0));
 
         topology.add_bond(0, 1).unwrap();
@@ -635,15 +616,16 @@ mod test {
         topology.add_bond(3, 5).unwrap();
         assert_eq!(topology.angles_count(), Ok(2));
 
-        assert_eq!(topology.is_angle(0, 1, 2), Ok(true));
-        assert_eq!(topology.is_angle(0, 2, 1), Ok(false));
-
         assert_eq!(topology.angles(), Ok(vec![[0, 1, 2], [5, 3, 7]]));
     }
 
     #[test]
     fn dihedrals() {
         let mut topology = Topology::new().unwrap();
+        for _ in 0..12 {
+            topology.add_atom(&Atom::new("S").unwrap()).unwrap();
+        }
+
         assert_eq!(topology.dihedrals_count(), Ok(0));
 
         topology.add_bond(0, 1).unwrap();
@@ -653,9 +635,6 @@ mod test {
         topology.add_bond(4, 5).unwrap();
         topology.add_bond(7, 10).unwrap();
         assert_eq!(topology.dihedrals_count(), Ok(2));
-
-        assert_eq!(topology.is_dihedral(0, 1, 2, 3), Ok(true));
-        assert_eq!(topology.is_dihedral(0, 2, 1, 3), Ok(false));
 
         assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3], [5, 4, 7, 10]]));
     }

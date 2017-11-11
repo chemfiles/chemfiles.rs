@@ -44,6 +44,12 @@ pub enum Status {
     FormatError,
     /// Error in selection string syntax
     SelectionError,
+    /// Error in configuration files syntax
+    ConfigurationError,
+    /// Error for out of bounds indexing
+    OutOfBounds,
+    /// Error related to properties
+    PropertyError,
     /// The given path is not valid UTF8
     UTF8PathError,
     /// We got a null pointer from C++
@@ -60,6 +66,9 @@ impl From<chfl_status> for Error {
             chfl_status::CHFL_FILE_ERROR => Status::FileError,
             chfl_status::CHFL_FORMAT_ERROR => Status::FormatError,
             chfl_status::CHFL_SELECTION_ERROR => Status::SelectionError,
+            chfl_status::CHFL_CONFIGURATION_ERROR => Status::ConfigurationError,
+            chfl_status::CHFL_OUT_OF_BOUNDS => Status::OutOfBounds,
+            chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
         Error {
             status: status,
@@ -97,8 +106,9 @@ impl Error {
     /// Clear any error from the C++ library
     pub fn cleanup() {
         unsafe {
-            // TODO check the status
-            let _ = chfl_clear_errors();
+            check(chfl_clear_errors()).expect(
+                "error in chfl_clear_errors. Things went very bad"
+            );
         }
     }
 }
@@ -166,6 +176,9 @@ impl error::Error for Error {
             Status::FormatError => "Error in file formatting, i.e. the file is invalid",
 	        Status::SelectionError => "Error in selection string syntax",
 	        Status::UTF8PathError => "The given path is not valid UTF8",
+	        Status::ConfigurationError => "Error in configuration files",
+	        Status::OutOfBounds => "Out of bounds indexing",
+	        Status::PropertyError => "Error in property",
             Status::NullPtr => "We got a NULL pointer from C++",
         }
     }
@@ -177,13 +190,19 @@ mod test {
     use super::*;
     use Trajectory;
     use std::error::Error as ErrorTrait;
+    use std::thread;
+    use std::time::Duration;
 
     #[test]
     fn errors() {
+        // The last_error is a global, so it can be polluted by other tests. We
+        // wait for a few time in order to be sure that every other test is
+        // finished.
+        thread::sleep(Duration::from_millis(300));
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
         assert!(Trajectory::open("nope", 'r').is_err());
-        assert_eq!(Error::last_error(), "Can not find a format associated with the \"\" extension.");
+        assert_eq!(Error::last_error(), "file at \'nope\' does not have an extension, provide a format name to read it");
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
     }

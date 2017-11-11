@@ -21,22 +21,22 @@ pub enum CellShape {
     Infinite,
 }
 
-impl From<chfl_cell_shape_t> for CellShape {
-    fn from(celltype: chfl_cell_shape_t) -> CellShape {
+impl From<chfl_cellshape> for CellShape {
+    fn from(celltype: chfl_cellshape) -> CellShape {
         match celltype {
-            chfl_cell_shape_t::CHFL_CELL_ORTHORHOMBIC => CellShape::Orthorhombic,
-            chfl_cell_shape_t::CHFL_CELL_TRICLINIC => CellShape::Triclinic,
-            chfl_cell_shape_t::CHFL_CELL_INFINITE => CellShape::Infinite,
+            chfl_cellshape::CHFL_CELL_ORTHORHOMBIC => CellShape::Orthorhombic,
+            chfl_cellshape::CHFL_CELL_TRICLINIC => CellShape::Triclinic,
+            chfl_cellshape::CHFL_CELL_INFINITE => CellShape::Infinite,
         }
     }
 }
 
-impl From<CellShape> for chfl_cell_shape_t {
-    fn from(celltype: CellShape) -> chfl_cell_shape_t {
+impl From<CellShape> for chfl_cellshape {
+    fn from(celltype: CellShape) -> chfl_cellshape {
         match celltype {
-            CellShape::Orthorhombic => chfl_cell_shape_t::CHFL_CELL_ORTHORHOMBIC,
-            CellShape::Triclinic => chfl_cell_shape_t::CHFL_CELL_TRICLINIC,
-            CellShape::Infinite => chfl_cell_shape_t::CHFL_CELL_INFINITE,
+            CellShape::Orthorhombic => chfl_cellshape::CHFL_CELL_ORTHORHOMBIC,
+            CellShape::Triclinic => chfl_cellshape::CHFL_CELL_TRICLINIC,
+            CellShape::Infinite => chfl_cellshape::CHFL_CELL_INFINITE,
         }
     }
 }
@@ -274,7 +274,7 @@ impl UnitCell {
     /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
     /// ```
     pub fn shape(&self) -> Result<CellShape> {
-        let mut shape = chfl_cell_shape_t::CHFL_CELL_INFINITE;
+        let mut shape = chfl_cellshape::CHFL_CELL_INFINITE;
         unsafe {
             try!(check(chfl_cell_shape(self.as_ptr(), &mut shape)));
         }
@@ -289,8 +289,8 @@ impl UnitCell {
     /// let mut cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
     /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
     ///
-    /// cell.set_shape(CellShape::Infinite).unwrap();
-    /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
+    /// cell.set_shape(CellShape::Triclinic).unwrap();
+    /// assert_eq!(cell.shape(), Ok(CellShape::Triclinic));
     /// ```
     pub fn set_shape(&mut self, shape: CellShape) -> Result<()> {
         unsafe {
@@ -391,16 +391,18 @@ mod test {
 
     #[test]
     fn shape() {
-        let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        let cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
-
-        assert!(cell.set_shape(CellShape::Infinite).is_ok());
-        assert_eq!(cell.shape(), Ok(CellShape::Infinite));
 
         let cell = UnitCell::infinite().unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Infinite));
 
         let cell = UnitCell::triclinic(1., 2., 3., 80., 90., 100.).unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Triclinic));
+
+        let mut cell = UnitCell::new(0.0, 0.0, 0.0).unwrap();
+        assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
+        assert!(cell.set_shape(CellShape::Infinite).is_ok());
+        assert_eq!(cell.shape(), Ok(CellShape::Infinite));
     }
 }
