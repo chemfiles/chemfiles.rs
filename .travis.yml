@@ -48,8 +48,8 @@ install:
     - rm -rf target/debug/deps/chemfiles-*
 
 script:
-    - cargo test
-    - cargo test --release
+    - cargo test -- --test-threads=2
+    - cargo test --release -- --test-threads=2
     - cargo run -p chemfiles-sys-tests
     - ./scripts/build-docs.sh
     - |
