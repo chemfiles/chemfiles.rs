@@ -9,8 +9,10 @@ use std::ptr;
 use std::slice;
 
 use chemfiles_sys::*;
+use strings;
 use errors::{check, Error};
 use {Atom, Topology, UnitCell};
+use property::{Property, RawProperty};
 use Result;
 
 /// A `Frame` contains data from one simulation step: the current unit
@@ -482,6 +484,56 @@ impl Frame {
         }
         return Ok(());
     }
+
+
+    /// Add a new `property` with the given `name` to this frame.
+    ///
+    /// If a property with the same name already exists, this function override
+    /// the existing property with the new one.
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Frame, Property};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.set("a string", Property::String("hello".into()));
+    ///
+    /// assert_eq!(frame.get("a string").unwrap(), Some(Property::String("hello".into())));
+    /// ```
+    pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
+        let buffer = strings::to_c(name);
+        let property = try!(property.as_raw());
+        unsafe {
+            try!(check(chfl_frame_set_property(
+                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+            )));
+        }
+        return Ok(());
+    }
+
+    /// Get a property with the given `name` in this frame, if it exist.
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Frame, Property};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.set("foo", Property::Double(22.2));
+    ///
+    /// assert_eq!(frame.get("foo").unwrap(), Some(Property::Double(22.2)));
+    /// assert_eq!(frame.get("Bar").unwrap(), None);
+    /// ```
+    pub fn get(&mut self, name: &str) -> Result<Option<Property>> {
+        let buffer = strings::to_c(name);
+        unsafe {
+            let handle = chfl_frame_get_property(self.as_ptr(), buffer.as_ptr());
+            if handle.is_null() {
+                Ok(None)
+            } else {
+                let raw = try!(RawProperty::from_ptr(handle));
+                let property = try!(Property::from_raw(raw));
+                Ok(Some(property))
+            }
+        }
+    }
 }
 
 impl Drop for Frame {
@@ -620,5 +672,12 @@ mod test {
 
         assert!(frame.set_step(42).is_ok());
         assert_eq!(frame.step(), Ok(42));
+    }
+
+    #[test]
+    fn property() {
+        let mut frame = Frame::new().unwrap();
+        assert_eq!(frame.set("foo", Property::Double(-22.0)), Ok(()));
+        assert_eq!(frame.get("foo"), Ok(Some(Property::Double(-22.0))));
     }
 }

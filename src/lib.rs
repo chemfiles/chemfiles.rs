@@ -80,6 +80,9 @@ pub use trajectory::Trajectory;
 mod selection;
 pub use selection::{Selection, Match};
 
+mod property;
+pub use property::Property;
+
 /// Get the version of the chemfiles library.
 pub fn version() -> String {
     unsafe {

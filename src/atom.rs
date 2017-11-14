@@ -11,6 +11,8 @@ use errors::{check, Error};
 use strings;
 use Result;
 
+use property::{Property, RawProperty};
+
 /// An `Atom` is a particle in the current `Frame`. It stores the following
 /// atomic properties:
 ///
@@ -281,6 +283,56 @@ impl Atom {
         }
         return Ok(number);
     }
+
+    /// Add a new `property` with the given `name` to this atom.
+    ///
+    /// If a property with the same name already exists, this function override
+    /// the existing property with the new one.
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Atom, Property};
+    /// let mut atom = Atom::new("He").unwrap();
+    /// atom.set("a bool value", Property::Bool(true));
+    ///
+    /// assert_eq!(atom.get("a bool value").unwrap(), Some(Property::Bool(true)));
+    /// ```
+    pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
+        let buffer = strings::to_c(name);
+        let property = try!(property.as_raw());
+        unsafe {
+            try!(check(chfl_atom_set_property(
+                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+            )));
+        }
+        return Ok(());
+    }
+
+
+    /// Get a property with the given `name` in this atom, if it exist.
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Atom, Property};
+    /// let mut atom = Atom::new("He").unwrap();
+    /// atom.set("foo", Property::Double(22.2));
+    ///
+    /// assert_eq!(atom.get("foo").unwrap(), Some(Property::Double(22.2)));
+    /// assert_eq!(atom.get("Bar").unwrap(), None);
+    /// ```
+    pub fn get(&mut self, name: &str) -> Result<Option<Property>> {
+        let buffer = strings::to_c(name);
+        unsafe {
+            let handle = chfl_atom_get_property(self.as_ptr(), buffer.as_ptr());
+            if handle.is_null() {
+                Ok(None)
+            } else {
+                let raw = try!(RawProperty::from_ptr(handle));
+                let property = try!(Property::from_raw(raw));
+                Ok(Some(property))
+            }
+        }
+    }
 }
 
 impl Drop for Atom {
@@ -358,5 +410,12 @@ mod test {
     fn atomic_number() {
         let atom = Atom::new("He").unwrap();
         assert_eq!(atom.atomic_number(), Ok(2));
+    }
+
+    #[test]
+    fn property() {
+        let mut atom = Atom::new("F").unwrap();
+        assert_eq!(atom.set("foo", Property::Double(-22.0)), Ok(()));
+        assert_eq!(atom.get("foo"), Ok(Some(Property::Double(-22.0))));
     }
 }
