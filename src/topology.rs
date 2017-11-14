@@ -65,7 +65,7 @@ impl Topology {
     /// ```
     /// # use chemfiles::Topology;
     /// let topology = Topology::new().unwrap();
-    /// assert_eq!(topology.natoms(), Ok(0));
+    /// assert_eq!(topology.size(), Ok(0));
     /// ```
     pub fn new() -> Result<Topology> {
         unsafe {
@@ -98,12 +98,12 @@ impl Topology {
     /// ```
     /// # use chemfiles::Topology;
     /// let mut topology = Topology::new().unwrap();
-    /// assert_eq!(topology.natoms(), Ok(0));
+    /// assert_eq!(topology.size(), Ok(0));
     ///
     /// topology.resize(6).unwrap();
-    /// assert_eq!(topology.natoms(), Ok(6));
+    /// assert_eq!(topology.size(), Ok(6));
     /// ```
-    pub fn natoms(&self) -> Result<u64> {
+    pub fn size(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_topology_atoms_count(self.as_ptr(), &mut natoms)));
@@ -118,10 +118,10 @@ impl Topology {
     /// ```
     /// # use chemfiles::Topology;
     /// let mut topology = Topology::new().unwrap();
-    /// assert_eq!(topology.natoms(), Ok(0));
+    /// assert_eq!(topology.size(), Ok(0));
     ///
     /// topology.resize(6).unwrap();
-    /// assert_eq!(topology.natoms(), Ok(6));
+    /// assert_eq!(topology.size(), Ok(6));
     /// ```
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
@@ -159,10 +159,10 @@ impl Topology {
     /// # use chemfiles::Topology;
     /// let mut topology = Topology::new().unwrap();
     /// topology.resize(9).unwrap();
-    /// assert_eq!(topology.natoms(), Ok(9));
+    /// assert_eq!(topology.size(), Ok(9));
     ///
     /// topology.remove(7).unwrap();
-    /// assert_eq!(topology.natoms(), Ok(8));
+    /// assert_eq!(topology.size(), Ok(8));
     /// ```
     pub fn remove(&mut self, index: u64) -> Result<()> {
         unsafe {
@@ -432,7 +432,7 @@ impl Topology {
             chfl_residue_for_atom(self.as_ptr(), index)
         };
         if handle.is_null() {
-            let natoms = self.natoms().expect(
+            let natoms = self.size().expect(
                 "Getting the number of atoms failed, everything is on fire!"
             );
             if index >= natoms {
@@ -541,29 +541,29 @@ mod test {
     #[test]
     fn clone() {
         let mut topology = Topology::new().unwrap();
-        assert_eq!(topology.natoms(), Ok(0));
+        assert_eq!(topology.size(), Ok(0));
 
         let copy = topology.clone();
-        assert_eq!(copy.natoms(), Ok(0));
+        assert_eq!(copy.size(), Ok(0));
 
         topology.resize(10).unwrap();
-        assert_eq!(topology.natoms(), Ok(10));
-        assert_eq!(copy.natoms(), Ok(0));
+        assert_eq!(topology.size(), Ok(10));
+        assert_eq!(copy.size(), Ok(0));
     }
 
     #[test]
     fn size() {
         let mut topology = Topology::new().unwrap();
-        assert_eq!(topology.natoms(), Ok(0));
+        assert_eq!(topology.size(), Ok(0));
 
         topology.resize(10).unwrap();
-        assert_eq!(topology.natoms(), Ok(10));
+        assert_eq!(topology.size(), Ok(10));
 
         topology.remove(7).unwrap();
-        assert_eq!(topology.natoms(), Ok(9));
+        assert_eq!(topology.size(), Ok(9));
 
         topology.add_atom(&Atom::new("Hg").unwrap()).unwrap();
-        assert_eq!(topology.natoms(), Ok(10));
+        assert_eq!(topology.size(), Ok(10));
     }
 
     #[test]

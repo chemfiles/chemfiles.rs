@@ -107,12 +107,12 @@ impl Frame {
     /// ```
     /// # use chemfiles::{Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
-    /// assert_eq!(frame.natoms(), Ok(0));
+    /// assert_eq!(frame.size(), Ok(0));
     ///
     /// frame.resize(67).unwrap();
-    /// assert_eq!(frame.natoms(), Ok(67));
+    /// assert_eq!(frame.size(), Ok(67));
     /// ```
-    pub fn natoms(&self) -> Result<u64> {
+    pub fn size(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
             try!(check(chfl_frame_atoms_count(self.as_ptr(), &mut natoms)));
@@ -129,7 +129,7 @@ impl Frame {
     /// # use chemfiles::{Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
     /// frame.resize(67).unwrap();
-    /// assert_eq!(frame.natoms(), Ok(67));
+    /// assert_eq!(frame.size(), Ok(67));
     /// ```
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
@@ -391,7 +391,7 @@ impl Frame {
     /// frame.resize(42).unwrap();
     ///
     /// let topology = frame.topology().unwrap();
-    /// assert_eq!(topology.natoms(), Ok(42));
+    /// assert_eq!(topology.size(), Ok(42));
     /// ```
     pub fn topology(&self) -> Result<Topology> {
         unsafe {
@@ -553,22 +553,22 @@ mod test {
     #[test]
     fn clone() {
         let mut frame = Frame::new().unwrap();
-        assert_eq!(frame.natoms(), Ok(0));
+        assert_eq!(frame.size(), Ok(0));
         let copy = frame.clone();
-        assert_eq!(copy.natoms(), Ok(0));
+        assert_eq!(copy.size(), Ok(0));
 
         frame.resize(42).unwrap();
-        assert_eq!(frame.natoms(), Ok(42));
-        assert_eq!(copy.natoms(), Ok(0));
+        assert_eq!(frame.size(), Ok(42));
+        assert_eq!(copy.size(), Ok(0));
     }
 
     #[test]
     fn size() {
         let mut frame = Frame::new().unwrap();
-        assert_eq!(frame.natoms(), Ok(0));
+        assert_eq!(frame.size(), Ok(0));
 
         frame.resize(12).unwrap();
-        assert_eq!(frame.natoms(), Ok(12));
+        assert_eq!(frame.size(), Ok(12));
     }
 
     #[test]
@@ -577,7 +577,7 @@ mod test {
         let mut frame = Frame::new().unwrap();
 
         frame.add_atom(&atom, (1.0, 1.0, 2.0), None).unwrap();
-        assert_eq!(frame.natoms(), Ok(1));
+        assert_eq!(frame.size(), Ok(1));
         assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
 
         let positions: &[[f64; 3]] = &[[1.0, 1.0, 2.0]];
@@ -587,7 +587,7 @@ mod test {
 
         let atom = Atom::new("F").unwrap();
         frame.add_atom(&atom, (1.0, 1.0, 2.0), (4.0, 3.0, 2.0)).unwrap();
-        assert_eq!(frame.natoms(), Ok(2));
+        assert_eq!(frame.size(), Ok(2));
         assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
         assert_eq!(frame.atom(1).unwrap().name(), Ok("F".into()));
 

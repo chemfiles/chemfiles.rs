@@ -318,7 +318,7 @@ mod test {
         let mut frame = Frame::new().unwrap();
         assert!(file.read(&mut frame).is_ok());
 
-        assert_eq!(frame.natoms(), Ok(297));
+        assert_eq!(frame.size(), Ok(297));
 
         {
             let positions = frame.positions().unwrap();
@@ -341,12 +341,12 @@ mod test {
         }
 
         let topology = frame.topology().unwrap();
-        assert_eq!(topology.natoms(), Ok(297));
+        assert_eq!(topology.size(), Ok(297));
         assert_eq!(topology.bonds_count(), Ok(0));
 
         assert!(frame.guess_topology().is_ok());
         let topology = frame.topology().unwrap();
-        assert_eq!(topology.natoms(), Ok(297));
+        assert_eq!(topology.size(), Ok(297));
         assert_eq!(topology.bonds_count(), Ok(181));
         assert_eq!(topology.angles_count(), Ok(87));
 
@@ -370,7 +370,7 @@ mod test {
             filename.to_str().unwrap(), 'r', "XYZ"
         ).unwrap();
         assert!(file.read(&mut frame).is_ok());
-        assert_eq!(frame.natoms(), Ok(125));
+        assert_eq!(frame.size(), Ok(125));
     }
 
     fn write_file(path: &str) {
