@@ -57,16 +57,14 @@ impl From<CellShape> for chfl_cellshape {
 /// |  0     0    c_z |
 /// ```
 pub struct UnitCell {
-    handle: *const CHFL_CELL
+    handle: *const CHFL_CELL,
 }
 
 impl Clone for UnitCell {
     fn clone(&self) -> UnitCell {
         unsafe {
             let new_handle = chfl_cell_copy(self.as_ptr());
-            UnitCell::from_ptr(new_handle).expect(
-                "Out of memory when copying an UnitCell"
-            )
+            UnitCell::from_ptr(new_handle).expect("Out of memory when copying an UnitCell")
         }
     }
 }
@@ -82,7 +80,7 @@ impl UnitCell {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(UnitCell{handle: ptr})
+            Ok(UnitCell { handle: ptr })
         }
     }
 
@@ -105,14 +103,13 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::{UnitCell, CellShape};
-    /// let cell = UnitCell::new(30.0, 30.0, 23.0).unwrap();
+    /// let cell = UnitCell::new([30.0, 30.0, 23.0]).unwrap();
     ///
-    /// assert_eq!(cell.lengths(), Ok((30.0, 30.0, 23.0)));
-    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// assert_eq!(cell.lengths(), Ok([30.0, 30.0, 23.0]));
+    /// assert_eq!(cell.angles(), Ok([90.0, 90.0, 90.0]));
     /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
     /// ```
-    pub fn new(a: f64, b: f64, c: f64) -> Result<UnitCell> {
-        let lengths = [a, b, c];
+    pub fn new(lengths: [f64; 3]) -> Result<UnitCell> {
         unsafe {
             let handle = chfl_cell(lengths.as_ptr());
             UnitCell::from_ptr(handle)
@@ -126,12 +123,12 @@ impl UnitCell {
     /// # use chemfiles::{UnitCell, CellShape};
     /// let cell = UnitCell::infinite().unwrap();
     ///
-    /// assert_eq!(cell.lengths(), Ok((0.0, 0.0, 0.0)));
-    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// assert_eq!(cell.lengths(), Ok([0.0, 0.0, 0.0]));
+    /// assert_eq!(cell.angles(), Ok([90.0, 90.0, 90.0]));
     /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
     /// ```
     pub fn infinite() -> Result<UnitCell> {
-        let mut cell = try!(UnitCell::new(0.0, 0.0, 0.0));
+        let mut cell = try!(UnitCell::new([0.0, 0.0, 0.0]));
         try!(cell.set_shape(CellShape::Infinite));
         Ok(cell)
     }
@@ -144,15 +141,13 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::{UnitCell, CellShape};
-    /// let cell = UnitCell::triclinic(10.0, 10.0, 10.0, 98.0, 99.0, 90.0).unwrap();
+    /// let cell = UnitCell::triclinic([10.0, 10.0, 10.0], [98.0, 99.0, 90.0]).unwrap();
     ///
-    /// assert_eq!(cell.lengths(), Ok((10.0, 10.0, 10.0)));
-    /// assert_eq!(cell.angles(), Ok((98.0, 99.0, 90.0)));
+    /// assert_eq!(cell.lengths(), Ok([10.0, 10.0, 10.0]));
+    /// assert_eq!(cell.angles(), Ok([98.0, 99.0, 90.0]));
     /// assert_eq!(cell.shape(), Ok(CellShape::Triclinic));
     /// ```
-    pub fn triclinic(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> Result<UnitCell> {
-        let lengths = [a, b, c];
-        let angles = [alpha, beta, gamma];
+    pub fn triclinic(lengths: [f64; 3], angles: [f64; 3]) -> Result<UnitCell> {
         unsafe {
             let handle = chfl_cell_triclinic(lengths.as_ptr(), angles.as_ptr());
             UnitCell::from_ptr(handle)
@@ -164,15 +159,15 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let cell = UnitCell::new(30.0, 30.0, 23.0).unwrap();
-    /// assert_eq!(cell.lengths(), Ok((30.0, 30.0, 23.0)));
+    /// let cell = UnitCell::new([30.0, 30.0, 23.0]).unwrap();
+    /// assert_eq!(cell.lengths(), Ok([30.0, 30.0, 23.0]));
     /// ```
-    pub fn lengths(&self) -> Result<(f64, f64, f64)> {
-        let mut lengths = [0.0_f64; 3];
+    pub fn lengths(&self) -> Result<[f64; 3]> {
+        let mut lengths = [0.0; 3];
         unsafe {
             try!(check(chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr())));
         }
-        Ok((lengths[0], lengths[1], lengths[2]))
+        Ok(lengths)
     }
 
     /// Set the three lengths of the cell, in Angstroms.
@@ -180,13 +175,12 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let mut cell = UnitCell::new(30.0, 30.0, 23.0).unwrap();
+    /// let mut cell = UnitCell::new([30.0, 30.0, 23.0]).unwrap();
     ///
-    /// cell.set_lengths(10.0, 30.0, 42.0).unwrap();
-    /// assert_eq!(cell.lengths(), Ok((10.0, 30.0, 42.0)));
+    /// cell.set_lengths([10.0, 30.0, 42.0]).unwrap();
+    /// assert_eq!(cell.lengths(), Ok([10.0, 30.0, 42.0]));
     /// ```
-    pub fn set_lengths(&mut self, a: f64, b: f64, c: f64) -> Result<()> {
-        let lengths = [a, b, c];
+    pub fn set_lengths(&mut self, lengths: [f64; 3]) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())));
         }
@@ -198,18 +192,18 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let cell = UnitCell::new(20.0, 20.0, 20.0).unwrap();
-    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// let cell = UnitCell::new([20.0, 20.0, 20.0]).unwrap();
+    /// assert_eq!(cell.angles(), Ok([90.0, 90.0, 90.0]));
     ///
-    /// let cell = UnitCell::triclinic(20.0, 20.0, 20.0, 100.0, 120.0, 90.0).unwrap();
-    /// assert_eq!(cell.angles(), Ok((100.0, 120.0, 90.0)));
+    /// let cell = UnitCell::triclinic([20.0, 20.0, 20.0], [100.0, 120.0, 90.0]).unwrap();
+    /// assert_eq!(cell.angles(), Ok([100.0, 120.0, 90.0]));
     /// ```
-    pub fn angles(&self) -> Result<(f64, f64, f64)> {
-        let mut angles = [0.0_f64; 3];
+    pub fn angles(&self) -> Result<[f64; 3]> {
+        let mut angles = [0.0; 3];
         unsafe {
             try!(check(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr())));
         }
-        Ok((angles[0], angles[1], angles[2]))
+        Ok((angles))
     }
 
     /// Set the three angles of the cell, in degrees. This is only possible
@@ -218,14 +212,13 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let mut cell = UnitCell::triclinic(20.0, 20.0, 20.0, 100.0, 120.0, 90.0).unwrap();
-    /// assert_eq!(cell.angles(), Ok((100.0, 120.0, 90.0)));
+    /// let mut cell = UnitCell::triclinic([20.0, 20.0, 20.0], [100.0, 120.0, 90.0]).unwrap();
+    /// assert_eq!(cell.angles(), Ok([100.0, 120.0, 90.0]));
     ///
-    /// cell.set_angles(90.0, 90.0, 90.0).unwrap();
-    /// assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+    /// cell.set_angles([90.0, 90.0, 90.0]).unwrap();
+    /// assert_eq!(cell.angles(), Ok([90.0, 90.0, 90.0]));
     /// ```
-    pub fn set_angles(&mut self, alpha: f64, beta: f64, gamma: f64) -> Result<()> {
-        let angles = [alpha, beta, gamma];
+    pub fn set_angles(&mut self, angles: [f64; 3]) -> Result<()> {
         unsafe {
             try!(check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())));
         }
@@ -247,7 +240,7 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let mut cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// let mut cell = UnitCell::new([10.0, 20.0, 30.0]).unwrap();
     ///
     /// let matrix = cell.matrix().unwrap();
     ///
@@ -270,7 +263,7 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::{UnitCell, CellShape};
-    /// let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// let cell = UnitCell::new([10.0, 20.0, 30.0]).unwrap();
     /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
     /// ```
     pub fn shape(&self) -> Result<CellShape> {
@@ -286,7 +279,7 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::{UnitCell, CellShape};
-    /// let mut cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// let mut cell = UnitCell::new([10.0, 20.0, 30.0]).unwrap();
     /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
     ///
     /// cell.set_shape(CellShape::Triclinic).unwrap();
@@ -304,7 +297,7 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// let cell = UnitCell::new([10.0, 20.0, 30.0]).unwrap();
     /// assert_eq!(cell.volume(), Ok(10.0 * 20.0 * 30.0));
     /// ```
     pub fn volume(&self) -> Result<f64> {
@@ -320,16 +313,14 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    /// let cell = UnitCell::new([10.0, 20.0, 30.0]).unwrap();
     ///
     /// let mut vector = [12.0, 5.2, -45.3];
     /// cell.wrap(&mut vector).unwrap();
     /// assert_eq!(vector, [2.0, 5.2, 14.700000000000003]);
     /// ```
     pub fn wrap(&self, vector: &mut [f64; 3]) -> Result<()> {
-        unsafe {
-            check(chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr()))
-        }
+        unsafe { check(chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr())) }
     }
 }
 
@@ -349,51 +340,51 @@ mod test {
 
     #[test]
     fn clone() {
-        let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
-        assert_eq!(cell.lengths(), Ok((2.0, 3.0, 4.0)));
+        let mut cell = UnitCell::new([2.0, 3.0, 4.0]).unwrap();
+        assert_eq!(cell.lengths(), Ok([2.0, 3.0, 4.0]));
 
         let copy = cell.clone();
-        assert_eq!(copy.lengths(), Ok((2.0, 3.0, 4.0)));
+        assert_eq!(copy.lengths(), Ok([2.0, 3.0, 4.0]));
 
-        assert!(cell.set_lengths(10.0, 12.0, 11.0).is_ok());
-        assert_eq!(cell.lengths(), Ok((10.0, 12.0, 11.0)));
-        assert_eq!(copy.lengths(), Ok((2.0, 3.0, 4.0)));
+        assert!(cell.set_lengths([10.0, 12.0, 11.0]).is_ok());
+        assert_eq!(cell.lengths(), Ok([10.0, 12.0, 11.0]));
+        assert_eq!(copy.lengths(), Ok([2.0, 3.0, 4.0]));
     }
 
     #[test]
     fn lengths() {
-        let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        let mut cell = UnitCell::new([2.0, 3.0, 4.0]).unwrap();
 
-        assert_eq!(cell.lengths(), Ok((2.0, 3.0, 4.0)));
+        assert_eq!(cell.lengths(), Ok([2.0, 3.0, 4.0]));
 
-        assert!(cell.set_lengths(10.0, 12.0, 11.0).is_ok());
-        assert_eq!(cell.lengths(), Ok((10.0, 12.0, 11.0)));
+        assert!(cell.set_lengths([10.0, 12.0, 11.0]).is_ok());
+        assert_eq!(cell.lengths(), Ok([10.0, 12.0, 11.0]));
     }
 
     #[test]
     fn angles() {
-        let mut cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        let mut cell = UnitCell::new([2.0, 3.0, 4.0]).unwrap();
 
-        assert_eq!(cell.angles(), Ok((90.0, 90.0, 90.0)));
+        assert_eq!(cell.angles(), Ok([90.0, 90.0, 90.0]));
 
         assert!(cell.set_shape(CellShape::Triclinic).is_ok());
-        assert!(cell.set_angles(80.0, 89.0, 100.0).is_ok());
+        assert!(cell.set_angles([80.0, 89.0, 100.0]).is_ok());
 
-        assert_eq!(cell.angles(), Ok((80.0, 89.0, 100.0)));
+        assert_eq!(cell.angles(), Ok([80.0, 89.0, 100.0]));
 
-        let cell = UnitCell::triclinic(1., 2., 3., 80., 90., 100.).unwrap();
-        assert_eq!(cell.angles(), Ok((80.0, 90.0, 100.0)));
+        let cell = UnitCell::triclinic([1., 2., 3.], [80., 90., 100.]).unwrap();
+        assert_eq!(cell.angles(), Ok([80.0, 90.0, 100.0]));
     }
 
     #[test]
     fn volume() {
-        let cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        let cell = UnitCell::new([2.0, 3.0, 4.0]).unwrap();
         assert_eq!(cell.volume(), Ok(2.0 * 3.0 * 4.0));
     }
 
     #[test]
     fn wrap() {
-        let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+        let cell = UnitCell::new([10.0, 20.0, 30.0]).unwrap();
         let mut vector = [12.0, 5.2, -45.3];
         cell.wrap(&mut vector).unwrap();
         assert_eq!(vector, [2.0, 5.2, 14.700000000000003]);
@@ -401,30 +392,30 @@ mod test {
 
     #[test]
     fn matrix() {
-        let cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        let cell = UnitCell::new([2.0, 3.0, 4.0]).unwrap();
 
         let matrix = cell.matrix().unwrap();
         let result = [[2.0, 0.0, 0.0], [0.0, 3.0, 0.0], [0.0, 0.0, 4.0]];
 
         for i in 0..3 {
             for j in 0..3 {
-                assert_ulps_eq!(matrix[i][j], result[i][j], epsilon=1e-12);
+                assert_ulps_eq!(matrix[i][j], result[i][j], epsilon = 1e-12);
             }
         }
     }
 
     #[test]
     fn shape() {
-        let cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
+        let cell = UnitCell::new([2.0, 3.0, 4.0]).unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
 
         let cell = UnitCell::infinite().unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Infinite));
 
-        let cell = UnitCell::triclinic(1., 2., 3., 80., 90., 100.).unwrap();
+        let cell = UnitCell::triclinic([1.0, 2.0, 3.0], [80.0, 90.0, 100.0]).unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Triclinic));
 
-        let mut cell = UnitCell::new(0.0, 0.0, 0.0).unwrap();
+        let mut cell = UnitCell::new([0.0, 0.0, 0.0]).unwrap();
         assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
         assert!(cell.set_shape(CellShape::Infinite).is_ok());
         assert_eq!(cell.shape(), Ok(CellShape::Infinite));

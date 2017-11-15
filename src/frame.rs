@@ -483,11 +483,11 @@ impl Frame {
     /// # use chemfiles::{Frame, UnitCell, CellShape};
     /// let mut frame = Frame::new().unwrap();
     ///
-    /// frame.set_cell(&UnitCell::new(10.0, 10.0, 10.0).unwrap()).unwrap();
+    /// frame.set_cell(&UnitCell::new([10.0, 10.0, 10.0]).unwrap()).unwrap();
     ///
     /// let cell = frame.cell().unwrap();
     /// assert_eq!(cell.shape(), Ok(CellShape::Orthorhombic));
-    /// assert_eq!(cell.lengths(), Ok((10.0, 10.0, 10.0)));
+    /// assert_eq!(cell.lengths(), Ok([10.0, 10.0, 10.0]));
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
@@ -755,11 +755,11 @@ mod test {
     #[test]
     fn cell() {
         let mut frame = Frame::new().unwrap();
-        let cell = UnitCell::new(3.0, 4.0, 5.0).unwrap();
+        let cell = UnitCell::new([3.0, 4.0, 5.0]).unwrap();
 
         assert!(frame.set_cell(&cell).is_ok());
         let cell = frame.cell().unwrap();
-        assert_eq!(cell.lengths(), Ok((3.0, 4.0, 5.0)));
+        assert_eq!(cell.lengths(), Ok([3.0, 4.0, 5.0]));
     }
 
     #[test]

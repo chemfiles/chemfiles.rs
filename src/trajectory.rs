@@ -256,7 +256,7 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::{Trajectory, UnitCell};
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
-    /// trajectory.set_cell(&UnitCell::new(10.0, 11.0, 12.5).unwrap()).unwrap();
+    /// trajectory.set_cell(&UnitCell::new([10.0, 11.0, 12.5]).unwrap()).unwrap();
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
@@ -328,11 +328,11 @@ mod test {
 
         assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("O")));
 
-        assert!(file.set_cell(&UnitCell::new(30.0, 30.0, 30.0).unwrap()).is_ok());
+        assert!(file.set_cell(&UnitCell::new([30.0, 30.0, 30.0]).unwrap()).is_ok());
 
         assert!(file.read_step(41, &mut frame).is_ok());
         let cell = frame.cell().unwrap();
-        assert_eq!(cell.lengths(), Ok((30.0, 30.0, 30.0)));
+        assert_eq!(cell.lengths(), Ok([30.0, 30.0, 30.0]));
 
         {
             let positions = frame.positions().unwrap();

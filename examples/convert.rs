@@ -9,7 +9,7 @@ fn main() {
     let mut frame = Frame::new().unwrap();
     let mut topology = Topology::new().unwrap();
     // Orthorombic UnitCell with lengths of 20, 15 and 35 A
-    let cell = UnitCell::new(20.0, 15.0, 35.0).unwrap();
+    let cell = UnitCell::new([20.0, 15.0, 35.0]).unwrap();
 
     // Create Atoms
     let oxygen = Atom::new("O").unwrap();
