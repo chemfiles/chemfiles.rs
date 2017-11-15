@@ -46,6 +46,7 @@ install:
           fi
       fi
     - rm -rf target/debug/deps/chemfiles-*
+    - rm -rf target/debug/chemfiles-sys-tests*
 
 script:
     - cargo test -- --test-threads=2

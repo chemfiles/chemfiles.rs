@@ -6,7 +6,7 @@ repository = "https://github.com/chemfiles/chemfiles.rs"
 publish = false
 
 [[bin]]
-name = "chfl_sys_tests"
+name = "chemfiles-sys-tests"
 path = "main.rs"
 
 [dependencies]
