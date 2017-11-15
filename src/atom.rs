@@ -25,16 +25,14 @@ use property::{Property, RawProperty};
 /// atom type will be shared between all particles of the same type: `H`,
 /// `Ow`, `CH3`.
 pub struct Atom {
-    handle: *const CHFL_ATOM
+    handle: *const CHFL_ATOM,
 }
 
 impl Clone for Atom {
     fn clone(&self) -> Atom {
         unsafe {
             let new_handle = chfl_atom_copy(self.as_ptr());
-            Atom::from_ptr(new_handle).expect(
-                "Out of memory when copying an Atom"
-            )
+            Atom::from_ptr(new_handle).expect("Out of memory when copying an Atom")
         }
     }
 }
@@ -50,7 +48,7 @@ impl Atom {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Atom{handle: ptr})
+            Ok(Atom { handle: ptr })
         }
     }
 
@@ -76,7 +74,10 @@ impl Atom {
     /// let atom = Atom::new("He").unwrap();
     /// assert_eq!(atom.name(), Ok(String::from("He")));
     /// ```
-    pub fn new<'a, S>(name: S) -> Result<Atom> where S: Into<&'a str>{
+    pub fn new<'a, S>(name: S) -> Result<Atom>
+    where
+        S: Into<&'a str>,
+    {
         let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_atom(buffer.as_ptr());
@@ -159,9 +160,8 @@ impl Atom {
     /// assert_eq!(atom.name(), Ok(String::from("He")));
     /// ```
     pub fn name(&self) -> Result<String> {
-        let name = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
-            chfl_atom_name(self.as_ptr(), ptr, len)
-        }));
+        let get_name = |ptr, len| unsafe { chfl_atom_name(self.as_ptr(), ptr, len) };
+        let name = try!(strings::call_autogrow_buffer(10, get_name));
         return Ok(strings::from_c(name.as_ptr()));
     }
 
@@ -174,9 +174,8 @@ impl Atom {
     /// assert_eq!(atom.atomic_type(), Ok(String::from("He")));
     /// ```
     pub fn atomic_type(&self) -> Result<String> {
-        let buffer = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
-            chfl_atom_type(self.as_ptr(), ptr, len)
-        }));
+        let get_type = |ptr, len| unsafe { chfl_atom_type(self.as_ptr(), ptr, len) };
+        let buffer = try!(strings::call_autogrow_buffer(10, get_type));
         return Ok(strings::from_c(buffer.as_ptr()));
     }
 
@@ -190,7 +189,10 @@ impl Atom {
     /// atom.set_name("Zn3").unwrap();
     /// assert_eq!(atom.name(), Ok(String::from("Zn3")));
     /// ```
-    pub fn set_name<'a, S>(&mut self, name: S) -> Result<()> where S: Into<&'a str>{
+    pub fn set_name<'a, S>(&mut self, name: S) -> Result<()>
+    where
+        S: Into<&'a str>,
+    {
         let buffer = strings::to_c(name.into());
         unsafe {
             try!(check(chfl_atom_set_name(self.as_mut_ptr(), buffer.as_ptr())));
@@ -208,7 +210,10 @@ impl Atom {
     /// atom.set_atomic_type("F").unwrap();
     /// assert_eq!(atom.atomic_type(), Ok(String::from("F")));
     /// ```
-    pub fn set_atomic_type<'a, S>(&mut self, atomic_type: S) -> Result<()> where S: Into<&'a str>{
+    pub fn set_atomic_type<'a, S>(&mut self, atomic_type: S) -> Result<()>
+    where
+        S: Into<&'a str>,
+    {
         let buffer = strings::to_c(atomic_type.into());
         unsafe {
             try!(check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr())));
@@ -227,9 +232,8 @@ impl Atom {
     /// assert_eq!(atom.full_name(), Ok(String::from("Zinc")));
     /// ```
     pub fn full_name(&self) -> Result<String> {
-        let name = try!(strings::call_autogrow_buffer(10, |ptr, len| unsafe {
-            chfl_atom_full_name(self.as_ptr(), ptr, len)
-        }));
+        let get_full_name = |ptr, len| unsafe { chfl_atom_full_name(self.as_ptr(), ptr, len) };
+        let name = try!(strings::call_autogrow_buffer(10, get_full_name));
         return Ok(strings::from_c(name.as_ptr()));
     }
 
@@ -301,9 +305,9 @@ impl Atom {
         let buffer = strings::to_c(name);
         let property = try!(property.as_raw());
         unsafe {
-            try!(check(chfl_atom_set_property(
-                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
-            )));
+            try!(check(
+                chfl_atom_set_property(self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr())
+            ));
         }
         return Ok(());
     }

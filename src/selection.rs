@@ -25,7 +25,7 @@ impl Match {
     fn zero() -> Match {
         Match(chfl_match {
             size: 0,
-            atoms: [0; 4]
+            atoms: [0; 4],
         })
     }
 
@@ -69,8 +69,8 @@ impl Match {
         }
         Match(chfl_match {
             size: size as u64,
-            atoms: matches}
-        )
+            atoms: matches,
+        })
     }
 
     /// Iterate over the atomic indexes in the match.
@@ -108,24 +108,20 @@ impl<'a> IntoIterator for &'a Match {
     }
 }
 
-/******************************************************************************/
-
 /// A `Selection` allow to select atoms in a `Frame`, from a selection
 /// language. The selection language is built by combining basic operations.
 /// Each basic operation follows the `<selector>[(<variable>)] <operator>
 /// <value>` structure, where `<operator>` is a comparison operator in
 /// `== != < <= > >=`.
 pub struct Selection {
-    handle: *const CHFL_SELECTION
+    handle: *const CHFL_SELECTION,
 }
 
 impl Clone for Selection {
     fn clone(&self) -> Selection {
         unsafe {
             let new_handle = chfl_selection_copy(self.as_ptr());
-            Selection::from_ptr(new_handle).expect(
-                "Out of memory when copying a Selection"
-            )
+            Selection::from_ptr(new_handle).expect("Out of memory when copying a Selection")
         }
     }
 }
@@ -150,7 +146,7 @@ impl Selection {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Selection{handle: ptr})
+            Ok(Selection { handle: ptr })
         }
     }
 
@@ -213,9 +209,8 @@ impl Selection {
     /// assert_eq!(selection.string(), Ok(String::from("name H")));
     /// ```
     pub fn string(&self) -> Result<String> {
-        let selection = try!(strings::call_autogrow_buffer(1024, |ptr, len| unsafe {
-            chfl_selection_string(self.as_ptr(), ptr, len)
-        }));
+        let get_string = |ptr, len| unsafe { chfl_selection_string(self.as_ptr(), ptr, len) };
+        let selection = try!(strings::call_autogrow_buffer(1024, get_string));
         return Ok(strings::from_c(selection.as_ptr()));
     }
 
@@ -246,11 +241,9 @@ impl Selection {
     pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
         let mut matches_count = 0;
         unsafe {
-            try!(check(chfl_selection_evaluate(
-                self.as_mut_ptr(),
-                frame.as_ptr(),
-                &mut matches_count
-            )));
+            try!(check(
+                chfl_selection_evaluate(self.as_mut_ptr(), frame.as_ptr(), &mut matches_count)
+            ));
         }
 
         let mut matches = vec![Match::zero(); matches_count as usize];
@@ -335,10 +328,7 @@ mod tests {
 
         #[test]
         fn size_of() {
-            assert_eq!(
-                ::std::mem::size_of::<chfl_match>(),
-                ::std::mem::size_of::<Match>()
-            )
+            assert_eq!(::std::mem::size_of::<chfl_match>(), ::std::mem::size_of::<Match>())
         }
 
         #[test]
@@ -357,10 +347,7 @@ mod tests {
         #[test]
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
-            assert_eq!(
-                match_.iter().cloned().collect::<Vec<u64>>(),
-                vec![1, 2, 3, 4]
-            );
+            assert_eq!(match_.iter().cloned().collect::<Vec<u64>>(), vec![1, 2, 3, 4]);
 
             let v = vec![1, 2, 3, 4];
             let mut i = 0;

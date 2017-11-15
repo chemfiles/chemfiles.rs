@@ -13,13 +13,13 @@ use errors::{check, Error};
 use strings;
 use Result;
 
-use {UnitCell, Topology, Frame};
+use {Frame, Topology, UnitCell};
 
 /// The `Trajectory` type is the main entry point when using chemfiles. A
 /// `Trajectory` behave a bit like a file, allowing to read and/or write
 /// `Frame`.
 pub struct Trajectory {
-    handle: *const CHFL_TRAJECTORY
+    handle: *const CHFL_TRAJECTORY,
 }
 
 impl Trajectory {
@@ -33,7 +33,7 @@ impl Trajectory {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Trajectory{handle: ptr})
+            Ok(Trajectory { handle: ptr })
         }
     }
 
@@ -60,10 +60,11 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open("water.xyz", 'r').unwrap();
     /// ```
-    pub fn open<P>(path: P, mode: char) -> Result<Trajectory> where P: AsRef<Path> {
-        let path = try!(path.as_ref().to_str().ok_or(
-            Error::utf8_path_error(path.as_ref())
-        ));
+    pub fn open<P>(path: P, mode: char) -> Result<Trajectory>
+    where
+        P: AsRef<Path>,
+    {
+        let path = try!(path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref())));
 
         let path = strings::to_c(path);
         unsafe {
@@ -88,20 +89,20 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open_with_format("water.zeo", 'r', "XYZ").unwrap();
     /// ```
-    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory> where P: AsRef<Path>, S: Into<&'a str> {
-        let filename = try!(filename.as_ref().to_str().ok_or(
-            Error::utf8_path_error(filename.as_ref())
-        ));
+    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory>
+    where
+        P: AsRef<Path>,
+        S: Into<&'a str>,
+    {
+        let filename =
+            try!(filename.as_ref().to_str().ok_or(Error::utf8_path_error(filename.as_ref())));
 
         let filename = strings::to_c(filename);
         let format = strings::to_c(format.into());
         unsafe {
             #[allow(cast_possible_wrap)]
-            let handle = chfl_trajectory_with_format(
-                filename.as_ptr(),
-                mode as i8,
-                format.as_ptr()
-            );
+            let handle =
+                chfl_trajectory_with_format(filename.as_ptr(), mode as i8, format.as_ptr());
             Trajectory::from_ptr(handle)
         }
     }
@@ -120,11 +121,7 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// ```
     pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
-        unsafe {
-            try!(check(chfl_trajectory_read(
-                self.as_mut_ptr(), frame.as_mut_ptr()
-            )))
-        }
+        unsafe { try!(check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr()))) }
         Ok(())
     }
 
@@ -143,9 +140,7 @@ impl Trajectory {
     /// ```
     pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_read_step(
-                self.as_mut_ptr(), step, frame.as_mut_ptr()
-            )))
+            try!(check(chfl_trajectory_read_step(self.as_mut_ptr(), step, frame.as_mut_ptr())))
         }
         Ok(())
     }
@@ -161,9 +156,7 @@ impl Trajectory {
     /// trajectory.write(&mut frame).unwrap();
     /// ```
     pub fn write(&mut self, frame: &Frame) -> Result<()> {
-        unsafe {
-            try!(check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())))
-        }
+        unsafe { try!(check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr()))) }
         Ok(())
     }
 
@@ -185,9 +178,7 @@ impl Trajectory {
     /// trajectory.set_topology(&topology).unwrap();
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
-        unsafe {
-            try!(check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr())))
-        }
+        unsafe { try!(check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()))) }
         Ok(())
     }
 
@@ -201,18 +192,17 @@ impl Trajectory {
     /// let mut trajectory = Trajectory::open("water.nc", 'r').unwrap();
     /// trajectory.set_topology_file("topology.pdb").unwrap();
     /// ```
-    pub fn set_topology_file<P>(&mut self, path: P) -> Result<()> where P: AsRef<Path> {
-        let path = try!(path.as_ref().to_str().ok_or(
-            Error::utf8_path_error(path.as_ref())
-        ));
+    pub fn set_topology_file<P>(&mut self, path: P) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
+        let path = try!(path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref())));
 
         let path = strings::to_c(path);
         unsafe {
-            try!(check(chfl_trajectory_topology_file(
-                self.as_mut_ptr(),
-                path.as_ptr(),
-                ptr::null()
-            )))
+            try!(check(
+                chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), ptr::null())
+            ))
         }
         Ok(())
     }
@@ -231,19 +221,18 @@ impl Trajectory {
     /// trajectory.set_topology_with_format("topology.mol", "PDB").unwrap();
     /// ```
     pub fn set_topology_with_format<'a, P, S>(&mut self, path: P, format: S) -> Result<()>
-        where P: AsRef<Path>, S: Into<&'a str> {
-        let path = try!(path.as_ref().to_str().ok_or(
-            Error::utf8_path_error(path.as_ref())
-        ));
+    where
+        P: AsRef<Path>,
+        S: Into<&'a str>,
+    {
+        let path = try!(path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref())));
 
         let format = strings::to_c(format.into());
         let path = strings::to_c(path);
         unsafe {
-            try!(check(chfl_trajectory_topology_file(
-                self.as_mut_ptr(),
-                path.as_ptr(),
-                format.as_ptr()
-            )))
+            try!(check(
+                chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), format.as_ptr())
+            ))
         }
         Ok(())
     }
@@ -260,9 +249,7 @@ impl Trajectory {
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_set_cell(
-                self.as_mut_ptr(), cell.as_ptr()
-            )))
+            try!(check(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr())));
         }
         Ok(())
     }
@@ -305,7 +292,7 @@ mod test {
     use std::path::Path;
     use std::io::Read;
 
-    use ::{Frame, Topology, UnitCell, Atom};
+    use {Atom, Frame, Topology, UnitCell};
 
     #[test]
     fn read() {
@@ -366,9 +353,8 @@ mod test {
         assert_eq!(frame.atom(100).unwrap().name(), Ok(String::from("Rd")));
 
         let filename = root.join("data").join("helium.xyz.but.not.really");
-        let mut file = Trajectory::open_with_format(
-            filename.to_str().unwrap(), 'r', "XYZ"
-        ).unwrap();
+        let filename = filename.to_str().unwrap();
+        let mut file = Trajectory::open_with_format(filename, 'r', "XYZ").unwrap();
         assert!(file.read(&mut frame).is_ok());
         assert_eq!(frame.size(), Ok(125));
     }

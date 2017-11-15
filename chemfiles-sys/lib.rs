@@ -11,6 +11,8 @@
 //                   https://github.com/chemfiles/bindgen
 // ========================================================================= //
 
+#![cfg_attr(rustfmt, rustfmt_skip)]
+
 #![allow(non_camel_case_types)]
 extern crate libc;
 use libc::{c_double, c_char, uint64_t};

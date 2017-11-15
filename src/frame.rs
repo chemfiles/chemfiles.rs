@@ -20,16 +20,14 @@ use Result;
 /// the system. If some information is missing (topology or velocity or unit
 /// cell), the corresponding data is filled with a default value.
 pub struct Frame {
-    handle: *const CHFL_FRAME
+    handle: *const CHFL_FRAME,
 }
 
 impl Clone for Frame {
     fn clone(&self) -> Frame {
         unsafe {
             let new_handle = chfl_frame_copy(self.as_ptr());
-            Frame::from_ptr(new_handle).expect(
-                "Out of memory when copying a Frame"
-            )
+            Frame::from_ptr(new_handle).expect("Out of memory when copying a Frame")
         }
     }
 }
@@ -45,7 +43,7 @@ impl Frame {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Frame{handle: ptr})
+            Ok(Frame { handle: ptr })
         }
     }
 
@@ -79,7 +77,7 @@ impl Frame {
         if handle.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Frame{handle: handle})
+            Ok(Frame { handle: handle })
         }
     }
 
@@ -151,16 +149,21 @@ impl Frame {
     /// frame.add_atom(&Atom::new("Zn").unwrap(), [-1.0, 1.0, 2.0], [0.2, 0.1, 0.0]).unwrap();
     /// ```
     pub fn add_atom<V>(&mut self, atom: &Atom, position: [f64; 3], velocity: V) -> Result<()>
-        where V: Into<Option<[f64; 3]>> {
+    where
+        V: Into<Option<[f64; 3]>>,
+    {
         let velocity = velocity.into();
         let velocity_ptr = match velocity {
             Some(ref data) => data.as_ptr(),
-            None => ptr::null()
+            None => ptr::null(),
         };
 
         unsafe {
             try!(check(chfl_frame_add_atom(
-                self.as_mut_ptr(), atom.as_ptr(), position.as_ptr(), velocity_ptr
+                self.as_mut_ptr(),
+                atom.as_ptr(),
+                position.as_ptr(),
+                velocity_ptr
             )));
         }
 
@@ -205,9 +208,7 @@ impl Frame {
     pub fn distance(&self, i: usize, j: usize) -> Result<f64> {
         let mut distance = 0.0;
         unsafe {
-            try!(check(chfl_frame_distance(
-                self.as_ptr(), i as u64, j as u64, &mut distance
-            )));
+            try!(check(chfl_frame_distance(self.as_ptr(), i as u64, j as u64, &mut distance)));
         }
         return Ok(distance);
     }
@@ -230,9 +231,7 @@ impl Frame {
     pub fn angle(&self, i: usize, j: usize, k: usize) -> Result<f64> {
         let mut angle = 0.0;
         unsafe {
-            try!(check(chfl_frame_angle(
-                self.as_ptr(), i as u64, j as u64, k as u64, &mut angle
-            )));
+            try!(check(chfl_frame_angle(self.as_ptr(), i as u64, j as u64, k as u64, &mut angle)));
         }
         return Ok(angle);
     }
@@ -257,7 +256,12 @@ impl Frame {
         let mut dihedral = 0.0;
         unsafe {
             try!(check(chfl_frame_dihedral(
-                self.as_ptr(), i as u64, j as u64, k as u64, m as u64, &mut dihedral
+                self.as_ptr(),
+                i as u64,
+                j as u64,
+                k as u64,
+                m as u64,
+                &mut dihedral
             )));
         }
         return Ok(dihedral);
@@ -285,7 +289,12 @@ impl Frame {
         let mut distance = 0.0;
         unsafe {
             try!(check(chfl_frame_out_of_plane(
-                self.as_ptr(), i as u64, j as u64, k as u64, m as u64, &mut distance
+                self.as_ptr(),
+                i as u64,
+                j as u64,
+                k as u64,
+                m as u64,
+                &mut distance
             )));
         }
         return Ok(distance);
@@ -342,11 +351,7 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_positions(
-                self.as_mut_ptr(),
-                &mut ptr,
-                &mut natoms
-            )));
+            try!(check(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms)));
         }
         let res = unsafe {
             #[allow(cast_possible_truncation)]
@@ -408,11 +413,7 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_velocities(
-                self.as_mut_ptr(),
-                &mut ptr,
-                &mut natoms
-            )));
+            try!(check(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms)));
         }
         let res = unsafe {
             #[allow(cast_possible_truncation)]
@@ -491,10 +492,7 @@ impl Frame {
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_set_cell(
-                self.as_mut_ptr(),
-                cell.as_ptr()
-            )));
+            try!(check(chfl_frame_set_cell(self.as_mut_ptr(), cell.as_ptr())));
         }
         return Ok(());
     }
@@ -536,10 +534,7 @@ impl Frame {
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_set_topology(
-                self.as_mut_ptr(),
-                topology.as_ptr()
-            )));
+            try!(check(chfl_frame_set_topology(self.as_mut_ptr(), topology.as_ptr())));
         }
         return Ok(());
     }
@@ -620,9 +615,9 @@ impl Frame {
         let buffer = strings::to_c(name);
         let property = try!(property.as_raw());
         unsafe {
-            try!(check(chfl_frame_set_property(
-                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
-            )));
+            try!(check(
+                chfl_frame_set_property(self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr())
+            ));
         }
         return Ok(());
     }
@@ -665,7 +660,7 @@ impl Drop for Frame {
 #[cfg(test)]
 mod test {
     use super::*;
-    use ::{Atom, Topology, UnitCell};
+    use {Atom, Topology, UnitCell};
 
     #[test]
     fn clone() {
@@ -719,15 +714,14 @@ mod test {
     fn positions() {
         let mut frame = Frame::new().unwrap();
         frame.resize(4).unwrap();
-        let expected = [[1.0, 2.0, 3.0],
-                        [4.0, 5.0, 6.0],
-                        [7.0, 8.0, 9.0],
-                        [10.0, 11.0, 12.0]];
-        {
-            let positions = frame.positions_mut().unwrap();
-            positions.clone_from_slice(expected.as_ref());
-        }
+        let expected = [
+            [1.0, 2.0, 3.0],
+            [4.0, 5.0, 6.0],
+            [7.0, 8.0, 9.0],
+            [10.0, 11.0, 12.0],
+        ];
 
+        frame.positions_mut().unwrap().clone_from_slice(expected.as_ref());
         assert_eq!(frame.positions(), Ok(expected.as_ref()));
     }
 
@@ -739,16 +733,14 @@ mod test {
         frame.add_velocities().unwrap();
         assert_eq!(frame.has_velocities(), Ok(true));
 
-        let expected = [[1.0, 2.0, 3.0],
-                        [4.0, 5.0, 6.0],
-                        [7.0, 8.0, 9.0],
-                        [10.0, 11.0, 12.0]];
+        let expected = [
+            [1.0, 2.0, 3.0],
+            [4.0, 5.0, 6.0],
+            [7.0, 8.0, 9.0],
+            [10.0, 11.0, 12.0],
+        ];
 
-        {
-            let velocities = frame.velocities_mut().unwrap();
-            velocities.clone_from_slice(expected.as_ref());
-        }
-
+        frame.velocities_mut().unwrap().clone_from_slice(expected.as_ref());
         assert_eq!(frame.velocities(), Ok(expected.as_ref()));
     }
 

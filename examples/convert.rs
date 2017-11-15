@@ -2,7 +2,7 @@
 // Any copyright is dedicated to the Public Domain.
 // http://creativecommons.org/publicdomain/zero/1.0/
 extern crate chemfiles;
-use chemfiles::{Trajectory, Frame, Topology,  UnitCell, Atom};
+use chemfiles::{Atom, Frame, Topology, Trajectory, UnitCell};
 
 fn main() {
     let mut input = Trajectory::open("water.xyz", 'r').unwrap();

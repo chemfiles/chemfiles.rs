@@ -18,8 +18,7 @@ pub fn from_c(buffer: *const i8) -> String {
     let mut res = String::new();
     unsafe {
         let c_string = CStr::from_ptr(buffer);
-        let rust_str = str::from_utf8(c_string.to_bytes())
-                            .expect("Got invalid UTF8 string from C!");
+        let rust_str = str::from_utf8(c_string.to_bytes()).expect("invalid Rust string from C");
         res.push_str(rust_str);
     }
     return res;
@@ -28,7 +27,7 @@ pub fn from_c(buffer: *const i8) -> String {
 
 /// Create a C string from a Rust string.
 pub fn to_c(string: &str) -> CString {
-    CString::new(string).expect("Got invalid C string from Rust!")
+    CString::new(string).expect("Invalid C string from Rust")
 }
 
 /// Check if a string buffer was big enough when passed to a C function
@@ -48,8 +47,9 @@ fn buffer_was_big_enough(buffer: &[i8]) -> bool {
 /// result truncated by the C library, grow the buffer and try again until we
 /// get all the data. Then return the filled buffer to the caller.
 pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<i8>>
-    where F: Fn(*mut i8, u64) -> chfl_status {
-
+where
+    F: Fn(*mut i8, u64) -> chfl_status,
+{
     let mut size = initial;
     let mut buffer = vec![0; size];
     try!(check(callback(buffer.as_mut_ptr(), buffer.len() as u64)));

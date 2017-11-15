@@ -2,7 +2,7 @@
 // Any copyright is dedicated to the Public Domain.
 // http://creativecommons.org/publicdomain/zero/1.0/
 extern crate chemfiles;
-use chemfiles::{Trajectory, Frame};
+use chemfiles::{Frame, Trajectory};
 
 fn main() {
     let mut trajectory = Trajectory::open("filename.nc", 'r').unwrap();
@@ -16,9 +16,7 @@ fn main() {
         // Position of the 10th atom
         let position = frame.positions().unwrap()[9];
         let distance = f64::sqrt(
-            position[0] * position[0] +
-            position[1] * position[1] +
-            position[2] * position[2]
+            position[0] * position[0] + position[1] * position[1] + position[2] * position[2],
         );
         distances.push(distance);
     }

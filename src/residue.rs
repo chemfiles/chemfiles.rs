@@ -16,16 +16,14 @@ use Result;
 /// can be small molecules, amino-acids in a protein, monomers in polymers,
 /// *etc.*
 pub struct Residue {
-    handle: *const CHFL_RESIDUE
+    handle: *const CHFL_RESIDUE,
 }
 
 impl Clone for Residue {
     fn clone(&self) -> Residue {
         unsafe {
             let new_handle = chfl_residue_copy(self.as_ptr());
-            Residue::from_ptr(new_handle).expect(
-                "Out of memory when copying a Residue"
-            )
+            Residue::from_ptr(new_handle).expect("Out of memory when copying a Residue")
         }
     }
 }
@@ -41,7 +39,7 @@ impl Residue {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Residue{handle: ptr})
+            Ok(Residue { handle: ptr })
         }
     }
 
@@ -68,7 +66,10 @@ impl Residue {
     /// assert_eq!(residue.name(), Ok(String::from("ALA")));
     /// assert_eq!(residue.id(), Ok(None));
     /// ```
-    pub fn new<'a, S>(name: S) -> Result<Residue> where S: Into<&'a str> {
+    pub fn new<'a, S>(name: S) -> Result<Residue>
+    where
+        S: Into<&'a str>,
+    {
         let handle: *const CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
         unsafe {
@@ -78,7 +79,7 @@ impl Residue {
         if handle.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Residue{handle: handle})
+            Ok(Residue { handle: handle })
         }
     }
 
@@ -91,7 +92,10 @@ impl Residue {
     /// assert_eq!(residue.name(), Ok(String::from("ALA")));
     /// assert_eq!(residue.id(), Ok(Some(67)));
     /// ```
-    pub fn with_id<'a, S>(name: S, id: u64) -> Result<Residue> where S: Into<&'a str> {
+    pub fn with_id<'a, S>(name: S, id: u64) -> Result<Residue>
+    where
+        S: Into<&'a str>,
+    {
         let handle: *const CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
         unsafe {
@@ -101,7 +105,7 @@ impl Residue {
         if handle.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Residue{handle: handle})
+            Ok(Residue { handle: handle })
         }
     }
 
@@ -145,7 +149,7 @@ impl Residue {
         } else if status == chfl_status::CHFL_GENERIC_ERROR {
             return Ok(None);
         } else {
-            return Err(Error::from(status))
+            return Err(Error::from(status));
         }
     }
 
@@ -158,9 +162,8 @@ impl Residue {
     /// assert_eq!(residue.name(), Ok(String::from("water")));
     /// ```
     pub fn name(&self) -> Result<String> {
-        let name = try!(strings::call_autogrow_buffer(64, |ptr, len| unsafe {
-            chfl_residue_name(self.as_ptr(), ptr, len)
-        }));
+        let get_name = |ptr, len| unsafe { chfl_residue_name(self.as_ptr(), ptr, len) };
+        let name = try!(strings::call_autogrow_buffer(64, get_name));
         return Ok(strings::from_c(name.as_ptr()));
     }
 

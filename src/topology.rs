@@ -16,16 +16,14 @@ use Result;
 /// the liaisons between the atoms (bonds, angles, dihedrals, ...). It will
 /// also contain all the residues information if it is available.
 pub struct Topology {
-    handle: *const CHFL_TOPOLOGY
+    handle: *const CHFL_TOPOLOGY,
 }
 
 impl Clone for Topology {
     fn clone(&self) -> Topology {
         unsafe {
             let new_handle = chfl_topology_copy(self.as_ptr());
-            Topology::from_ptr(new_handle).expect(
-                "Out of memory when copying a Topology"
-            )
+            Topology::from_ptr(new_handle).expect("Out of memory when copying a Topology")
         }
     }
 }
@@ -41,7 +39,7 @@ impl Topology {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(Topology{handle: ptr})
+            Ok(Topology { handle: ptr })
         }
     }
 
@@ -143,10 +141,7 @@ impl Topology {
     /// ```
     pub fn add_atom(&mut self, atom: &Atom) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_add_atom(
-                self.as_mut_ptr(),
-                atom.as_ptr()
-            )));
+            try!(check(chfl_topology_add_atom(self.as_mut_ptr(), atom.as_ptr())));
         }
         return Ok(());
     }
@@ -295,11 +290,7 @@ impl Topology {
         let nbonds = try!(self.bonds_count());
         let mut res = vec![[u64::MAX; 2]; nbonds as usize];
         unsafe {
-            try!(check(chfl_topology_bonds(
-                self.handle,
-                res.as_mut_ptr(),
-                nbonds
-            )));
+            try!(check(chfl_topology_bonds(self.handle, res.as_mut_ptr(), nbonds)));
         }
         return Ok(res);
     }
@@ -480,17 +471,11 @@ impl Topology {
     /// assert!(residue.is_none());
     /// ```
     pub fn residue_for_atom(&self, index: u64) -> Result<Option<Residue>> {
-        let handle = unsafe {
-            chfl_residue_for_atom(self.as_ptr(), index)
-        };
+        let handle = unsafe { chfl_residue_for_atom(self.as_ptr(), index) };
         if handle.is_null() {
-            let natoms = self.size().expect(
-                "Getting the number of atoms failed, everything is on fire!"
-            );
+            let natoms = try!(self.size());
             if index >= natoms {
-                let result = unsafe {
-                    Residue::from_ptr(handle).map(Some)
-                };
+                let result = unsafe { Residue::from_ptr(handle).map(Some) };
                 assert!(result.is_err());
                 result
             } else {
@@ -498,9 +483,7 @@ impl Topology {
                 Ok(None)
             }
         } else {
-            let residue = unsafe {
-                try!(Residue::from_ptr(handle))
-            };
+            let residue = unsafe { try!(Residue::from_ptr(handle)) };
             Ok(Some(residue))
         }
     }

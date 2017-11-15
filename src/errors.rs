@@ -24,7 +24,7 @@ pub struct Error {
     /// The error status code
     pub status: Status,
     /// A message describing the error cause
-    pub message: String
+    pub message: String,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -72,7 +72,7 @@ impl From<chfl_status> for Error {
         };
         Error {
             status: status,
-            message: Error::last_error()
+            message: Error::last_error(),
         }
     }
 }
@@ -83,7 +83,7 @@ impl Error {
     pub fn utf8_path_error(path: &Path) -> Error {
         Error {
             status: Status::UTF8PathError,
-            message: format!("Could not convert '{}' to UTF8", path.display())
+            message: format!("Could not convert '{}' to UTF8", path.display()),
         }
     }
 
@@ -92,23 +92,19 @@ impl Error {
     pub fn null_ptr() -> Error {
         Error {
             status: Status::NullPtr,
-            message: Error::last_error()
+            message: Error::last_error(),
         }
     }
 
     /// Get the last error message from the C++ library.
     pub fn last_error() -> String {
-        unsafe {
-            strings::from_c(chfl_last_error())
-        }
+        unsafe { strings::from_c(chfl_last_error()) }
     }
 
     /// Clear any error from the C++ library
     pub fn cleanup() {
         unsafe {
-            check(chfl_clear_errors()).expect(
-                "error in chfl_clear_errors. Things went very bad"
-            );
+            check(chfl_clear_errors()).expect("error in chfl_clear_errors. Things went very bad");
         }
     }
 }
@@ -125,9 +121,7 @@ pub fn check(status: chfl_status) -> Result<()> {
 static mut LOGGING_CALLBACK: Option<*const Fn(&str)> = None;
 extern "C" fn warning_callback(message: *const c_char) {
     unsafe {
-        let callback = LOGGING_CALLBACK.expect(
-            "No callback provided, this is an internal bug"
-        );
+        let callback = LOGGING_CALLBACK.expect("No callback provided, this is an internal bug");
         (*callback)(&strings::from_c(message));
     }
 }
@@ -143,7 +137,10 @@ extern "C" fn warning_callback(message: *const c_char) {
 /// This function hold a `Mutex` under the hood, and will block when called
 /// from multiple threads. You should really call this function once, at the
 /// beggining of your application.
-pub fn set_warning_callback<F>(callback: F) -> Result<()> where F: Fn(&str) + 'static {
+pub fn set_warning_callback<F>(callback: F) -> Result<()>
+where
+    F: Fn(&str) + 'static,
+{
     // Grab a mutex to prevent concurent modifications of the warning callback
     let mutex = Mutex::new(());
     let _guard = mutex.lock().expect("Could not get the mutex in set_warning_callback");
@@ -174,11 +171,11 @@ impl error::Error for Error {
             Status::MemoryError => "Error in memory allocations",
             Status::FileError => "Error while reading or writing a file",
             Status::FormatError => "Error in file formatting, i.e. the file is invalid",
-	        Status::SelectionError => "Error in selection string syntax",
-	        Status::UTF8PathError => "The given path is not valid UTF8",
-	        Status::ConfigurationError => "Error in configuration files",
-	        Status::OutOfBounds => "Out of bounds indexing",
-	        Status::PropertyError => "Error in property",
+            Status::SelectionError => "Error in selection string syntax",
+            Status::UTF8PathError => "The given path is not valid UTF8",
+            Status::ConfigurationError => "Error in configuration files",
+            Status::OutOfBounds => "Out of bounds indexing",
+            Status::PropertyError => "Error in property",
             Status::NullPtr => "We got a NULL pointer from C++",
         }
     }
@@ -189,7 +186,6 @@ impl error::Error for Error {
 mod test {
     use super::*;
     use Trajectory;
-    use std::error::Error as ErrorTrait;
     use std::thread;
     use std::time::Duration;
 
@@ -202,7 +198,10 @@ mod test {
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
         assert!(Trajectory::open("nope", 'r').is_err());
-        assert_eq!(Error::last_error(), "file at \'nope\' does not have an extension, provide a format name to read it");
+        assert_eq!(
+            Error::last_error(),
+            "file at \'nope\' does not have an extension, provide a format name to read it"
+        );
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
     }
@@ -216,16 +215,7 @@ mod test {
         assert_eq!(Error::from(chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
         assert_eq!(Error::from(chfl_status::CHFL_FORMAT_ERROR).status, Status::FormatError);
         assert_eq!(Error::from(chfl_status::CHFL_SELECTION_ERROR).status, Status::SelectionError);
-    }
-
-    #[test]
-    fn messages() {
-        assert!(Error::from(chfl_status::CHFL_SUCCESS).description().contains("Success"));
-        assert!(Error::from(chfl_status::CHFL_CXX_ERROR).description().contains("C++ standard library"));
-        assert!(Error::from(chfl_status::CHFL_GENERIC_ERROR).description().contains("chemfiles library"));
-        assert!(Error::from(chfl_status::CHFL_MEMORY_ERROR).description().contains("memory"));
-        assert!(Error::from(chfl_status::CHFL_FILE_ERROR).description().contains("file"));
-        assert!(Error::from(chfl_status::CHFL_FORMAT_ERROR).description().contains("format"));
-        assert!(Error::from(chfl_status::CHFL_SELECTION_ERROR).description().contains("selection"));
+        assert_eq!(Error::from(chfl_status::CHFL_OUT_OF_BOUNDS).status, Status::OutOfBounds);
+        assert_eq!(Error::from(chfl_status::CHFL_PROPERTY_ERROR).status, Status::PropertyError);
     }
 }

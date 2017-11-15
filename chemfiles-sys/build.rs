@@ -12,8 +12,7 @@ fn main() {
 fn build_chemfiles() -> PathBuf {
     let path = Path::new("chemfiles").join("CMakeLists.txt");
     if !path.exists() {
-        panic!("The git submodule for chemfiles is not initalized.\n\
-                Please run `git submodule update --init.`")
+        panic!("uninitalized git submodule. Please run `git submodule update --init.`")
     }
 
     let out_dir = cmake::Config::new(".").build();

@@ -27,27 +27,22 @@
 //! [overview]: https://chemfiles.org/chemfiles/latest/overview.html
 //! [formats]: https://chemfiles.org/chemfiles/latest/formats.html
 //! [selections]: https://chemfiles.org/chemfiles/latest/selections.html
+
 #![deny(missing_docs)]
-
-#![warn(
-    trivial_casts, unused_import_braces, variant_size_differences,
-    unused_qualifications, unused_results
-)]
-
+#![warn(trivial_casts, unused_import_braces, variant_size_differences)]
+#![warn(unused_qualifications, unused_results)]
+// Configuration fro clippy lints
 #![allow(unknown_lints)]
 #![warn(clippy, clippy_pedantic)]
-// List of Clippy lints we allow in this code
-#![allow(
-    needless_return, shadow_reuse, stutter, missing_docs_in_private_items,
-    zero_ptr, cast_possible_truncation, or_fun_call
-)]
+#![allow(needless_return, shadow_reuse, stutter, missing_docs_in_private_items)]
+#![allow(zero_ptr, cast_possible_truncation, or_fun_call)]
 
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
 
 extern crate chemfiles_sys;
-use chemfiles_sys::{chfl_version, chfl_add_configuration};
+use chemfiles_sys::{chfl_add_configuration, chfl_version};
 
 mod strings;
 
@@ -78,7 +73,7 @@ mod trajectory;
 pub use trajectory::Trajectory;
 
 mod selection;
-pub use selection::{Selection, Match};
+pub use selection::{Match, Selection};
 
 mod property;
 pub use property::Property;
@@ -92,9 +87,7 @@ pub use property::Property;
 /// assert!(version.starts_with("0.8"));
 /// ```
 pub fn version() -> String {
-    unsafe {
-        strings::from_c(chfl_version())
-    }
+    unsafe { strings::from_c(chfl_version()) }
 }
 
 /// Read configuration data from the file at `path`.
@@ -113,7 +106,10 @@ pub fn version() -> String {
 /// chemfiles::add_configuration("local-config.toml");
 /// // from now on, the data from "local-config.toml" will be used
 /// ```
-pub fn add_configuration<S>(path: S) -> Result<()> where S: AsRef<str> {
+pub fn add_configuration<S>(path: S) -> Result<()>
+where
+    S: AsRef<str>,
+{
     let buffer = strings::to_c(path.as_ref());
     unsafe {
         try!(errors::check(chfl_add_configuration(buffer.as_ptr())));

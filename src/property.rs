@@ -13,7 +13,7 @@ use Result;
 
 /// A thin wrapper around CHFL_PROPERTY
 pub(crate) struct RawProperty {
-    handle: *const CHFL_PROPERTY
+    handle: *const CHFL_PROPERTY,
 }
 
 impl RawProperty {
@@ -25,7 +25,7 @@ impl RawProperty {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
-            Ok(RawProperty{handle: ptr})
+            Ok(RawProperty { handle: ptr })
         }
     }
 
@@ -47,7 +47,7 @@ impl RawProperty {
     }
 
     fn bool(value: bool) -> Result<RawProperty> {
-        let value = if value {1} else {0};
+        let value = if value { 1 } else { 0 };
         unsafe {
             let handle = chfl_property_bool(value);
             RawProperty::from_ptr(handle)
@@ -94,9 +94,8 @@ impl RawProperty {
     }
 
     fn get_string(&self) -> Result<String> {
-        let value = try!(strings::call_autogrow_buffer(64, |ptr, len| unsafe {
-            chfl_property_get_string(self.as_ptr(), ptr, len)
-        }));
+        let get_string = |ptr, len| unsafe { chfl_property_get_string(self.as_ptr(), ptr, len) };
+        let value = try!(strings::call_autogrow_buffer(64, get_string));
         return Ok(strings::from_c(value.as_ptr()));
     }
 
@@ -147,7 +146,9 @@ impl Property {
             chfl_property_kind::CHFL_PROPERTY_BOOL => Ok(Property::Bool(raw.get_bool()?)),
             chfl_property_kind::CHFL_PROPERTY_DOUBLE => Ok(Property::Double(raw.get_double()?)),
             chfl_property_kind::CHFL_PROPERTY_STRING => Ok(Property::String(raw.get_string()?)),
-            chfl_property_kind::CHFL_PROPERTY_VECTOR3D => Ok(Property::Vector3D(raw.get_vector3d()?)),
+            chfl_property_kind::CHFL_PROPERTY_VECTOR3D => {
+                Ok(Property::Vector3D(raw.get_vector3d()?))
+            }
         }
     }
 }
