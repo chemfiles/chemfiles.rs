@@ -226,9 +226,9 @@ impl Selection {
     /// ```
     /// # use chemfiles::{Selection, Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), (1.0, 0.0, 0.0), None).unwrap();
-    /// frame.add_atom(&Atom::new("O").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), (-1.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(&Atom::new("H").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("O").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("H").unwrap(), [-1.0, 0.0, 0.0], None).unwrap();
     ///
     /// let mut selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
     /// let matches = selection.evaluate(&frame).unwrap();
@@ -275,9 +275,9 @@ impl Selection {
     /// ```
     /// # use chemfiles::{Selection, Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), (1.0, 0.0, 0.0), None).unwrap();
-    /// frame.add_atom(&Atom::new("O").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), (-1.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(&Atom::new("H").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("O").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("H").unwrap(), [-1.0, 0.0, 0.0], None).unwrap();
     ///
     /// let mut selection = Selection::new("name H").unwrap();
     /// let matches = selection.list(&frame).unwrap();

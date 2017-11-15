@@ -314,6 +314,23 @@ impl UnitCell {
         }
         Ok(res)
     }
+
+    /// Wrap a `vector` in this unit cell.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::UnitCell;
+    /// let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+    ///
+    /// let mut vector = [12.0, 5.2, -45.3];
+    /// cell.wrap(&mut vector).unwrap();
+    /// assert_eq!(vector, [2.0, 5.2, 14.700000000000003]);
+    /// ```
+    pub fn wrap(&self, vector: &mut [f64; 3]) -> Result<()> {
+        unsafe {
+            check(chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr()))
+        }
+    }
 }
 
 impl Drop for UnitCell {
@@ -371,8 +388,15 @@ mod test {
     #[test]
     fn volume() {
         let cell = UnitCell::new(2.0, 3.0, 4.0).unwrap();
-
         assert_eq!(cell.volume(), Ok(2.0 * 3.0 * 4.0));
+    }
+
+    #[test]
+    fn wrap() {
+        let cell = UnitCell::new(10.0, 20.0, 30.0).unwrap();
+        let mut vector = [12.0, 5.2, -45.3];
+        cell.wrap(&mut vector).unwrap();
+        assert_eq!(vector, [2.0, 5.2, 14.700000000000003]);
     }
 
     #[test]

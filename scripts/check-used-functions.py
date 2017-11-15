@@ -4,8 +4,16 @@ Check that all the functions defined in the chemfiles-sys crate are
 effectivelly used in the chemfiles binding.
 """
 import os
+import sys
 
-ROOT = os.path.dirname(os.path.dirname(__file__))
+ERROR = False
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+
+
+def error(message):
+    print(message)
+    global ERROR
+    ERROR = True
 
 
 def functions_list():
@@ -37,10 +45,13 @@ def read_all_source():
 def check_functions(functions, source):
     for function in functions:
         if function not in source:
-            print("Missing: " + function)
+            error("Missing: " + function)
 
 
 if __name__ == '__main__':
     functions = functions_list()
     source = read_all_source()
     check_functions(functions, source)
+
+    if ERROR:
+        sys.exit(1)

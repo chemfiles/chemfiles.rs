@@ -47,7 +47,7 @@
 extern crate approx;
 
 extern crate chemfiles_sys;
-use chemfiles_sys::chfl_version;
+use chemfiles_sys::{chfl_version, chfl_add_configuration};
 
 mod strings;
 
@@ -84,10 +84,41 @@ mod property;
 pub use property::Property;
 
 /// Get the version of the chemfiles library.
+///
+/// # Example
+/// ```
+/// # use chemfiles;
+/// let version = chemfiles::version();
+/// assert!(version.starts_with("0.8"));
+/// ```
 pub fn version() -> String {
     unsafe {
         strings::from_c(chfl_version())
     }
+}
+
+/// Read configuration data from the file at `path`.
+///
+/// By default, chemfiles reads configuration from any file name `.chemfilesrc`
+/// in the current directory or any parent directory. This function can be used
+/// to add data from another configuration file.
+///
+/// This function will fail if there is no file at `path`, or if the file is
+/// incorectly formatted. Data from the new configuration file will overwrite
+/// any existing data.
+///
+/// # Example
+/// ```no_run
+/// # use chemfiles;
+/// chemfiles::add_configuration("local-config.toml");
+/// // from now on, the data from "local-config.toml" will be used
+/// ```
+pub fn add_configuration<S>(path: S) -> Result<()> where S: AsRef<str> {
+    let buffer = strings::to_c(path.as_ref());
+    unsafe {
+        try!(errors::check(chfl_add_configuration(buffer.as_ptr())));
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -95,5 +126,6 @@ mod tests {
     #[test]
     fn version() {
         assert!(::version().len() > 0);
+        assert!(::version().starts_with("0.8"));
     }
 }

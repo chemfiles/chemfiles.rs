@@ -89,7 +89,7 @@ impl Frame {
     /// ```
     /// # use chemfiles::{Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
-    /// frame.add_atom(&Atom::new("Zn").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), [0.0; 3], None).unwrap();
     ///
     /// let atom = frame.atom(0).unwrap();
     /// assert_eq!(atom.name(), Ok(String::from("Zn")));
@@ -145,33 +145,150 @@ impl Frame {
     /// ```
     /// # use chemfiles::{Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
-    /// frame.add_atom(&Atom::new("Zn").unwrap(), (1.0, 1.0, 2.0), None).unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), [1.0, 1.0, 2.0], None).unwrap();
     ///
     /// frame.add_velocities().unwrap();
-    /// frame.add_atom(&Atom::new("Zn").unwrap(), (-1.0, 1.0, 2.0), (0.2, 0.1, 0.0)).unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), [-1.0, 1.0, 2.0], [0.2, 0.1, 0.0]).unwrap();
     /// ```
-    pub fn add_atom<V>(&mut self, atom: &Atom, position: (f64, f64, f64), velocity: V) -> Result<()>
-        where V: Into<Option<(f64, f64, f64)>> {
-        let position = [position.0, position.1, position.2];
-        let velocity_data;
-        let velocity_ptr = match velocity.into() {
-            Some((x, y, z)) => {
-                velocity_data = [x, y, z];
-                velocity_data.as_ptr()
-            }
-            None => 0 as *const _
+    pub fn add_atom<V>(&mut self, atom: &Atom, position: [f64; 3], velocity: V) -> Result<()>
+        where V: Into<Option<[f64; 3]>> {
+        let velocity = velocity.into();
+        let velocity_ptr = match velocity {
+            Some(ref data) => data.as_ptr(),
+            None => ptr::null()
         };
 
         unsafe {
             try!(check(chfl_frame_add_atom(
-                self.as_mut_ptr(),
-                atom.as_ptr(),
-                position.as_ptr(),
-                velocity_ptr
+                self.as_mut_ptr(), atom.as_ptr(), position.as_ptr(), velocity_ptr
             )));
         }
 
         return Ok(());
+    }
+
+    /// Remove the atom at index `i` in this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), [0.0; 3], None).unwrap();
+    /// frame.add_atom(&Atom::new("Fe").unwrap(), [0.0; 3], None).unwrap();
+    /// frame.add_atom(&Atom::new("Sn").unwrap(), [0.0; 3], None).unwrap();
+    /// assert_eq!(frame.size(), Ok(3));
+    ///
+    /// frame.remove(1).unwrap();
+    /// assert_eq!(frame.size(), Ok(2));
+    /// assert_eq!(frame.atom(1).unwrap().name().unwrap(), "Sn");
+    /// ```
+    pub fn remove(&mut self, i: usize) -> Result<()> {
+        unsafe {
+            try!(check(chfl_frame_remove(self.as_mut_ptr(), i as u64)));
+        }
+        return Ok(());
+    }
+
+    /// Get the distance between the atoms at indexes `i` and `j` in this frame,
+    /// accounting for periodic boundary conditions. The result is expressed in
+    /// Angstroms.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("A").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [1.0, 2.0, 3.0], None).unwrap();
+    ///
+    /// assert_eq!(frame.distance(0, 1), Ok(f64::sqrt(14.0)));
+    /// ```
+    pub fn distance(&self, i: usize, j: usize) -> Result<f64> {
+        let mut distance = 0.0;
+        unsafe {
+            try!(check(chfl_frame_distance(
+                self.as_ptr(), i as u64, j as u64, &mut distance
+            )));
+        }
+        return Ok(distance);
+    }
+
+    /// Get the angle formed by the atoms at indexes `i`, `j` and `k` in this
+    /// frame, accounting for periodic boundary conditions. The result is
+    /// expressed in radians.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// # use std::f64;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("A").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 1.0, 0.0], None).unwrap();
+    ///
+    /// assert_eq!(frame.angle(0, 1, 2), Ok(f64::consts::PI / 2.0));
+    /// ```
+    pub fn angle(&self, i: usize, j: usize, k: usize) -> Result<f64> {
+        let mut angle = 0.0;
+        unsafe {
+            try!(check(chfl_frame_angle(
+                self.as_ptr(), i as u64, j as u64, k as u64, &mut angle
+            )));
+        }
+        return Ok(angle);
+    }
+
+    /// Get the dihedral angle formed by the atoms at indexes `i`, `j`, `k` and
+    /// `m` in this frame, accounting for periodic boundary conditions. The
+    /// result is expressed in radians.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// # use std::f64;
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("A").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 1.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 1.0, 1.0], None).unwrap();
+    ///
+    /// assert_eq!(frame.dihedral(0, 1, 2, 3), Ok(f64::consts::PI / 2.0));
+    /// ```
+    pub fn dihedral(&self, i: usize, j: usize, k: usize, m: usize) -> Result<f64> {
+        let mut dihedral = 0.0;
+        unsafe {
+            try!(check(chfl_frame_dihedral(
+                self.as_ptr(), i as u64, j as u64, k as u64, m as u64, &mut dihedral
+            )));
+        }
+        return Ok(dihedral);
+    }
+
+    /// Get the out of plane distance formed by the atoms at indexes `i`, `j`,
+    /// `k` and `m` in this frame, accounting for periodic boundary conditions.
+    /// The result is expressed in angstroms.
+    ///
+    /// This is the distance betweent the atom j and the ikm plane. The j atom
+    /// is the center of the improper dihedral angle formed by i, j, k and m.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("A").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 0.0, 2.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("B").unwrap(), [0.0, 1.0, 0.0], None).unwrap();
+    ///
+    /// assert_eq!(frame.out_of_plane(0, 1, 2, 3), Ok(2.0));
+    /// ```
+    pub fn out_of_plane(&self, i: usize, j: usize, k: usize, m: usize) -> Result<f64> {
+        let mut distance = 0.0;
+        unsafe {
+            try!(check(chfl_frame_out_of_plane(
+                self.as_ptr(), i as u64, j as u64, k as u64, m as u64, &mut distance
+            )));
+        }
+        return Ok(distance);
     }
 
     /// Get a view into the positions of this frame.
@@ -471,8 +588,8 @@ impl Frame {
     /// # use chemfiles::{Frame, Atom};
     /// let mut frame = Frame::new().unwrap();
     ///
-    /// frame.add_atom(&Atom::new("Cl").unwrap(), (0.0, 0.0, 0.0), None).unwrap();
-    /// frame.add_atom(&Atom::new("Cl").unwrap(), (1.5, 0.0, 0.0), None).unwrap();
+    /// frame.add_atom(&Atom::new("Cl").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
+    /// frame.add_atom(&Atom::new("Cl").unwrap(), [1.5, 0.0, 0.0], None).unwrap();
     /// assert_eq!(frame.topology().unwrap().bonds_count(), Ok(0));
     ///
     /// frame.guess_topology().unwrap();
@@ -576,7 +693,7 @@ mod test {
         let atom = Atom::new("U").unwrap();
         let mut frame = Frame::new().unwrap();
 
-        frame.add_atom(&atom, (1.0, 1.0, 2.0), None).unwrap();
+        frame.add_atom(&atom, [1.0, 1.0, 2.0], None).unwrap();
         assert_eq!(frame.size(), Ok(1));
         assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
 
@@ -586,7 +703,7 @@ mod test {
         frame.add_velocities().unwrap();
 
         let atom = Atom::new("F").unwrap();
-        frame.add_atom(&atom, (1.0, 1.0, 2.0), (4.0, 3.0, 2.0)).unwrap();
+        frame.add_atom(&atom, [1.0, 1.0, 2.0], [4.0, 3.0, 2.0]).unwrap();
         assert_eq!(frame.size(), Ok(2));
         assert_eq!(frame.atom(0).unwrap().name(), Ok("U".into()));
         assert_eq!(frame.atom(1).unwrap().name(), Ok("F".into()));
@@ -679,5 +796,24 @@ mod test {
         let mut frame = Frame::new().unwrap();
         assert_eq!(frame.set("foo", Property::Double(-22.0)), Ok(()));
         assert_eq!(frame.get("foo"), Ok(Some(Property::Double(-22.0))));
+    }
+
+    #[test]
+    fn pbc_geometry() {
+        use std::f64::consts::PI;
+
+        let mut frame = Frame::new().unwrap();
+        let atom = &Atom::new("").unwrap();
+
+        frame.add_atom(atom, [1.0, 0.0, 0.0], None).unwrap();
+        frame.add_atom(atom, [0.0, 0.0, 0.0], None).unwrap();
+        frame.add_atom(atom, [0.0, 1.0, 0.0], None).unwrap();
+        frame.add_atom(atom, [0.0, 1.0, 1.0], None).unwrap();
+        frame.add_atom(atom, [0.0, 0.0, 2.0], None).unwrap();
+
+        assert_eq!(frame.distance(0, 2), Ok(f64::sqrt(2.0)));
+        assert_eq!(frame.angle(0, 1, 2), Ok(PI / 2.0));
+        assert_eq!(frame.dihedral(0, 1, 2, 3), Ok(PI / 2.0));
+        assert_eq!(frame.out_of_plane(1, 4, 0, 2), Ok(2.0));
     }
 }

@@ -249,6 +249,32 @@ impl Topology {
         return Ok(res);
     }
 
+    /// Get the number of improper dihedral angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Atom};
+    /// let mut topology = Topology::new().unwrap();
+    /// assert_eq!(topology.dihedrals_count(), Ok(0));
+    ///
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(0, 2).unwrap();
+    /// topology.add_bond(0, 3).unwrap();
+    /// assert_eq!(topology.impropers_count(), Ok(1));
+    /// ```
+    pub fn impropers_count(&self) -> Result<u64> {
+        let mut res = 0;
+        unsafe {
+            try!(check(chfl_topology_impropers_count(self.as_ptr(), &mut res)));
+        }
+        return Ok(res);
+    }
+
     /// Get the list of bonds in the topology.
     ///
     /// # Example
@@ -325,6 +351,32 @@ impl Topology {
         let mut res = vec![[u64::MAX; 4]; ndihedrals as usize];
         unsafe {
             try!(check(chfl_topology_dihedrals(self.as_ptr(), res.as_mut_ptr(), ndihedrals)));
+        }
+        return Ok(res);
+    }
+
+    /// Get the list of improper dihedral angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, Atom};
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    /// topology.add_atom(&Atom::new("F").unwrap()).unwrap();
+    ///
+    /// topology.add_bond(0, 1).unwrap();
+    /// topology.add_bond(0, 2).unwrap();
+    /// topology.add_bond(0, 3).unwrap();
+    ///
+    /// assert_eq!(topology.impropers(), Ok(vec![[1, 0, 2, 3]]));
+    /// ```
+    pub fn impropers(&self) -> Result<Vec<[u64; 4]>> {
+        let nimpropers = try!(self.impropers_count());
+        let mut res = vec![[u64::MAX; 4]; nimpropers as usize];
+        unsafe {
+            try!(check(chfl_topology_impropers(self.as_ptr(), res.as_mut_ptr(), nimpropers)));
         }
         return Ok(res);
     }
@@ -637,6 +689,26 @@ mod test {
         assert_eq!(topology.dihedrals_count(), Ok(2));
 
         assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3], [5, 4, 7, 10]]));
+    }
+
+    #[test]
+    fn impropers() {
+        let mut topology = Topology::new().unwrap();
+        for _ in 0..12 {
+            topology.add_atom(&Atom::new("S").unwrap()).unwrap();
+        }
+
+        assert_eq!(topology.dihedrals_count(), Ok(0));
+
+        topology.add_bond(0, 1).unwrap();
+        topology.add_bond(0, 2).unwrap();
+        topology.add_bond(0, 3).unwrap();
+        topology.add_bond(4, 7).unwrap();
+        topology.add_bond(4, 5).unwrap();
+        topology.add_bond(4, 8).unwrap();
+        assert_eq!(topology.impropers_count(), Ok(2));
+
+        assert_eq!(topology.impropers(), Ok(vec![[1, 0, 2, 3], [5, 4, 7, 8]]));
     }
 
     #[test]
