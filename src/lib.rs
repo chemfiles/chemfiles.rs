@@ -35,7 +35,7 @@
 #![allow(unknown_lints)]
 #![warn(clippy, clippy_pedantic)]
 #![allow(needless_return, shadow_reuse, stutter, missing_docs_in_private_items)]
-#![allow(zero_ptr, cast_possible_truncation, or_fun_call)]
+#![allow(zero_ptr, cast_possible_truncation, or_fun_call, use_self, needless_pass_by_value)]
 
 #[cfg(test)]
 #[macro_use]

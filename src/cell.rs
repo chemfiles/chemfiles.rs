@@ -203,7 +203,7 @@ impl UnitCell {
         unsafe {
             try!(check(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr())));
         }
-        Ok((angles))
+        Ok(angles)
     }
 
     /// Set the three angles of the cell, in degrees. This is only possible

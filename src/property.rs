@@ -11,7 +11,7 @@ use errors::{check, Error};
 use strings;
 use Result;
 
-/// A thin wrapper around CHFL_PROPERTY
+/// A thin wrapper around `CHFL_PROPERTY`
 pub(crate) struct RawProperty {
     handle: *const CHFL_PROPERTY,
 }
@@ -133,11 +133,11 @@ pub enum Property {
 
 impl Property {
     pub(crate) fn as_raw(&self) -> Result<RawProperty> {
-        match self {
-            &Property::Bool(value) => RawProperty::bool(value),
-            &Property::Double(value) => RawProperty::double(value),
-            &Property::String(ref value) => RawProperty::string(value),
-            &Property::Vector3D(value) => RawProperty::vector3d(value),
+        match *self {
+            Property::Bool(value) => RawProperty::bool(value),
+            Property::Double(value) => RawProperty::double(value),
+            Property::String(ref value) => RawProperty::string(value),
+            Property::Vector3D(value) => RawProperty::vector3d(value),
         }
     }
 
