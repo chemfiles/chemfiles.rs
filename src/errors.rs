@@ -8,7 +8,7 @@ extern crate libc;
 
 use std::error;
 use std::fmt;
-use std::sync::Mutex;
+use std::panic::{self, RefUnwindSafe};
 use std::result;
 use std::path::Path;
 
@@ -117,40 +117,42 @@ pub fn check(status: chfl_status) -> Result<()> {
     return Ok(());
 }
 
-// FIXME: there must be a better way to do this ...
-static mut LOGGING_CALLBACK: Option<*const Fn(&str)> = None;
+
+pub trait WarningCallback: RefUnwindSafe + Fn(&str) -> () {}
+impl<T> WarningCallback for T where T: RefUnwindSafe + Fn(&str) -> () {}
+
+static mut LOGGING_CALLBACK: Option<*mut WarningCallback<Output=()>> = None;
+
 extern "C" fn warning_callback(message: *const c_char) {
     unsafe {
-        let callback = LOGGING_CALLBACK.expect("No callback provided, this is an internal bug");
-        (*callback)(&strings::from_c(message));
+        let callback = &*LOGGING_CALLBACK.expect("No callback provided, this is an internal bug");
+        // ignore result. If a panic happened, everything is going badly anyway
+        let _ = panic::catch_unwind(|| {
+            callback(&strings::from_c(message));
+        });
     }
 }
 
 /// Use `callback` for every chemfiles warning. The callback will be passed
 /// the warning message.
-///
-/// # Caveats
-///
-/// This function will box and forget the callback, effectivelly leaking it.
-/// Calling this function multiple time will leak all callbacks.
-///
-/// This function hold a `Mutex` under the hood, and will block when called
-/// from multiple threads. You should really call this function once, at the
-/// beggining of your application.
 pub fn set_warning_callback<F>(callback: F) -> Result<()>
 where
-    F: Fn(&str) + 'static,
+    F: WarningCallback + 'static,
 {
-    // Grab a mutex to prevent concurent modifications of the warning callback
-    let mutex = Mutex::new(());
-    let _guard = mutex.lock().expect("Could not get the mutex in set_warning_callback");
-
-    // Put the callback on the heap to be sure it survives long enough. This
-    // mean than we leak all the callbacks here.
+    // box callback to ensure it stays accessible
     let callback = Box::into_raw(Box::new(callback));
     unsafe {
-        LOGGING_CALLBACK = Some(callback);
-        try!(check(chfl_set_warning_callback(warning_callback)));
+        if let Some(previous) = LOGGING_CALLBACK {
+            // set the LOGGING_CALLBACK to the new one
+            LOGGING_CALLBACK = Some(callback);
+            // drop the previous callback
+            let _ = Box::from_raw(previous);
+        } else {
+            // set the LOGGING_CALLBACK
+            LOGGING_CALLBACK = Some(callback);
+            // Tell C code to use Rust-provided callback
+            try!(check(chfl_set_warning_callback(warning_callback)));
+        }
     }
     return Ok(());
 }
