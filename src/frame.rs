@@ -11,7 +11,7 @@ use std::slice;
 use chemfiles_sys::*;
 use strings;
 use errors::{check, Error};
-use {Atom, Topology, UnitCell};
+use {Atom, Residue, Topology, UnitCell};
 use property::{Property, RawProperty};
 use Result;
 
@@ -188,6 +188,85 @@ impl Frame {
     pub fn remove(&mut self, i: usize) -> Result<()> {
         unsafe {
             try!(check(chfl_frame_remove(self.as_mut_ptr(), i as u64)));
+        }
+        return Ok(());
+    }
+
+    /// Add a bond between the atoms at indexes `i` and `j` in the frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// for i in 0..5 {
+    ///    frame.add_atom(&Atom::new("C").unwrap(), [0.0; 3], None).unwrap();
+    /// }
+    ///
+    /// frame.add_bond(0, 1).unwrap();
+    /// frame.add_bond(3, 1).unwrap();
+    /// frame.add_bond(2, 4).unwrap();
+    ///
+    /// let bonds = frame.topology().unwrap().bonds().unwrap();
+    /// assert_eq!(bonds, vec![[0, 1], [1, 3], [2, 4]]);
+    /// ```
+    pub fn add_bond(&mut self, i: usize, j: usize) -> Result<()> {
+        unsafe {
+            try!(check(chfl_frame_add_bond(self.as_mut_ptr(), i as u64, j as u64)));
+        }
+        return Ok(());
+    }
+
+    /// Remove any existing bond between the atoms at indexes `i` and `j` in
+    /// the frame.
+    ///
+    /// This function does nothing if there is no bond between `i` and `j`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// for i in 0..5 {
+    ///    frame.add_atom(&Atom::new("C").unwrap(), [0.0; 3], None).unwrap();
+    /// }
+    ///
+    /// frame.add_bond(0, 1).unwrap();
+    /// frame.add_bond(3, 1).unwrap();
+    /// frame.add_bond(2, 4).unwrap();
+    ///
+    /// let bonds = frame.topology().unwrap().bonds().unwrap();
+    /// assert_eq!(bonds, vec![[0, 1], [1, 3], [2, 4]]);
+    ///
+    /// frame.remove_bond(2, 4).unwrap();
+    /// let bonds = frame.topology().unwrap().bonds().unwrap();
+    /// assert_eq!(bonds, vec![[0, 1], [1, 3]]);
+    /// ```
+    pub fn remove_bond(&mut self, i: usize, j: usize) -> Result<()> {
+        unsafe {
+            try!(check(chfl_frame_remove_bond(self.as_mut_ptr(), i as u64, j as u64)));
+        }
+        return Ok(());
+    }
+
+    /// Remove any existing bond between the atoms at indexes `i` and `j` in
+    /// the frame.
+    ///
+    /// This function does nothing if there is no bond between `i` and `j`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Residue};
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// let residue = Residue::new("foo").unwrap();
+    /// frame.add_residue(&residue).unwrap();
+    ///
+    /// let topology = frame.topology().unwrap();
+    /// assert_eq!(topology.residues_count(), Ok(1));
+    /// assert_eq!(topology.residue(0).unwrap().name().unwrap(), "foo");
+    /// ```
+    pub fn add_residue(&mut self, residue: &Residue) -> Result<()> {
+        unsafe {
+            try!(check(chfl_frame_add_residue(self.as_mut_ptr(), residue.as_ptr())));
         }
         return Ok(());
     }
@@ -772,6 +851,41 @@ mod test {
 
         assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("Zn")));
         assert_eq!(frame.atom(1).unwrap().name(), Ok(String::from("Ar")));
+    }
+
+    #[test]
+    fn bonds() {
+        let mut frame = Frame::new().unwrap();
+        let atom = &Atom::new("").unwrap();
+        frame.add_atom(atom, [0.0, 0.0, 0.0], None).unwrap();
+        frame.add_atom(atom, [0.0, 0.0, 0.0], None).unwrap();
+        frame.add_atom(atom, [0.0, 0.0, 0.0], None).unwrap();
+
+        frame.add_bond(0, 1).unwrap();
+        frame.add_bond(2, 1).unwrap();
+
+        assert_eq!(frame.topology().unwrap().bonds(), Ok(vec![[0, 1], [1, 2]]));
+
+        frame.remove_bond(2, 1).unwrap();
+        // Various useless operations to make sure they don't crash
+        frame.remove_bond(2, 1).unwrap();
+        frame.remove_bond(2, 0).unwrap();
+
+        assert_eq!(frame.topology().unwrap().bonds(), Ok(vec![[0, 1]]));
+    }
+
+    #[test]
+    fn residues() {
+        let mut frame = Frame::new().unwrap();
+        assert_eq!(frame.topology().unwrap().residues_count(), Ok(0));
+
+        let residue = &Residue::new("foobar").unwrap();
+        frame.add_residue(residue).unwrap();
+        frame.add_residue(residue).unwrap();
+        frame.add_residue(residue).unwrap();
+
+        assert_eq!(frame.topology().unwrap().residues_count(), Ok(3));
+        assert_eq!(frame.topology().unwrap().residue(0).unwrap().name().unwrap(), "foobar");
     }
 
     #[test]
