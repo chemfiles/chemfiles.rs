@@ -119,9 +119,13 @@ pub fn check(status: chfl_status) -> Result<()> {
 
 
 pub trait WarningCallback: RefUnwindSafe + Fn(&str) -> () {}
-impl<T> WarningCallback for T where T: RefUnwindSafe + Fn(&str) -> () {}
+impl<T> WarningCallback for T
+where
+    T: RefUnwindSafe + Fn(&str) -> (),
+{
+}
 
-static mut LOGGING_CALLBACK: Option<*mut WarningCallback<Output=()>> = None;
+static mut LOGGING_CALLBACK: Option<*mut WarningCallback<Output = ()>> = None;
 
 extern "C" fn warning_callback(message: *const c_char) {
     unsafe {
@@ -188,15 +192,9 @@ impl error::Error for Error {
 mod test {
     use super::*;
     use Trajectory;
-    use std::thread;
-    use std::time::Duration;
 
     #[test]
     fn errors() {
-        // The last_error is a global, so it can be polluted by other tests. We
-        // wait for a few time in order to be sure that every other test is
-        // finished.
-        thread::sleep(Duration::from_millis(300));
         Error::cleanup();
         assert_eq!(Error::last_error(), "");
         assert!(Trajectory::open("nope", 'r').is_err());
