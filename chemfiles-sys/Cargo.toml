@@ -4,7 +4,7 @@ version = "0.8.0"
 authors = ["Guillaume Fraux <guillaume.fraux@ens.fr>"]
 links = "chemfiles"
 repository = "https://github.com/chemfiles/chemfiles.rs"
-license = "MPL-2.0"
+license = "BSD-3-Clause"
 description = "Rust FFI declaration for the chemfiles library"
 
 [lib]

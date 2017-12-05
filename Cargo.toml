@@ -8,7 +8,7 @@ homepage = "http://chemfiles.org/"
 description = "Modern library for chemistry trajectories reading and writing"
 keywords = ["computational", "theoretical", "chemistry", "file", "trajectory"]
 readme = "README.md"
-license = "MPL-2.0"
+license = "BSD-3-Clause"
 
 [lib]
 name = "chemfiles"
