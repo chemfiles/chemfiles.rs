@@ -34,13 +34,26 @@ fn list_cxx_libs(build: &Path) {
     let mut content = String::new();
     libs_file.read_to_string(&mut content).unwrap();
     for lib in content.lines() {
-        /// Exclude bogus libraries: libclang_rt.osx.a is not found by the
-        /// linker, and to_library is a bug with cmake
-        fn exclude(name: &str) -> bool {
-            name.contains("libclang_rt.osx.a") || name == "to_library"
-        }
-        if !exclude(&lib) {
+        if !is_excluded_lib(&lib) {
             println!("cargo:rustc-link-lib={}", lib);
         }
     }
+}
+
+#[cfg(target_os = "macos")]
+fn is_excluded_lib(name: &str) -> bool {
+    // libclang_rt.osx.a is not found by the linker, and to_library is a bug
+    // with cmake (trying to parse -lto_library=<...>)
+    name.contains("libclang_rt.osx.a") || name == "to_library"
+}
+
+#[cfg(target_os = "linux")]
+fn is_excluded_lib(name: &str) -> bool {
+    // Fiw warnings about redundant linker flag
+    name == "gcc" || name == "gcc_s"
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+fn is_excluded_lib(name: &str) -> bool {
+    false
 }
