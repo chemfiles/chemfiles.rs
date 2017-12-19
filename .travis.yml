@@ -57,7 +57,7 @@ script:
     - |
       if $EXTRA_WORK; then
           rm -rf target/kcov
-          kcov --include-pattern=$(pwd) --exclude-pattern=target target/kcov target/debug/deps/chemfiles-*
+          kcov --include-pattern=$(pwd)/src target/kcov target/debug/deps/chemfiles-*
           bash <(curl -s https://codecov.io/bash) -s target/kcov
       fi
 
