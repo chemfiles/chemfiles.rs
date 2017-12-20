@@ -15,7 +15,7 @@ Add this to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-chemfiles = "0.7"
+chemfiles = "0.8"
 ```
 
 And then use `chemfiles` in your project:
