@@ -9,6 +9,7 @@ description = "Modern library for chemistry trajectories reading and writing"
 keywords = ["computational", "theoretical", "chemistry", "file", "trajectory"]
 readme = "README.md"
 license = "BSD-3-Clause"
+exclude = ["data/*"]
 
 [lib]
 name = "chemfiles"
