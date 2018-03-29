@@ -6,6 +6,7 @@ links = "chemfiles"
 repository = "https://github.com/chemfiles/chemfiles.rs"
 license = "BSD-3-Clause"
 description = "Rust FFI declaration for the chemfiles library"
+exclude = ["chemfiles/tests/**"]
 
 [lib]
 name = "chemfiles_sys"
