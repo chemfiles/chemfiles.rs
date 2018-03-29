@@ -6,7 +6,7 @@ addons:
     - ubuntu-toolchain-r-test
     - kalakris-cmake
     packages:
-    - g++-4.9
+    - g++-7
     - cmake
     - libcurl4-openssl-dev
     - libelf-dev
@@ -27,8 +27,8 @@ install:
       fi
     - |
       if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-          export CC=gcc-4.9
-          export CXX=g++-4.9
+          export CC=gcc-7
+          export CXX=g++-7
       fi
     # Build and cache kcov
     - |
