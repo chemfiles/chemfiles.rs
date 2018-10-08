@@ -102,7 +102,7 @@ impl Frame {
     pub fn size(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_atoms_count(self.as_ptr(), &mut natoms)));
+            check(chfl_frame_atoms_count(self.as_ptr(), &mut natoms))?;
         }
         return Ok(natoms);
     }
@@ -120,7 +120,7 @@ impl Frame {
     /// ```
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_resize(self.as_mut_ptr(), natoms)));
+            check(chfl_frame_resize(self.as_mut_ptr(), natoms))?;
         }
         return Ok(());
     }
@@ -148,12 +148,12 @@ impl Frame {
         };
 
         unsafe {
-            try!(check(chfl_frame_add_atom(
+            check(chfl_frame_add_atom(
                 self.as_mut_ptr(),
                 atom.as_ptr(),
                 position.as_ptr(),
                 velocity_ptr
-            )));
+            ))?;
         }
 
         return Ok(());
@@ -176,7 +176,7 @@ impl Frame {
     /// ```
     pub fn remove(&mut self, i: usize) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_remove(self.as_mut_ptr(), i as u64)));
+            check(chfl_frame_remove(self.as_mut_ptr(), i as u64))?;
         }
         return Ok(());
     }
@@ -200,7 +200,7 @@ impl Frame {
     /// ```
     pub fn add_bond(&mut self, i: usize, j: usize) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_add_bond(self.as_mut_ptr(), i as u64, j as u64)));
+            check(chfl_frame_add_bond(self.as_mut_ptr(), i as u64, j as u64))?;
         }
         return Ok(());
     }
@@ -231,7 +231,7 @@ impl Frame {
     /// ```
     pub fn remove_bond(&mut self, i: usize, j: usize) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_remove_bond(self.as_mut_ptr(), i as u64, j as u64)));
+            check(chfl_frame_remove_bond(self.as_mut_ptr(), i as u64, j as u64))?;
         }
         return Ok(());
     }
@@ -255,7 +255,7 @@ impl Frame {
     /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_add_residue(self.as_mut_ptr(), residue.as_ptr())));
+            check(chfl_frame_add_residue(self.as_mut_ptr(), residue.as_ptr()))?;
         }
         return Ok(());
     }
@@ -276,7 +276,7 @@ impl Frame {
     pub fn distance(&self, i: usize, j: usize) -> Result<f64> {
         let mut distance = 0.0;
         unsafe {
-            try!(check(chfl_frame_distance(self.as_ptr(), i as u64, j as u64, &mut distance)));
+            check(chfl_frame_distance(self.as_ptr(), i as u64, j as u64, &mut distance))?;
         }
         return Ok(distance);
     }
@@ -299,7 +299,7 @@ impl Frame {
     pub fn angle(&self, i: usize, j: usize, k: usize) -> Result<f64> {
         let mut angle = 0.0;
         unsafe {
-            try!(check(chfl_frame_angle(self.as_ptr(), i as u64, j as u64, k as u64, &mut angle)));
+            check(chfl_frame_angle(self.as_ptr(), i as u64, j as u64, k as u64, &mut angle))?;
         }
         return Ok(angle);
     }
@@ -323,14 +323,14 @@ impl Frame {
     pub fn dihedral(&self, i: usize, j: usize, k: usize, m: usize) -> Result<f64> {
         let mut dihedral = 0.0;
         unsafe {
-            try!(check(chfl_frame_dihedral(
+            check(chfl_frame_dihedral(
                 self.as_ptr(),
                 i as u64,
                 j as u64,
                 k as u64,
                 m as u64,
                 &mut dihedral
-            )));
+            ))?;
         }
         return Ok(dihedral);
     }
@@ -356,14 +356,14 @@ impl Frame {
     pub fn out_of_plane(&self, i: usize, j: usize, k: usize, m: usize) -> Result<f64> {
         let mut distance = 0.0;
         unsafe {
-            try!(check(chfl_frame_out_of_plane(
+            check(chfl_frame_out_of_plane(
                 self.as_ptr(),
                 i as u64,
                 j as u64,
                 k as u64,
                 m as u64,
                 &mut distance
-            )));
+            ))?;
         }
         return Ok(distance);
     }
@@ -384,13 +384,13 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_positions(
+            check(chfl_frame_positions(
                 // not using .as_ptr() because the C function uses a *mut
                 // pointer and we are re-creating the shared/mut by ourselve
                 self.handle,
                 &mut ptr,
                 &mut natoms
-            )));
+            ))?;
         }
         let res = unsafe {
             #[allow(cast_possible_truncation)]
@@ -419,7 +419,7 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms)));
+            check(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms))?;
         }
         let res = unsafe {
             #[allow(cast_possible_truncation)]
@@ -445,13 +445,13 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_velocities(
+            check(chfl_frame_velocities(
                 // not using .as_ptr() because the C function uses a *mut
                 // pointer and we are re-creating the shared/mut by ourselve
                 self.handle,
                 &mut ptr,
                 &mut natoms
-            )));
+            ))?;
         }
         let res = unsafe {
             #[allow(cast_possible_truncation)]
@@ -481,7 +481,7 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms)));
+            check(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms))?;
         }
         let res = unsafe {
             #[allow(cast_possible_truncation)]
@@ -504,7 +504,7 @@ impl Frame {
     pub fn has_velocities(&self) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_frame_has_velocities(self.as_ptr(), &mut res)));
+            check(chfl_frame_has_velocities(self.as_ptr(), &mut res))?;
         }
         return Ok(res != 0);
     }
@@ -523,7 +523,7 @@ impl Frame {
     /// ```
     pub fn add_velocities(&mut self) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_add_velocities(self.as_mut_ptr())));
+            check(chfl_frame_add_velocities(self.as_mut_ptr()))?;
         }
         return Ok(());
     }
@@ -560,7 +560,7 @@ impl Frame {
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_set_cell(self.as_mut_ptr(), cell.as_ptr())));
+            check(chfl_frame_set_cell(self.as_mut_ptr(), cell.as_ptr()))?;
         }
         return Ok(());
     }
@@ -602,7 +602,7 @@ impl Frame {
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_set_topology(self.as_mut_ptr(), topology.as_ptr())));
+            check(chfl_frame_set_topology(self.as_mut_ptr(), topology.as_ptr()))?;
         }
         return Ok(());
     }
@@ -618,7 +618,7 @@ impl Frame {
     pub fn step(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_frame_step(self.as_ptr(), &mut res)));
+            check(chfl_frame_step(self.as_ptr(), &mut res))?;
         }
         return Ok(res);
     }
@@ -636,7 +636,7 @@ impl Frame {
     /// ```
     pub fn set_step(&mut self, step: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_set_step(self.as_mut_ptr(), step)));
+            check(chfl_frame_set_step(self.as_mut_ptr(), step))?;
         }
         return Ok(());
     }
@@ -660,7 +660,7 @@ impl Frame {
     /// ```
     pub fn guess_topology(&mut self) -> Result<()> {
         unsafe {
-            try!(check(chfl_frame_guess_topology(self.as_mut_ptr())));
+            check(chfl_frame_guess_topology(self.as_mut_ptr()))?;
         }
         return Ok(());
     }
@@ -682,11 +682,11 @@ impl Frame {
     #[allow(needless_pass_by_value)]  // property
     pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
         let buffer = strings::to_c(name);
-        let property = try!(property.as_raw());
+        let property = property.as_raw()?;
         unsafe {
-            try!(check(
-                chfl_frame_set_property(self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr())
-            ));
+            check(chfl_frame_set_property(
+                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+            ))?;
         }
         return Ok(());
     }
@@ -709,8 +709,8 @@ impl Frame {
             if handle.is_null() {
                 Ok(None)
             } else {
-                let raw = try!(RawProperty::from_ptr(handle));
-                let property = try!(Property::from_raw(raw));
+                let raw = RawProperty::from_ptr(handle)?;
+                let property = Property::from_raw(raw)?;
                 Ok(Some(property))
             }
         }

@@ -68,7 +68,7 @@ impl RawProperty {
     fn get_kind(&self) -> Result<chfl_property_kind> {
         let mut kind = chfl_property_kind::CHFL_PROPERTY_BOOL;
         unsafe {
-            try!(check(chfl_property_get_kind(self.as_ptr(), &mut kind)));
+            check(chfl_property_get_kind(self.as_ptr(), &mut kind))?;
         }
         return Ok(kind);
     }
@@ -76,7 +76,7 @@ impl RawProperty {
     fn get_bool(&self) -> Result<bool> {
         let mut value = 0;
         unsafe {
-            try!(check(chfl_property_get_bool(self.as_ptr(), &mut value)));
+            check(chfl_property_get_bool(self.as_ptr(), &mut value))?;
         }
         return Ok(value != 0);
     }
@@ -84,21 +84,21 @@ impl RawProperty {
     fn get_double(&self) -> Result<f64> {
         let mut value = 0.0;
         unsafe {
-            try!(check(chfl_property_get_double(self.as_ptr(), &mut value)));
+            check(chfl_property_get_double(self.as_ptr(), &mut value))?;
         }
         return Ok(value);
     }
 
     fn get_string(&self) -> Result<String> {
         let get_string = |ptr, len| unsafe { chfl_property_get_string(self.as_ptr(), ptr, len) };
-        let value = try!(strings::call_autogrow_buffer(64, get_string));
+        let value = strings::call_autogrow_buffer(64, get_string)?;
         return Ok(strings::from_c(value.as_ptr()));
     }
 
     fn get_vector3d(&self) -> Result<[f64; 3]> {
         let mut value = [0.0; 3];
         unsafe {
-            try!(check(chfl_property_get_vector3d(self.as_ptr(), value.as_mut_ptr())));
+            check(chfl_property_get_vector3d(self.as_ptr(), value.as_mut_ptr()))?;
         }
         return Ok(value);
     }

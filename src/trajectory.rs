@@ -51,7 +51,7 @@ impl Trajectory {
     where
         P: AsRef<Path>,
     {
-        let path = try!(path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref())));
+        let path = path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref()))?;
 
         let path = strings::to_c(path);
         unsafe {
@@ -82,7 +82,7 @@ impl Trajectory {
         S: Into<&'a str>,
     {
         let filename =
-            try!(filename.as_ref().to_str().ok_or(Error::utf8_path_error(filename.as_ref())));
+            filename.as_ref().to_str().ok_or(Error::utf8_path_error(filename.as_ref()))?;
 
         let filename = strings::to_c(filename);
         let format = strings::to_c(format.into());
@@ -108,8 +108,9 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// ```
     pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
-        unsafe { try!(check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr()))) }
-        Ok(())
+        unsafe {
+            check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr()))
+        }
     }
 
     /// Read a specific `step` of this trajectory into a `frame`.
@@ -127,9 +128,8 @@ impl Trajectory {
     /// ```
     pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_read_step(self.as_mut_ptr(), step, frame.as_mut_ptr())))
+            check(chfl_trajectory_read_step(self.as_mut_ptr(), step, frame.as_mut_ptr()))
         }
-        Ok(())
     }
 
     /// Write a `frame` to this trajectory.
@@ -143,8 +143,9 @@ impl Trajectory {
     /// trajectory.write(&mut frame).unwrap();
     /// ```
     pub fn write(&mut self, frame: &Frame) -> Result<()> {
-        unsafe { try!(check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr()))) }
-        Ok(())
+        unsafe {
+            check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr()))
+        }
     }
 
     /// Set the `topology` associated with this trajectory. This topology will
@@ -165,8 +166,9 @@ impl Trajectory {
     /// trajectory.set_topology(&topology).unwrap();
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
-        unsafe { try!(check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()))) }
-        Ok(())
+        unsafe {
+            check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()))
+        }
     }
 
     /// Set the topology associated with this trajectory by reading the first
@@ -183,15 +185,12 @@ impl Trajectory {
     where
         P: AsRef<Path>,
     {
-        let path = try!(path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref())));
+        let path = path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref()))?;
 
         let path = strings::to_c(path);
         unsafe {
-            try!(check(
-                chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), ptr::null())
-            ))
+            check(chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), ptr::null()))
         }
-        Ok(())
     }
 
     /// Set the topology associated with this trajectory by reading the first
@@ -212,16 +211,13 @@ impl Trajectory {
         P: AsRef<Path>,
         S: Into<&'a str>,
     {
-        let path = try!(path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref())));
+        let path = path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref()))?;
 
         let format = strings::to_c(format.into());
         let path = strings::to_c(path);
         unsafe {
-            try!(check(
-                chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), format.as_ptr())
-            ))
+            check(chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), format.as_ptr()))
         }
-        Ok(())
     }
 
     /// Set the unit `cell` associated with a trajectory. This cell will be
@@ -236,9 +232,8 @@ impl Trajectory {
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
         unsafe {
-            try!(check(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr())));
+            check(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr()))
         }
-        Ok(())
     }
 
     /// Get the number of steps (the number of frames) in a trajectory.
@@ -256,7 +251,7 @@ impl Trajectory {
     pub fn nsteps(&mut self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res)));
+            check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))?;
         }
         Ok(res)
     }
