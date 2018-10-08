@@ -73,8 +73,7 @@ impl UnitCell {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Result<UnitCell> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Result<UnitCell> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -84,15 +83,13 @@ impl UnitCell {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_ptr(&self) -> *const CHFL_CELL {
+    pub(crate) fn as_ptr(&self) -> *const CHFL_CELL {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
         self.handle
     }
 

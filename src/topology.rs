@@ -30,8 +30,7 @@ impl Topology {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Result<Topology> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Result<Topology> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -41,15 +40,13 @@ impl Topology {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
+    pub(crate) fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
         self.handle
     }
 
