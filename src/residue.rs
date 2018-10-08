@@ -16,7 +16,7 @@ use Result;
 /// can be small molecules, amino-acids in a protein, monomers in polymers,
 /// *etc.*
 pub struct Residue {
-    handle: *const CHFL_RESIDUE,
+    handle: *mut CHFL_RESIDUE,
 }
 
 impl Clone for Residue {
@@ -35,7 +35,7 @@ impl Residue {
     /// except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_RESIDUE) -> Result<Residue> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Result<Residue> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -54,7 +54,7 @@ impl Residue {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_RESIDUE {
-        self.handle as *mut CHFL_RESIDUE
+        self.handle
     }
 
     /// Create a new residue with the given `name`
@@ -70,7 +70,7 @@ impl Residue {
     where
         S: Into<&'a str>,
     {
-        let handle: *const CHFL_RESIDUE;
+        let handle: *mut CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
         unsafe {
             handle = chfl_residue(buffer.as_ptr());
@@ -96,7 +96,7 @@ impl Residue {
     where
         S: Into<&'a str>,
     {
-        let handle: *const CHFL_RESIDUE;
+        let handle: *mut CHFL_RESIDUE;
         let buffer = strings::to_c(name.into());
         unsafe {
             handle = chfl_residue_with_id(buffer.as_ptr(), id);

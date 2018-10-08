@@ -19,7 +19,7 @@ use {Frame, Topology, UnitCell};
 /// `Trajectory` behave a bit like a file, allowing to read and/or write
 /// `Frame`.
 pub struct Trajectory {
-    handle: *const CHFL_TRAJECTORY,
+    handle: *mut CHFL_TRAJECTORY,
 }
 
 impl Trajectory {
@@ -29,7 +29,7 @@ impl Trajectory {
     /// except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_TRAJECTORY) -> Result<Trajectory> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -48,7 +48,7 @@ impl Trajectory {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
-        self.handle as *mut CHFL_TRAJECTORY
+        self.handle
     }
 
     /// Open the file at the given `path` in the given `mode`.

@@ -20,7 +20,7 @@ use Result;
 /// the system. If some information is missing (topology or velocity or unit
 /// cell), the corresponding data is filled with a default value.
 pub struct Frame {
-    handle: *const CHFL_FRAME,
+    handle: *mut CHFL_FRAME,
 }
 
 impl Clone for Frame {
@@ -39,7 +39,7 @@ impl Frame {
     /// except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_FRAME) -> Result<Frame> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_FRAME) -> Result<Frame> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -58,7 +58,7 @@ impl Frame {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_FRAME {
-        self.handle as *mut CHFL_FRAME
+        self.handle
     }
 
     /// Create an empty frame. It will be resized by the library as needed.
@@ -69,11 +69,7 @@ impl Frame {
     /// let frame = Frame::new().unwrap();
     /// ```
     pub fn new() -> Result<Frame> {
-        let handle: *const CHFL_FRAME;
-        unsafe {
-            handle = chfl_frame();
-        }
-
+        let handle = unsafe { chfl_frame() };
         if handle.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -398,7 +394,7 @@ impl Frame {
             try!(check(chfl_frame_positions(
                 // not using .as_ptr() because the C function uses a *mut
                 // pointer and we are re-creating the shared/mut by ourselve
-                self.handle as *mut CHFL_FRAME,
+                self.handle,
                 &mut ptr,
                 &mut natoms
             )));
@@ -459,7 +455,7 @@ impl Frame {
             try!(check(chfl_frame_velocities(
                 // not using .as_ptr() because the C function uses a *mut
                 // pointer and we are re-creating the shared/mut by ourselve
-                self.handle as *mut CHFL_FRAME,
+                self.handle,
                 &mut ptr,
                 &mut natoms
             )));

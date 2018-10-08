@@ -25,7 +25,7 @@ use property::{Property, RawProperty};
 /// atom type will be shared between all particles of the same type: `H`,
 /// `Ow`, `CH3`.
 pub struct Atom {
-    handle: *const CHFL_ATOM,
+    handle: *mut CHFL_ATOM,
 }
 
 impl Clone for Atom {
@@ -44,7 +44,7 @@ impl Atom {
     /// pointer, except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_ATOM) -> Result<Atom> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Result<Atom> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -63,7 +63,7 @@ impl Atom {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_ATOM {
-        self.handle as *mut CHFL_ATOM
+        self.handle
     }
 
     /// Create an atom with the given `name`, and set the atom type to `name`.
