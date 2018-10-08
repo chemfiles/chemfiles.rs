@@ -57,7 +57,7 @@ impl From<CellShape> for chfl_cellshape {
 /// |  0     0    c_z |
 /// ```
 pub struct UnitCell {
-    handle: *const CHFL_CELL,
+    handle: *mut CHFL_CELL,
 }
 
 impl Clone for UnitCell {
@@ -76,7 +76,7 @@ impl UnitCell {
     /// except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_CELL) -> Result<UnitCell> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Result<UnitCell> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -95,7 +95,7 @@ impl UnitCell {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
-        self.handle as *mut CHFL_CELL
+        self.handle
     }
 
     /// Create an `Orthorhombic` `UnitCell` from the three lengths, in Angstroms.

@@ -114,7 +114,7 @@ impl<'a> IntoIterator for &'a Match {
 /// <value>` structure, where `<operator>` is a comparison operator in
 /// `== != < <= > >=`.
 pub struct Selection {
-    handle: *const CHFL_SELECTION,
+    handle: *mut CHFL_SELECTION,
 }
 
 impl Clone for Selection {
@@ -142,7 +142,7 @@ impl Selection {
     /// except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_SELECTION) -> Result<Selection> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Result<Selection> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -161,7 +161,7 @@ impl Selection {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_SELECTION {
-        self.handle as *mut CHFL_SELECTION
+        self.handle
     }
 
     /// Create a new selection from the given selection string.

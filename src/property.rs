@@ -13,7 +13,7 @@ use Result;
 
 /// A thin wrapper around `CHFL_PROPERTY`
 pub(crate) struct RawProperty {
-    handle: *const CHFL_PROPERTY,
+    handle: *mut CHFL_PROPERTY,
 }
 
 impl RawProperty {
@@ -21,7 +21,7 @@ impl RawProperty {
     ///
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
-    pub unsafe fn from_ptr(ptr: *const CHFL_PROPERTY) -> Result<RawProperty> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> Result<RawProperty> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -36,7 +36,7 @@ impl RawProperty {
 
     /// Get the underlying C pointer as a mutable pointer.
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_PROPERTY {
-        self.handle as *mut CHFL_PROPERTY
+        self.handle
     }
 
     fn double(value: f64) -> Result<RawProperty> {

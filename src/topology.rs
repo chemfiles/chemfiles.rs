@@ -16,7 +16,7 @@ use Result;
 /// the liaisons between the atoms (bonds, angles, dihedrals, ...). It will
 /// also contain all the residues information if it is available.
 pub struct Topology {
-    handle: *const CHFL_TOPOLOGY,
+    handle: *mut CHFL_TOPOLOGY,
 }
 
 impl Clone for Topology {
@@ -35,7 +35,7 @@ impl Topology {
     /// except for it being non-null.
     #[inline]
     #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *const CHFL_TOPOLOGY) -> Result<Topology> {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Result<Topology> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -54,7 +54,7 @@ impl Topology {
     #[inline]
     #[doc(hidden)]
     pub fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
-        self.handle as *mut CHFL_TOPOLOGY
+        self.handle
     }
 
     /// Create a new empty topology.
