@@ -1,6 +1,7 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
+use std::ops::{Drop, Deref, DerefMut};
+use std::marker::PhantomData;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
@@ -24,6 +25,38 @@ pub struct Atom {
     handle: *mut CHFL_ATOM,
 }
 
+/// An analog to a reference to an atom (`&Atom`)
+pub struct AtomRef<'a> {
+    inner: Atom,
+    marker: PhantomData<&'a Atom>
+}
+
+impl<'a> Deref for AtomRef<'a> {
+    type Target = Atom;
+    fn deref(&self) -> &Atom {
+        &self.inner
+    }
+}
+
+/// An analog to a mutable reference to an atom (`&mut Atom`)
+pub struct AtomMut<'a> {
+    inner: Atom,
+    marker: PhantomData<&'a mut Atom>
+}
+
+impl<'a> Deref for AtomMut<'a> {
+    type Target = Atom;
+    fn deref(&self) -> &Atom {
+        &self.inner
+    }
+}
+
+impl<'a> DerefMut for AtomMut<'a> {
+    fn deref_mut(&mut self) -> &mut Atom {
+        &mut self.inner
+    }
+}
+
 impl Clone for Atom {
     fn clone(&self) -> Atom {
         unsafe {
@@ -34,7 +67,7 @@ impl Clone for Atom {
 }
 
 impl Atom {
-    /// Create an `Atom` from a C pointer.
+    /// Create an owned `Atom` from a C pointer.
     ///
     /// This function is unsafe because no validity check is made on the
     /// pointer, except for it being non-null.
@@ -45,6 +78,34 @@ impl Atom {
         } else {
             Ok(Atom { handle: ptr })
         }
+    }
+
+    /// Create a borrowed `Atom` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null, and the caller is responsible
+    /// for setting the right lifetime
+    #[inline]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_ATOM) -> Result<AtomRef<'a>> {
+        let atom = try!(Atom::from_ptr(ptr as *mut CHFL_ATOM));
+        Ok(AtomRef {
+            inner: atom,
+            marker: PhantomData,
+        })
+    }
+
+    /// Create a mutably borrowed `Atom` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null, and the caller is responsible
+    /// for setting the right lifetime
+    #[inline]
+    pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_ATOM) -> Result<AtomMut<'a>> {
+        let atom = try!(Atom::from_ptr(ptr));
+        Ok(AtomMut {
+            inner: atom,
+            marker: PhantomData,
+        })
     }
 
     /// Get the underlying C pointer as a const pointer.

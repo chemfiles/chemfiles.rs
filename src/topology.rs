@@ -1,11 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
+use std::ops::{Drop, Deref};
+use std::marker::PhantomData;
 use std::u64;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
-use {Atom, Residue};
+use super::{Atom, AtomRef, AtomMut};
+use super::{Residue, ResidueRef};
 use Result;
 
 /// A `Topology` contains the definition of all the atoms in the system, and
@@ -13,6 +15,19 @@ use Result;
 /// also contain all the residues information if it is available.
 pub struct Topology {
     handle: *mut CHFL_TOPOLOGY,
+}
+
+/// An analog to a reference to a topology (`&Topology`)
+pub struct TopologyRef<'a> {
+    inner: Topology,
+    marker: PhantomData<&'a Topology>
+}
+
+impl<'a> Deref for TopologyRef<'a> {
+    type Target = Topology;
+    fn deref(&self) -> &Topology {
+        &self.inner
+    }
 }
 
 impl Clone for Topology {
@@ -38,6 +53,20 @@ impl Topology {
         }
     }
 
+    /// Create a borrowed `Topology` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null, and the caller is responsible
+    /// for setting the right lifetime
+    #[inline]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_TOPOLOGY) -> Result<TopologyRef<'a>> {
+        let topology = try!(Topology::from_ptr(ptr as *mut CHFL_TOPOLOGY));
+        Ok(TopologyRef {
+            inner: topology,
+            marker: PhantomData,
+        })
+    }
+
     /// Get the underlying C pointer as a const pointer.
     #[inline]
     pub(crate) fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
@@ -47,6 +76,17 @@ impl Topology {
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
     pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
+        self.handle
+    }
+
+    /// Get the underlying C pointer as a mutable pointer FROM A SHARED REFERENCE.
+    ///
+    /// For uses with functions of the C API using mut pointers for both read
+    /// and write access. Users should check that this does not lead to multiple
+    /// mutable borrows
+    #[inline]
+    #[allow(non_snake_case)]
+    pub(crate) fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_TOPOLOGY {
         self.handle
     }
 
@@ -65,7 +105,7 @@ impl Topology {
         }
     }
 
-    /// Get a copy of the atom at index `index` from this topology.
+    /// Get a reference of the atom at index `index` from this topology.
     ///
     /// # Example
     /// ```
@@ -76,10 +116,34 @@ impl Topology {
     /// let atom = topology.atom(4).unwrap();
     /// assert_eq!(atom.name(), Ok(String::new()));
     /// ```
-    pub fn atom(&self, index: u64) -> Result<Atom> {
+    pub fn atom(&self, index: u64) -> Result<AtomRef> {
         unsafe {
-            let handle = chfl_atom_from_topology(self.as_ptr(), index);
-            Atom::from_ptr(handle)
+            let handle = chfl_atom_from_topology(
+                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index
+            );
+            Atom::ref_from_ptr(handle)
+        }
+    }
+
+    /// Get a mutable reference of the atom at index `index` from this topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new().unwrap();
+    /// topology.resize(6).unwrap();
+    ///
+    /// assert_eq!(topology.atom(4).unwrap().name(), Ok(String::new()));
+    ///
+    /// topology.atom_mut(4).unwrap().set_name("Fe").unwrap();
+    /// assert_eq!(topology.atom(4).unwrap().name(), Ok("Fe".into()));
+    /// ```
+    pub fn atom_mut(&mut self, index: u64) -> Result<AtomMut> {
+        unsafe {
+            let handle = chfl_atom_from_topology(
+                self.as_mut_ptr(), index
+            );
+            Atom::ref_mut_from_ptr(handle)
         }
     }
 
@@ -429,7 +493,7 @@ impl Topology {
         Ok(())
     }
 
-    /// Get a copy of the residue at index `index` from this topology.
+    /// Get a reference to the residue at index `index` from this topology.
     ///
     /// The residue index in the topology is not always the same as the residue
     /// `id`.
@@ -443,10 +507,10 @@ impl Topology {
     /// let residue = topology.residue(0).unwrap();
     /// assert_eq!(residue.name(), Ok(String::from("water")));
     /// ```
-    pub fn residue(&self, index: u64) -> Result<Residue> {
+    pub fn residue(&self, index: u64) -> Result<ResidueRef> {
         unsafe {
             let handle = chfl_residue_from_topology(self.as_ptr(), index);
-            Residue::from_ptr(handle)
+            Residue::ref_from_ptr(handle)
         }
     }
 
@@ -471,12 +535,12 @@ impl Topology {
     /// let residue = topology.residue_for_atom(6).unwrap();
     /// assert!(residue.is_none());
     /// ```
-    pub fn residue_for_atom(&self, index: u64) -> Result<Option<Residue>> {
+    pub fn residue_for_atom(&self, index: u64) -> Result<Option<ResidueRef>> {
         let handle = unsafe { chfl_residue_for_atom(self.as_ptr(), index) };
         if handle.is_null() {
             let natoms = self.size()?;
             if index >= natoms {
-                let result = unsafe { Residue::from_ptr(handle).map(Some) };
+                let result = unsafe { Residue::ref_from_ptr(handle).map(Some) };
                 assert!(result.is_err());
                 result
             } else {
@@ -484,7 +548,7 @@ impl Topology {
                 Ok(None)
             }
         } else {
-            let residue = unsafe { Residue::from_ptr(handle)? };
+            let residue = unsafe { Residue::ref_from_ptr(handle)? };
             Ok(Some(residue))
         }
     }
@@ -709,8 +773,10 @@ mod test {
         assert_eq!(topology.residues_count(), Ok(1));
 
         assert_eq!(topology.residue(0).unwrap().name(), Ok("Foo".into()));
-        let residue = topology.residue_for_atom(2).unwrap().unwrap();
-        assert_eq!(residue.name(), Ok("Foo".into()));
+        {
+            let residue = topology.residue_for_atom(2).unwrap().unwrap();
+            assert_eq!(residue.name(), Ok("Foo".into()));
+        }
 
         let mut residue = Residue::new("Bar").unwrap();
         residue.add_atom(3).unwrap();
@@ -724,5 +790,9 @@ mod test {
         let missing = topology.residue_for_atom(1).unwrap();
         assert!(missing.is_none());
         assert!(topology.residue_for_atom(67).is_err());
+
+
+        println!("tmp");
+
     }
 }

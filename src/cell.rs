@@ -1,6 +1,7 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
+use std::ops::{Drop, Deref, DerefMut};
+use std::marker::PhantomData;
 
 use chemfiles_sys::*;
 use errors::{check, Error};
@@ -38,7 +39,7 @@ impl From<CellShape> for chfl_cellshape {
     }
 }
 
-/// An `UnitCell` represent the box containing the atoms, and its periodicity.
+/// An `UnitCell` represent the box containing the UnitCells, and its periodicity.
 ///
 /// An unit cell is fully represented by three lengths (a, b, c); and three
 /// angles (alpha, beta, gamma). The angles are stored in degrees, and the
@@ -58,6 +59,38 @@ pub struct UnitCell {
     handle: *mut CHFL_CELL,
 }
 
+/// An analog to a reference to an unit cell (`&UnitCell`)
+pub struct UnitCellRef<'a> {
+    inner: UnitCell,
+    marker: PhantomData<&'a UnitCell>
+}
+
+impl<'a> Deref for UnitCellRef<'a> {
+    type Target = UnitCell;
+    fn deref(&self) -> &UnitCell {
+        &self.inner
+    }
+}
+
+/// An analog to a mutable reference to an unit cell (`&mut UnitCell`)
+pub struct UnitCellMut<'a> {
+    inner: UnitCell,
+    marker: PhantomData<&'a mut UnitCell>
+}
+
+impl<'a> Deref for UnitCellMut<'a> {
+    type Target = UnitCell;
+    fn deref(&self) -> &UnitCell {
+        &self.inner
+    }
+}
+
+impl<'a> DerefMut for UnitCellMut<'a> {
+    fn deref_mut(&mut self) -> &mut UnitCell {
+        &mut self.inner
+    }
+}
+
 impl Clone for UnitCell {
     fn clone(&self) -> UnitCell {
         unsafe {
@@ -68,7 +101,7 @@ impl Clone for UnitCell {
 }
 
 impl UnitCell {
-    /// Create an `UnitCell` from a C pointer.
+    /// Create an owned `UnitCell` from a C pointer.
     ///
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
@@ -79,6 +112,34 @@ impl UnitCell {
         } else {
             Ok(UnitCell { handle: ptr })
         }
+    }
+
+    /// Create a borrowed `UnitCell` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null, and the caller is responsible for
+    /// setting the right lifetime
+    #[inline]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_CELL) -> Result<UnitCellRef<'a>> {
+        let cell = try!(UnitCell::from_ptr(ptr as *mut CHFL_CELL));
+        Ok(UnitCellRef {
+            inner: cell,
+            marker: PhantomData,
+        })
+    }
+
+    /// Create a borrowed `UnitCell` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null, and the caller is responsible for
+    /// setting the right lifetime
+    #[inline]
+    pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_CELL) -> Result<UnitCellMut<'a>> {
+        let cell = try!(UnitCell::from_ptr(ptr));
+        Ok(UnitCellMut {
+            inner: cell,
+            marker: PhantomData,
+        })
     }
 
     /// Get the underlying C pointer as a const pointer.
