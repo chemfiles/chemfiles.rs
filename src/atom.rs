@@ -301,6 +301,7 @@ impl Atom {
     ///
     /// assert_eq!(atom.get("a bool value").unwrap(), Some(Property::Bool(true)));
     /// ```
+    #[allow(needless_pass_by_value)]  // property
     pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
         let buffer = strings::to_c(name);
         let property = try!(property.as_raw());

@@ -141,6 +141,7 @@ impl Property {
         }
     }
 
+    #[allow(needless_pass_by_value)]  // raw
     pub(crate) fn from_raw(raw: RawProperty) -> Result<Property> {
         match raw.get_kind()? {
             chfl_property_kind::CHFL_PROPERTY_BOOL => Ok(Property::Bool(raw.get_bool()?)),

@@ -34,8 +34,8 @@
 // Configuration fro clippy lints
 #![allow(unknown_lints)]
 #![warn(clippy, clippy_pedantic)]
-#![allow(needless_return, shadow_reuse, stutter, missing_docs_in_private_items)]
-#![allow(zero_ptr, cast_possible_truncation, or_fun_call, use_self, needless_pass_by_value)]
+#![allow(needless_return, redundant_field_names, use_self)]
+#![allow(missing_docs_in_private_items, or_fun_call, indexing_slicing)] 
 
 #[cfg(test)]
 #[macro_use]
