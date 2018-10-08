@@ -137,8 +137,7 @@ impl Selection {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Result<Selection> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Result<Selection> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -148,15 +147,13 @@ impl Selection {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_ptr(&self) -> *const CHFL_SELECTION {
+    pub(crate) fn as_ptr(&self) -> *const CHFL_SELECTION {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_SELECTION {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_SELECTION {
         self.handle
     }
 

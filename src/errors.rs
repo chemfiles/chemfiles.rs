@@ -75,8 +75,7 @@ impl From<chfl_status> for Error {
 
 impl Error {
     /// Create a new error because the given `path` is invalid UTF-8 data
-    #[doc(hidden)]
-    pub fn utf8_path_error(path: &Path) -> Error {
+    pub(crate) fn utf8_path_error(path: &Path) -> Error {
         Error {
             status: Status::UTF8PathError,
             message: format!("Could not convert '{}' to UTF8", path.display()),
@@ -84,8 +83,7 @@ impl Error {
     }
 
     /// Create a new error because we got a null pointer from C++
-    #[doc(hidden)]
-    pub fn null_ptr() -> Error {
+    pub(crate) fn null_ptr() -> Error {
         Error {
             status: Status::NullPtr,
             message: Error::last_error(),

@@ -24,8 +24,7 @@ impl Trajectory {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    #[doc(hidden)]
-    pub unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory> {
         if ptr.is_null() {
             Err(Error::null_ptr())
         } else {
@@ -33,17 +32,9 @@ impl Trajectory {
         }
     }
 
-    /// Get the underlying C pointer as a const pointer.
-    #[inline]
-    #[doc(hidden)]
-    pub fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
-        self.handle
-    }
-
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    #[doc(hidden)]
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
         self.handle
     }
 
