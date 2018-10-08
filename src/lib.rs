@@ -51,16 +51,22 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 mod atom;
 pub use atom::Atom;
+pub use atom::AtomRef;
+pub use atom::AtomMut;
 
 mod cell;
 pub use cell::UnitCell;
+pub use cell::UnitCellRef;
+pub use cell::UnitCellMut;
 pub use cell::CellShape;
 
 mod residue;
 pub use residue::Residue;
+pub use residue::ResidueRef;
 
 mod topology;
 pub use topology::Topology;
+pub use topology::TopologyRef;
 
 mod frame;
 pub use frame::Frame;
@@ -80,7 +86,7 @@ pub use property::Property;
 /// ```
 /// # use chemfiles;
 /// let version = chemfiles::version();
-/// assert!(version.starts_with("0.8"));
+/// assert!(version.starts_with("0.9"));
 /// ```
 pub fn version() -> String {
     unsafe { strings::from_c(chfl_version()) }
@@ -118,6 +124,6 @@ mod tests {
     #[test]
     fn version() {
         assert!(::version().len() > 0);
-        assert!(::version().starts_with("0.8"));
+        assert!(::version().starts_with("0.9"));
     }
 }

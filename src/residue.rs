@@ -1,6 +1,7 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
+use std::ops::{Drop, Deref};
+use std::marker::PhantomData;
 use std::u64;
 
 use chemfiles_sys::*;
@@ -13,6 +14,19 @@ use Result;
 /// *etc.*
 pub struct Residue {
     handle: *mut CHFL_RESIDUE,
+}
+
+/// An analog to a reference to a residue (`&Residue`)
+pub struct ResidueRef<'a> {
+    inner: Residue,
+    marker: PhantomData<&'a Residue>
+}
+
+impl<'a> Deref for ResidueRef<'a> {
+    type Target = Residue;
+    fn deref(&self) -> &Residue {
+        &self.inner
+    }
 }
 
 impl Clone for Residue {
@@ -36,6 +50,20 @@ impl Residue {
         } else {
             Ok(Residue { handle: ptr })
         }
+    }
+
+    /// Create a borrowed `Residue` from a C pointer.
+    ///
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null, and the caller is responsible
+    /// for setting the right lifetime
+    #[inline]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_RESIDUE) -> Result<ResidueRef<'a>> {
+        let residue = try!(Residue::from_ptr(ptr as *mut CHFL_RESIDUE));
+        Ok(ResidueRef {
+            inner: residue,
+            marker: PhantomData,
+        })
     }
 
     /// Get the underlying C pointer as a const pointer.

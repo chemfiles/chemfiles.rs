@@ -300,7 +300,7 @@ mod test {
         assert!(file.set_cell(&UnitCell::new([30.0, 30.0, 30.0]).unwrap()).is_ok());
 
         assert!(file.read_step(41, &mut frame).is_ok());
-        let cell = frame.cell().unwrap();
+        let cell = frame.cell().unwrap().clone();
         assert_eq!(cell.lengths(), Ok([30.0, 30.0, 30.0]));
 
         {
@@ -309,15 +309,19 @@ mod test {
             assert_eq!(positions[124], [5.13242, 0.079862, 14.194161]);
         }
 
-        let topology = frame.topology().unwrap();
-        assert_eq!(topology.size(), Ok(297));
-        assert_eq!(topology.bonds_count(), Ok(0));
+        {
+            let topology = frame.topology().unwrap();
+            assert_eq!(topology.size(), Ok(297));
+            assert_eq!(topology.bonds_count(), Ok(0));
+        }
 
-        assert!(frame.guess_topology().is_ok());
-        let topology = frame.topology().unwrap();
-        assert_eq!(topology.size(), Ok(297));
-        assert_eq!(topology.bonds_count(), Ok(181));
-        assert_eq!(topology.angles_count(), Ok(87));
+        assert!(frame.guess_bonds().is_ok());
+        {
+            let topology = frame.topology().unwrap();
+            assert_eq!(topology.size(), Ok(297));
+            assert_eq!(topology.bonds_count(), Ok(181));
+            assert_eq!(topology.angles_count(), Ok(87));
+        }
 
         let mut topology = Topology::new().unwrap();
         let atom = Atom::new("Cs").unwrap();

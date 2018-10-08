@@ -7,7 +7,9 @@ use std::slice;
 use chemfiles_sys::*;
 use strings;
 use errors::{check, Error};
-use {Atom, Residue, Topology, UnitCell};
+use super::{Atom, AtomRef, AtomMut};
+use super::{Topology, TopologyRef, Residue};
+use super::{UnitCell, UnitCellRef, UnitCellMut};
 use property::{Property, RawProperty};
 use Result;
 
@@ -54,6 +56,17 @@ impl Frame {
         self.handle
     }
 
+    /// Get the underlying C pointer as a mutable pointer FROM A SHARED REFERENCE.
+    ///
+    /// For uses with functions of the C API using mut pointers for both read
+    /// and write access. Users should check that this does not lead to multiple
+    /// mutable borrows
+    #[inline]
+    #[allow(non_snake_case)]
+    pub(crate) fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_FRAME {
+        self.handle
+    }
+
     /// Create an empty frame. It will be resized by the library as needed.
     ///
     /// # Example
@@ -70,7 +83,7 @@ impl Frame {
         }
     }
 
-    /// Get a copy of the atom at index `index` in this frame.
+    /// Get a reference to the atom at index `index` in this frame.
     ///
     /// # Example
     /// ```
@@ -81,10 +94,33 @@ impl Frame {
     /// let atom = frame.atom(0).unwrap();
     /// assert_eq!(atom.name(), Ok(String::from("Zn")));
     /// ```
-    pub fn atom(&self, index: u64) -> Result<Atom> {
+    pub fn atom(&self, index: u64) -> Result<AtomRef> {
         unsafe {
-            let handle = chfl_atom_from_frame(self.as_ptr(), index);
-            Atom::from_ptr(handle)
+            let handle = chfl_atom_from_frame(
+                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
+                index
+            );
+            Atom::ref_from_ptr(handle)
+        }
+    }
+
+    /// Get a mutable reference to the atom at index `index` in this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, Atom};
+    /// let mut frame = Frame::new().unwrap();
+    /// frame.add_atom(&Atom::new("Zn").unwrap(), [0.0; 3], None).unwrap();
+    ///
+    /// assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("Zn")));
+    ///
+    /// frame.atom_mut(0).unwrap().set_name("Fe").unwrap();
+    /// assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("Fe")));
+    /// ```
+    pub fn atom_mut(&mut self, index: u64) -> Result<AtomMut> {
+        unsafe {
+            let handle = chfl_atom_from_frame(self.as_mut_ptr(), index);
+            Atom::ref_mut_from_ptr(handle)
         }
     }
 
@@ -385,9 +421,7 @@ impl Frame {
         let mut natoms = 0;
         unsafe {
             check(chfl_frame_positions(
-                // not using .as_ptr() because the C function uses a *mut
-                // pointer and we are re-creating the shared/mut by ourselve
-                self.handle,
+                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
                 &mut ptr,
                 &mut natoms
             ))?;
@@ -446,9 +480,7 @@ impl Frame {
         let mut natoms = 0;
         unsafe {
             check(chfl_frame_velocities(
-                // not using .as_ptr() because the C function uses a *mut
-                // pointer and we are re-creating the shared/mut by ourselve
-                self.handle,
+                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
                 &mut ptr,
                 &mut natoms
             ))?;
@@ -528,7 +560,7 @@ impl Frame {
         return Ok(());
     }
 
-    /// Get a copy of the `UnitCell` from this frame.
+    /// Get a reference to the `UnitCell` from this frame.
     ///
     /// # Example
     /// ```
@@ -538,10 +570,29 @@ impl Frame {
     /// let cell = frame.cell().unwrap();
     /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
     /// ```
-    pub fn cell(&self) -> Result<UnitCell> {
+    pub fn cell(&self) -> Result<UnitCellRef> {
         unsafe {
-            let handle = chfl_cell_from_frame(self.as_ptr());
-            UnitCell::from_ptr(handle)
+            let handle = chfl_cell_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW());
+            UnitCell::ref_from_ptr(handle)
+        }
+    }
+
+    /// Get a mutable reference to the `UnitCell` from this frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, CellShape};
+    /// let mut frame = Frame::new().unwrap();
+    ///
+    /// assert_eq!(frame.cell().unwrap().shape(), Ok(CellShape::Infinite));
+    ///
+    /// frame.cell_mut().unwrap().set_shape(CellShape::Triclinic).unwrap();
+    /// assert_eq!(frame.cell().unwrap().shape(), Ok(CellShape::Triclinic));
+    /// ```
+    pub fn cell_mut(&mut self) -> Result<UnitCellMut> {
+        unsafe {
+            let handle = chfl_cell_from_frame(self.as_mut_ptr());
+            UnitCell::ref_mut_from_ptr(handle)
         }
     }
 
@@ -576,10 +627,10 @@ impl Frame {
     /// let topology = frame.topology().unwrap();
     /// assert_eq!(topology.size(), Ok(42));
     /// ```
-    pub fn topology(&self) -> Result<Topology> {
+    pub fn topology(&self) -> Result<TopologyRef> {
         unsafe {
             let handle = chfl_topology_from_frame(self.as_ptr());
-            Topology::from_ptr(handle)
+            Topology::ref_from_ptr(handle)
         }
     }
 
@@ -655,14 +706,13 @@ impl Frame {
     /// frame.add_atom(&Atom::new("Cl").unwrap(), [1.5, 0.0, 0.0], None).unwrap();
     /// assert_eq!(frame.topology().unwrap().bonds_count(), Ok(0));
     ///
-    /// frame.guess_topology().unwrap();
+    /// frame.guess_bonds().unwrap();
     /// assert_eq!(frame.topology().unwrap().bonds_count(), Ok(1));
     /// ```
-    pub fn guess_topology(&mut self) -> Result<()> {
+    pub fn guess_bonds(&mut self) -> Result<()> {
         unsafe {
-            check(chfl_frame_guess_topology(self.as_mut_ptr()))?;
+            check(chfl_frame_guess_bonds(self.as_mut_ptr()))
         }
-        return Ok(());
     }
 
 
