@@ -48,13 +48,13 @@ where
 {
     let mut size = initial;
     let mut buffer = vec![0; size];
-    try!(check(callback(buffer.as_mut_ptr(), buffer.len() as u64)));
+    check(callback(buffer.as_mut_ptr(), buffer.len() as u64))?;
 
     while !buffer_was_big_enough(&buffer) {
         // Grow the buffer and retry
         size *= 2;
         buffer.resize(size, 0);
-        try!(check(callback(buffer.as_mut_ptr(), buffer.len() as u64)));
+        check(callback(buffer.as_mut_ptr(), buffer.len() as u64))?;
     }
 
     Ok(buffer)

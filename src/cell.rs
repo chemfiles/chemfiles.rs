@@ -123,8 +123,8 @@ impl UnitCell {
     /// assert_eq!(cell.shape(), Ok(CellShape::Infinite));
     /// ```
     pub fn infinite() -> Result<UnitCell> {
-        let mut cell = try!(UnitCell::new([0.0, 0.0, 0.0]));
-        try!(cell.set_shape(CellShape::Infinite));
+        let mut cell = UnitCell::new([0.0, 0.0, 0.0])?;
+        cell.set_shape(CellShape::Infinite)?;
         Ok(cell)
     }
 
@@ -160,7 +160,7 @@ impl UnitCell {
     pub fn lengths(&self) -> Result<[f64; 3]> {
         let mut lengths = [0.0; 3];
         unsafe {
-            try!(check(chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr())));
+            check(chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr()))?;
         }
         Ok(lengths)
     }
@@ -177,7 +177,7 @@ impl UnitCell {
     /// ```
     pub fn set_lengths(&mut self, lengths: [f64; 3]) -> Result<()> {
         unsafe {
-            try!(check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())));
+            check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr()))?;
         }
         Ok(())
     }
@@ -196,7 +196,7 @@ impl UnitCell {
     pub fn angles(&self) -> Result<[f64; 3]> {
         let mut angles = [0.0; 3];
         unsafe {
-            try!(check(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr())));
+            check(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr()))?;
         }
         Ok(angles)
     }
@@ -215,7 +215,7 @@ impl UnitCell {
     /// ```
     pub fn set_angles(&mut self, angles: [f64; 3]) -> Result<()> {
         unsafe {
-            try!(check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())));
+            check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr()))?;
         }
         Ok(())
     }
@@ -248,7 +248,7 @@ impl UnitCell {
     pub fn matrix(&self) -> Result<[[f64; 3]; 3]> {
         let mut res = [[0.0; 3]; 3];
         unsafe {
-            try!(check(chfl_cell_matrix(self.as_ptr(), res.as_mut_ptr())));
+            check(chfl_cell_matrix(self.as_ptr(), res.as_mut_ptr()))?;
         }
         Ok(res)
     }
@@ -264,7 +264,7 @@ impl UnitCell {
     pub fn shape(&self) -> Result<CellShape> {
         let mut shape = chfl_cellshape::CHFL_CELL_INFINITE;
         unsafe {
-            try!(check(chfl_cell_shape(self.as_ptr(), &mut shape)));
+            check(chfl_cell_shape(self.as_ptr(), &mut shape))?;
         }
         Ok(CellShape::from(shape))
     }
@@ -282,7 +282,7 @@ impl UnitCell {
     /// ```
     pub fn set_shape(&mut self, shape: CellShape) -> Result<()> {
         unsafe {
-            try!(check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into())));
+            check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into()))?;
         }
         Ok(())
     }
@@ -298,7 +298,7 @@ impl UnitCell {
     pub fn volume(&self) -> Result<f64> {
         let mut res = 0.0;
         unsafe {
-            try!(check(chfl_cell_volume(self.as_ptr(), &mut res)));
+            check(chfl_cell_volume(self.as_ptr(), &mut res))?;
         }
         Ok(res)
     }

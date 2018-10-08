@@ -118,7 +118,7 @@ impl Residue {
     pub fn natoms(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_residue_atoms_count(self.as_ptr(), &mut natoms)));
+            check(chfl_residue_atoms_count(self.as_ptr(), &mut natoms))?;
         }
         return Ok(natoms);
     }
@@ -156,7 +156,7 @@ impl Residue {
     /// ```
     pub fn name(&self) -> Result<String> {
         let get_name = |ptr, len| unsafe { chfl_residue_name(self.as_ptr(), ptr, len) };
-        let name = try!(strings::call_autogrow_buffer(64, get_name));
+        let name = strings::call_autogrow_buffer(64, get_name)?;
         return Ok(strings::from_c(name.as_ptr()));
     }
 
@@ -173,7 +173,7 @@ impl Residue {
     /// ```
     pub fn add_atom(&mut self, atom: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_residue_add_atom(self.as_mut_ptr(), atom)));
+            check(chfl_residue_add_atom(self.as_mut_ptr(), atom))?;
         }
         return Ok(());
     }
@@ -192,7 +192,7 @@ impl Residue {
     pub fn contains(&self, atom: u64) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_residue_contains(self.as_ptr(), atom, &mut res)));
+            check(chfl_residue_contains(self.as_ptr(), atom, &mut res))?;
         }
         return Ok(res != 0);
     }

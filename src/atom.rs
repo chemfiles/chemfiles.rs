@@ -89,7 +89,7 @@ impl Atom {
     pub fn mass(&self) -> Result<f64> {
         let mut mass = 0.0;
         unsafe {
-            try!(check(chfl_atom_mass(self.as_ptr(), &mut mass)));
+            check(chfl_atom_mass(self.as_ptr(), &mut mass))?;
         }
         return Ok(mass);
     }
@@ -106,7 +106,7 @@ impl Atom {
     /// ```
     pub fn set_mass(&mut self, mass: f64) -> Result<()> {
         unsafe {
-            try!(check(chfl_atom_set_mass(self.as_mut_ptr(), mass)));
+            check(chfl_atom_set_mass(self.as_mut_ptr(), mass))?;
         }
         return Ok(());
     }
@@ -122,7 +122,7 @@ impl Atom {
     pub fn charge(&self) -> Result<f64> {
         let mut charge = 0.0;
         unsafe {
-            try!(check(chfl_atom_charge(self.as_ptr(), &mut charge)));
+            check(chfl_atom_charge(self.as_ptr(), &mut charge))?;
         }
         return Ok(charge);
     }
@@ -139,7 +139,7 @@ impl Atom {
     /// ```
     pub fn set_charge(&mut self, charge: f64) -> Result<()> {
         unsafe {
-            try!(check(chfl_atom_set_charge(self.as_mut_ptr(), charge)));
+            check(chfl_atom_set_charge(self.as_mut_ptr(), charge))?;
         }
         return Ok(());
     }
@@ -154,7 +154,7 @@ impl Atom {
     /// ```
     pub fn name(&self) -> Result<String> {
         let get_name = |ptr, len| unsafe { chfl_atom_name(self.as_ptr(), ptr, len) };
-        let name = try!(strings::call_autogrow_buffer(10, get_name));
+        let name = strings::call_autogrow_buffer(10, get_name)?;
         return Ok(strings::from_c(name.as_ptr()));
     }
 
@@ -168,7 +168,7 @@ impl Atom {
     /// ```
     pub fn atomic_type(&self) -> Result<String> {
         let get_type = |ptr, len| unsafe { chfl_atom_type(self.as_ptr(), ptr, len) };
-        let buffer = try!(strings::call_autogrow_buffer(10, get_type));
+        let buffer = strings::call_autogrow_buffer(10, get_type)?;
         return Ok(strings::from_c(buffer.as_ptr()));
     }
 
@@ -188,7 +188,7 @@ impl Atom {
     {
         let buffer = strings::to_c(name.into());
         unsafe {
-            try!(check(chfl_atom_set_name(self.as_mut_ptr(), buffer.as_ptr())));
+            check(chfl_atom_set_name(self.as_mut_ptr(), buffer.as_ptr()))?;
         }
         return Ok(());
     }
@@ -209,7 +209,7 @@ impl Atom {
     {
         let buffer = strings::to_c(atomic_type.into());
         unsafe {
-            try!(check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr())));
+            check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr()))?;
         }
         return Ok(());
     }
@@ -226,7 +226,7 @@ impl Atom {
     /// ```
     pub fn full_name(&self) -> Result<String> {
         let get_full_name = |ptr, len| unsafe { chfl_atom_full_name(self.as_ptr(), ptr, len) };
-        let name = try!(strings::call_autogrow_buffer(10, get_full_name));
+        let name = strings::call_autogrow_buffer(10, get_full_name)?;
         return Ok(strings::from_c(name.as_ptr()));
     }
 
@@ -242,7 +242,7 @@ impl Atom {
     pub fn vdw_radius(&self) -> Result<f64> {
         let mut radius: f64 = 0.0;
         unsafe {
-            try!(check(chfl_atom_vdw_radius(self.as_ptr(), &mut radius)));
+            check(chfl_atom_vdw_radius(self.as_ptr(), &mut radius))?;
         }
         return Ok(radius);
     }
@@ -259,7 +259,7 @@ impl Atom {
     pub fn covalent_radius(&self) -> Result<f64> {
         let mut radius: f64 = 0.0;
         unsafe {
-            try!(check(chfl_atom_covalent_radius(self.as_ptr(), &mut radius)));
+            check(chfl_atom_covalent_radius(self.as_ptr(), &mut radius))?;
         }
         return Ok(radius);
     }
@@ -276,7 +276,7 @@ impl Atom {
     pub fn atomic_number(&self) -> Result<u64> {
         let mut number = 0;
         unsafe {
-            try!(check(chfl_atom_atomic_number(self.as_ptr(), &mut number)));
+            check(chfl_atom_atomic_number(self.as_ptr(), &mut number))?;
         }
         return Ok(number);
     }
@@ -297,11 +297,11 @@ impl Atom {
     #[allow(needless_pass_by_value)]  // property
     pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
         let buffer = strings::to_c(name);
-        let property = try!(property.as_raw());
+        let property = property.as_raw()?;
         unsafe {
-            try!(check(
-                chfl_atom_set_property(self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr())
-            ));
+            check(chfl_atom_set_property(
+                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+            ))?;
         }
         return Ok(());
     }
@@ -325,8 +325,8 @@ impl Atom {
             if handle.is_null() {
                 Ok(None)
             } else {
-                let raw = try!(RawProperty::from_ptr(handle));
-                let property = try!(Property::from_raw(raw));
+                let raw = RawProperty::from_ptr(handle)?;
+                let property = Property::from_raw(raw)?;
                 Ok(Some(property))
             }
         }

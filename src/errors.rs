@@ -149,7 +149,7 @@ where
             // set the LOGGING_CALLBACK
             LOGGING_CALLBACK = Some(callback);
             // Tell C code to use Rust-provided callback
-            try!(check(chfl_set_warning_callback(warning_callback)));
+            check(chfl_set_warning_callback(warning_callback))?;
         }
     }
     return Ok(());

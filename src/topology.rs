@@ -97,7 +97,7 @@ impl Topology {
     pub fn size(&self) -> Result<u64> {
         let mut natoms = 0;
         unsafe {
-            try!(check(chfl_topology_atoms_count(self.as_ptr(), &mut natoms)));
+            check(chfl_topology_atoms_count(self.as_ptr(), &mut natoms))?;
         }
         return Ok(natoms);
     }
@@ -116,7 +116,7 @@ impl Topology {
     /// ```
     pub fn resize(&mut self, natoms: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_resize(self.as_mut_ptr(), natoms)));
+            check(chfl_topology_resize(self.as_mut_ptr(), natoms))?;
         }
         return Ok(());
     }
@@ -134,7 +134,7 @@ impl Topology {
     /// ```
     pub fn add_atom(&mut self, atom: &Atom) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_add_atom(self.as_mut_ptr(), atom.as_ptr())));
+            check(chfl_topology_add_atom(self.as_mut_ptr(), atom.as_ptr()))?;
         }
         return Ok(());
     }
@@ -154,7 +154,7 @@ impl Topology {
     /// ```
     pub fn remove(&mut self, index: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_remove(self.as_mut_ptr(), index)));
+            check(chfl_topology_remove(self.as_mut_ptr(), index))?;
         }
         return Ok(());
     }
@@ -180,7 +180,7 @@ impl Topology {
     pub fn bonds_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_bonds_count(self.as_ptr(), &mut res)));
+            check(chfl_topology_bonds_count(self.as_ptr(), &mut res))?;
         }
         return Ok(res);
     }
@@ -206,7 +206,7 @@ impl Topology {
     pub fn angles_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_angles_count(self.as_ptr(), &mut res)));
+            check(chfl_topology_angles_count(self.as_ptr(), &mut res))?;
         }
         return Ok(res);
     }
@@ -232,7 +232,7 @@ impl Topology {
     pub fn dihedrals_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_dihedrals_count(self.as_ptr(), &mut res)));
+            check(chfl_topology_dihedrals_count(self.as_ptr(), &mut res))?;
         }
         return Ok(res);
     }
@@ -258,7 +258,7 @@ impl Topology {
     pub fn impropers_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_impropers_count(self.as_ptr(), &mut res)));
+            check(chfl_topology_impropers_count(self.as_ptr(), &mut res))?;
         }
         return Ok(res);
     }
@@ -280,12 +280,12 @@ impl Topology {
     /// assert_eq!(topology.bonds(), Ok(vec![[0, 1], [1, 2], [2, 3]]));
     /// ```
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>> {
-        let nbonds = try!(self.bonds_count());
+        let nbonds = self.bonds_count()?;
         #[allow(cast_possible_truncation)]
         let size = nbonds as usize;
         let mut res = vec![[u64::max_value(); 2]; size];
         unsafe {
-            try!(check(chfl_topology_bonds(self.handle, res.as_mut_ptr(), nbonds)));
+            check(chfl_topology_bonds(self.handle, res.as_mut_ptr(), nbonds))?;
         }
         return Ok(res);
     }
@@ -307,12 +307,12 @@ impl Topology {
     /// assert_eq!(topology.angles(), Ok(vec![[0, 1, 2], [1, 2, 3]]));
     /// ```
     pub fn angles(&self) -> Result<Vec<[u64; 3]>> {
-        let nangles = try!(self.angles_count());
+        let nangles = self.angles_count()?;
         #[allow(cast_possible_truncation)]
         let size = nangles as usize;
         let mut res = vec![[u64::max_value(); 3]; size];
         unsafe {
-            try!(check(chfl_topology_angles(self.as_ptr(), res.as_mut_ptr(), nangles)));
+            check(chfl_topology_angles(self.as_ptr(), res.as_mut_ptr(), nangles))?;
         }
         return Ok(res);
     }
@@ -335,12 +335,12 @@ impl Topology {
     /// assert_eq!(topology.dihedrals(), Ok(vec![[0, 1, 2, 3]]));
     /// ```
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>> {
-        let ndihedrals = try!(self.dihedrals_count());
+        let ndihedrals = self.dihedrals_count()?;
         #[allow(cast_possible_truncation)]
         let size = ndihedrals as usize;
         let mut res = vec![[u64::max_value(); 4]; size];
         unsafe {
-            try!(check(chfl_topology_dihedrals(self.as_ptr(), res.as_mut_ptr(), ndihedrals)));
+            check(chfl_topology_dihedrals(self.as_ptr(), res.as_mut_ptr(), ndihedrals))?;
         }
         return Ok(res);
     }
@@ -363,12 +363,12 @@ impl Topology {
     /// assert_eq!(topology.impropers(), Ok(vec![[1, 0, 2, 3]]));
     /// ```
     pub fn impropers(&self) -> Result<Vec<[u64; 4]>> {
-        let nimpropers = try!(self.impropers_count());
+        let nimpropers = self.impropers_count()?;
         #[allow(cast_possible_truncation)]
         let size = nimpropers as usize;
         let mut res = vec![[u64::max_value(); 4]; size];
         unsafe {
-            try!(check(chfl_topology_impropers(self.as_ptr(), res.as_mut_ptr(), nimpropers)));
+            check(chfl_topology_impropers(self.as_ptr(), res.as_mut_ptr(), nimpropers))?;
         }
         return Ok(res);
     }
@@ -391,7 +391,7 @@ impl Topology {
     /// ```
     pub fn add_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_add_bond(self.as_mut_ptr(), i, j)));
+            check(chfl_topology_add_bond(self.as_mut_ptr(), i, j))?;
         }
         Ok(())
     }
@@ -424,7 +424,7 @@ impl Topology {
     /// ```
     pub fn remove_bond(&mut self, i: u64, j: u64) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_remove_bond(self.as_mut_ptr(), i, j)));
+            check(chfl_topology_remove_bond(self.as_mut_ptr(), i, j))?;
         }
         Ok(())
     }
@@ -474,7 +474,7 @@ impl Topology {
     pub fn residue_for_atom(&self, index: u64) -> Result<Option<Residue>> {
         let handle = unsafe { chfl_residue_for_atom(self.as_ptr(), index) };
         if handle.is_null() {
-            let natoms = try!(self.size());
+            let natoms = self.size()?;
             if index >= natoms {
                 let result = unsafe { Residue::from_ptr(handle).map(Some) };
                 assert!(result.is_err());
@@ -484,7 +484,7 @@ impl Topology {
                 Ok(None)
             }
         } else {
-            let residue = unsafe { try!(Residue::from_ptr(handle)) };
+            let residue = unsafe { Residue::from_ptr(handle)? };
             Ok(Some(residue))
         }
     }
@@ -504,7 +504,7 @@ impl Topology {
     pub fn residues_count(&self) -> Result<u64> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_residues_count(self.as_ptr(), &mut res)));
+            check(chfl_topology_residues_count(self.as_ptr(), &mut res))?;
         }
         Ok(res)
     }
@@ -525,7 +525,7 @@ impl Topology {
     /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<()> {
         unsafe {
-            try!(check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())));
+            check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr()))?;
         }
         Ok(())
     }
@@ -549,12 +549,12 @@ impl Topology {
     pub fn are_linked(&self, first: &Residue, second: &Residue) -> Result<bool> {
         let mut res = 0;
         unsafe {
-            try!(check(chfl_topology_residues_linked(
+            check(chfl_topology_residues_linked(
                 self.as_ptr(),
                 first.as_ptr(),
                 second.as_ptr(),
                 &mut res
-            )));
+            ))?;
         }
         Ok(res != 0)
     }

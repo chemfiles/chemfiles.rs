@@ -188,7 +188,7 @@ impl Selection {
     pub fn size(&self) -> Result<u64> {
         let mut size = 0;
         unsafe {
-            try!(check(chfl_selection_size(self.as_ptr(), &mut size)));
+            check(chfl_selection_size(self.as_ptr(), &mut size))?;
         }
         return Ok(size);
     }
@@ -203,7 +203,7 @@ impl Selection {
     /// ```
     pub fn string(&self) -> Result<String> {
         let get_string = |ptr, len| unsafe { chfl_selection_string(self.as_ptr(), ptr, len) };
-        let selection = try!(strings::call_autogrow_buffer(1024, get_string));
+        let selection = strings::call_autogrow_buffer(1024, get_string)?;
         return Ok(strings::from_c(selection.as_ptr()));
     }
 
@@ -232,21 +232,21 @@ impl Selection {
     /// assert_eq!(matches[1][1], 1);
     /// ```
     pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
-        let mut matches_count = 0;
+        let mut count = 0;
         unsafe {
-            try!(check(
-                chfl_selection_evaluate(self.as_mut_ptr(), frame.as_ptr(), &mut matches_count)
-            ));
+            check(chfl_selection_evaluate(
+                self.as_mut_ptr(), frame.as_ptr(), &mut count
+            ))?;
         }
 
         #[allow(cast_possible_truncation)]
-        let mut matches = vec![Match::zero(); matches_count as usize];
+        let mut matches = vec![Match::zero(); count as usize];
         unsafe {
-            try!(check(chfl_selection_matches(
+            check(chfl_selection_matches(
                 self.handle,
                 matches.as_mut_ptr() as *mut _,
-                matches_count
-            )));
+                count
+            ))?;
         }
         return Ok(matches);
     }
@@ -274,7 +274,7 @@ impl Selection {
     /// assert_eq!(matches[1], 2);
     /// ```
     pub fn list(&mut self, frame: &Frame) -> Result<Vec<u64>> {
-        let matches = try!(self.evaluate(frame));
+        let matches = self.evaluate(frame)?;
         let mut list = vec![0; matches.len()];
         for (i, m) in matches.iter().enumerate() {
             list[i] = m[0];

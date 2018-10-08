@@ -108,7 +108,7 @@ where
 {
     let buffer = strings::to_c(path.as_ref());
     unsafe {
-        try!(errors::check(chfl_add_configuration(buffer.as_ptr())));
+        errors::check(chfl_add_configuration(buffer.as_ptr()))?;
     }
     Ok(())
 }
