@@ -63,7 +63,7 @@ impl Match {
     pub fn new(atoms: &[u64]) -> Match {
         assert!(atoms.len() <= 4);
         let size = atoms.len();
-        let mut matches = [u64::MAX; 4];
+        let mut matches = [u64::max_value(); 4];
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
@@ -246,6 +246,7 @@ impl Selection {
             ));
         }
 
+        #[allow(cast_possible_truncation)]
         let mut matches = vec![Match::zero(); matches_count as usize];
         unsafe {
             try!(check(chfl_selection_matches(

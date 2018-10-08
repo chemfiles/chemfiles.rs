@@ -686,6 +686,7 @@ impl Frame {
     ///
     /// assert_eq!(frame.get("a string").unwrap(), Some(Property::String("hello".into())));
     /// ```
+    #[allow(needless_pass_by_value)]  // property
     pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
         let buffer = strings::to_c(name);
         let property = try!(property.as_raw());

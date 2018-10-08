@@ -288,7 +288,9 @@ impl Topology {
     /// ```
     pub fn bonds(&self) -> Result<Vec<[u64; 2]>> {
         let nbonds = try!(self.bonds_count());
-        let mut res = vec![[u64::MAX; 2]; nbonds as usize];
+        #[allow(cast_possible_truncation)]
+        let size = nbonds as usize;
+        let mut res = vec![[u64::max_value(); 2]; size];
         unsafe {
             try!(check(chfl_topology_bonds(self.handle, res.as_mut_ptr(), nbonds)));
         }
@@ -313,7 +315,9 @@ impl Topology {
     /// ```
     pub fn angles(&self) -> Result<Vec<[u64; 3]>> {
         let nangles = try!(self.angles_count());
-        let mut res = vec![[u64::MAX; 3]; nangles as usize];
+        #[allow(cast_possible_truncation)]
+        let size = nangles as usize;
+        let mut res = vec![[u64::max_value(); 3]; size];
         unsafe {
             try!(check(chfl_topology_angles(self.as_ptr(), res.as_mut_ptr(), nangles)));
         }
@@ -339,7 +343,9 @@ impl Topology {
     /// ```
     pub fn dihedrals(&self) -> Result<Vec<[u64; 4]>> {
         let ndihedrals = try!(self.dihedrals_count());
-        let mut res = vec![[u64::MAX; 4]; ndihedrals as usize];
+        #[allow(cast_possible_truncation)]
+        let size = ndihedrals as usize;
+        let mut res = vec![[u64::max_value(); 4]; size];
         unsafe {
             try!(check(chfl_topology_dihedrals(self.as_ptr(), res.as_mut_ptr(), ndihedrals)));
         }
@@ -365,7 +371,9 @@ impl Topology {
     /// ```
     pub fn impropers(&self) -> Result<Vec<[u64; 4]>> {
         let nimpropers = try!(self.impropers_count());
-        let mut res = vec![[u64::MAX; 4]; nimpropers as usize];
+        #[allow(cast_possible_truncation)]
+        let size = nimpropers as usize;
+        let mut res = vec![[u64::max_value(); 4]; size];
         unsafe {
             try!(check(chfl_topology_impropers(self.as_ptr(), res.as_mut_ptr(), nimpropers)));
         }
