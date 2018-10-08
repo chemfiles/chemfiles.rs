@@ -1,9 +1,5 @@
 // Chemfiles, a modern library for chemistry file reading and writing
-// Copyright (C) 2015-2017 Guillaume Fraux
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
+// Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 
 //! Chemfiles is a multi-language library written in modern C++ for reading and
 //! writing from and to molecular trajectory files. These files are created by
@@ -35,7 +31,7 @@
 #![allow(unknown_lints)]
 #![warn(clippy, clippy_pedantic)]
 #![allow(needless_return, redundant_field_names, use_self)]
-#![allow(missing_docs_in_private_items, or_fun_call, indexing_slicing)] 
+#![allow(missing_docs_in_private_items, or_fun_call, indexing_slicing)]
 
 #[cfg(test)]
 #[macro_use]
