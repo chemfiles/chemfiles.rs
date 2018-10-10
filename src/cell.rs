@@ -292,7 +292,7 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::UnitCell;
-    /// let mut cell = UnitCell::new([10.0, 20.0, 30.0]);
+    /// let cell = UnitCell::new([10.0, 20.0, 30.0]);
     ///
     /// let matrix = cell.matrix();
     ///
@@ -337,7 +337,7 @@ impl UnitCell {
     /// let mut cell = UnitCell::new([10.0, 20.0, 30.0]);
     /// assert_eq!(cell.shape(), CellShape::Orthorhombic);
     ///
-    /// cell.set_shape(CellShape::Triclinic);
+    /// cell.set_shape(CellShape::Triclinic).unwrap();
     /// assert_eq!(cell.shape(), CellShape::Triclinic);
     /// ```
     pub fn set_shape(&mut self, shape: CellShape) -> Result<(), Error> {

@@ -232,7 +232,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.bonds_count(), 0);
     /// topology.resize(4);
@@ -254,7 +254,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.angles_count(), 0);
     /// topology.resize(4);
@@ -276,7 +276,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.dihedrals_count(), 0);
     /// topology.resize(4);
@@ -298,7 +298,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.dihedrals_count(), 0);
     /// topology.resize(4);
@@ -320,7 +320,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// topology.resize(4);
     ///
@@ -344,7 +344,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// topology.resize(4);
     ///
@@ -368,7 +368,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// topology.resize(4);
     ///
@@ -395,7 +395,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// topology.resize(4);
     ///
@@ -422,7 +422,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.bonds_count(), 0);
     /// topology.resize(4);
@@ -444,7 +444,7 @@ impl Topology {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Topology, Atom};
+    /// # use chemfiles::Topology;
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.bonds_count(), 0);
     /// topology.resize(4);
@@ -475,7 +475,7 @@ impl Topology {
     /// ```
     /// # use chemfiles::{Topology, Residue};
     /// let mut topology = Topology::new();
-    /// topology.add_residue(&Residue::new("water"));
+    /// topology.add_residue(&Residue::new("water")).unwrap();
     ///
     /// let residue = topology.residue(0).unwrap();
     /// assert_eq!(residue.name(), "water");
