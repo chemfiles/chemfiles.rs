@@ -8,10 +8,11 @@ publish = false
 [[bin]]
 name = "chemfiles-sys-tests"
 path = "main.rs"
+doctest = false
 
 [dependencies]
 libc = "0.2"
 chemfiles-sys = {path = "../chemfiles-sys"}
 
 [build-dependencies]
-ctest = "0.1"
+ctest = "0.2"
