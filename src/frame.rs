@@ -133,7 +133,7 @@ impl Frame {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Frame, Atom};
+    /// # use chemfiles::Frame;
     /// let mut frame = Frame::new();
     /// assert_eq!(frame.size(), 0);
     ///
@@ -154,7 +154,7 @@ impl Frame {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Frame, Atom};
+    /// # use chemfiles::Frame;
     /// let mut frame = Frame::new();
     /// frame.resize(67);
     /// assert_eq!(frame.size(), 67);
@@ -289,7 +289,7 @@ impl Frame {
     /// let mut frame = Frame::new();
     ///
     /// let residue = Residue::new("foo");
-    /// frame.add_residue(&residue);
+    /// frame.add_residue(&residue).unwrap();
     ///
     /// let topology = frame.topology();
     /// assert_eq!(topology.residues_count(), 1);
@@ -595,7 +595,7 @@ impl Frame {
     ///
     /// assert_eq!(frame.cell().shape(), CellShape::Infinite);
     ///
-    /// frame.cell_mut().set_shape(CellShape::Triclinic);
+    /// frame.cell_mut().set_shape(CellShape::Triclinic).unwrap();
     /// assert_eq!(frame.cell().shape(), CellShape::Triclinic);
     /// ```
     pub fn cell_mut(&mut self) -> UnitCellMut {
@@ -656,7 +656,7 @@ impl Frame {
     /// topology.add_atom(&Atom::new("Cl"));
     /// topology.add_bond(0, 1);
     ///
-    /// frame.set_topology(&topology);
+    /// frame.set_topology(&topology).unwrap();
     /// assert_eq!(frame.atom(0).name(), "Cl");
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<(), Error> {
@@ -715,7 +715,7 @@ impl Frame {
     /// frame.add_atom(&Atom::new("Cl"), [1.5, 0.0, 0.0], None);
     /// assert_eq!(frame.topology().bonds_count(), 0);
     ///
-    /// frame.guess_bonds();
+    /// frame.guess_bonds().unwrap();
     /// assert_eq!(frame.topology().bonds_count(), 1);
     /// ```
     pub fn guess_bonds(&mut self) -> Result<(), Error> {

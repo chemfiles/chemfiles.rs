@@ -30,6 +30,10 @@
 #![allow(needless_return, redundant_field_names, use_self)]
 #![allow(missing_docs_in_private_items, or_fun_call, indexing_slicing)]
 
+// deny(warnings) in doc tests
+#![doc(test(attr(deny(warnings))))]
+#![doc(test(attr(allow(unused_variables))))]
+
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
@@ -98,8 +102,7 @@ pub fn version() -> String {
 ///
 /// # Example
 /// ```no_run
-/// # use chemfiles;
-/// chemfiles::add_configuration("local-config.toml");
+/// chemfiles::add_configuration("local-config.toml").unwrap();
 /// // from now on, the data from "local-config.toml" will be used
 /// ```
 pub fn add_configuration<S>(path: S) -> Result<(), Error>
