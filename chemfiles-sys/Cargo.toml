@@ -11,6 +11,8 @@ exclude = ["chemfiles/tests/**"]
 [lib]
 name = "chemfiles_sys"
 path = "lib.rs"
+test = false
+doctest = false
 
 [dependencies]
 libc = "0.2"
