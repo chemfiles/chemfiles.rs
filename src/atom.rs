@@ -4,9 +4,8 @@ use std::ops::{Drop, Deref, DerefMut};
 use std::marker::PhantomData;
 
 use chemfiles_sys::*;
-use errors::{check, Error};
+use errors::{check_success, check_not_null};
 use strings;
-use Result;
 
 use property::{Property, RawProperty};
 
@@ -61,7 +60,7 @@ impl Clone for Atom {
     fn clone(&self) -> Atom {
         unsafe {
             let new_handle = chfl_atom_copy(self.as_ptr());
-            Atom::from_ptr(new_handle).expect("Out of memory when copying an Atom")
+            Atom::from_ptr(new_handle)
         }
     }
 }
@@ -70,42 +69,37 @@ impl Atom {
     /// Create an owned `Atom` from a C pointer.
     ///
     /// This function is unsafe because no validity check is made on the
-    /// pointer, except for it being non-null.
+    /// pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Result<Atom> {
-        if ptr.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(Atom { handle: ptr })
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Atom {
+        check_not_null(ptr);
+        Atom {
+            handle: ptr
         }
     }
 
     /// Create a borrowed `Atom` from a C pointer.
     ///
     /// This function is unsafe because no validity check is made on the
-    /// pointer, except for it being non-null, and the caller is responsible
-    /// for setting the right lifetime
+    /// pointer, and the caller is responsible for setting the right lifetime
     #[inline]
-    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_ATOM) -> Result<AtomRef<'a>> {
-        let atom = try!(Atom::from_ptr(ptr as *mut CHFL_ATOM));
-        Ok(AtomRef {
-            inner: atom,
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_ATOM) -> AtomRef<'a> {
+        AtomRef {
+            inner: Atom::from_ptr(ptr as *mut CHFL_ATOM),
             marker: PhantomData,
-        })
+        }
     }
 
     /// Create a mutably borrowed `Atom` from a C pointer.
     ///
     /// This function is unsafe because no validity check is made on the
-    /// pointer, except for it being non-null, and the caller is responsible
-    /// for setting the right lifetime
+    /// pointer, and the caller is responsible for setting the right lifetime
     #[inline]
-    pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_ATOM) -> Result<AtomMut<'a>> {
-        let atom = try!(Atom::from_ptr(ptr));
-        Ok(AtomMut {
-            inner: atom,
+    pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_ATOM) -> AtomMut<'a> {
+        AtomMut {
+            inner: Atom::from_ptr(ptr),
             marker: PhantomData,
-        })
+        }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -125,13 +119,10 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.name(), Ok(String::from("He")));
+    /// let atom = Atom::new("He");
+    /// assert_eq!(atom.name(), "He");
     /// ```
-    pub fn new<'a, S>(name: S) -> Result<Atom>
-    where
-        S: Into<&'a str>,
-    {
+    pub fn new<'a>(name: impl Into<&'a str>) -> Atom {
         let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_atom(buffer.as_ptr());
@@ -144,15 +135,15 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.mass(), Ok(4.002602));
+    /// let atom = Atom::new("He");
+    /// assert_eq!(atom.mass(), 4.002602);
     /// ```
-    pub fn mass(&self) -> Result<f64> {
+    pub fn mass(&self) -> f64 {
         let mut mass = 0.0;
         unsafe {
-            check(chfl_atom_mass(self.as_ptr(), &mut mass))?;
+            check_success(chfl_atom_mass(self.as_ptr(), &mut mass));
         }
-        return Ok(mass);
+        return mass;
     }
 
     /// Set the atom mass to `mass`, in atomic mass units.
@@ -160,16 +151,15 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let mut atom = Atom::new("He").unwrap();
+    /// let mut atom = Atom::new("He");
     ///
-    /// atom.set_mass(34.9).unwrap();
-    /// assert_eq!(atom.mass(), Ok(34.9));
+    /// atom.set_mass(34.9);
+    /// assert_eq!(atom.mass(), 34.9);
     /// ```
-    pub fn set_mass(&mut self, mass: f64) -> Result<()> {
+    pub fn set_mass(&mut self, mass: f64) {
         unsafe {
-            check(chfl_atom_set_mass(self.as_mut_ptr(), mass))?;
+            check_success(chfl_atom_set_mass(self.as_mut_ptr(), mass));
         }
-        return Ok(());
     }
 
     /// Get the atom charge, in number of the electron charge *e*.
@@ -177,15 +167,15 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.charge(), Ok(0.0));
+    /// let atom = Atom::new("He");
+    /// assert_eq!(atom.charge(), 0.0);
     /// ```
-    pub fn charge(&self) -> Result<f64> {
+    pub fn charge(&self) -> f64 {
         let mut charge = 0.0;
         unsafe {
-            check(chfl_atom_charge(self.as_ptr(), &mut charge))?;
+            check_success(chfl_atom_charge(self.as_ptr(), &mut charge));
         }
-        return Ok(charge);
+        return charge;
     }
 
     /// Set the atom charge to `charge`, in number of the electron charge *e*.
@@ -193,16 +183,15 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let mut atom = Atom::new("He").unwrap();
+    /// let mut atom = Atom::new("He");
     ///
-    /// atom.set_charge(-2.0).unwrap();
-    /// assert_eq!(atom.charge(), Ok(-2.0));
+    /// atom.set_charge(-2.0);
+    /// assert_eq!(atom.charge(), -2.0);
     /// ```
-    pub fn set_charge(&mut self, charge: f64) -> Result<()> {
+    pub fn set_charge(&mut self, charge: f64) {
         unsafe {
-            check(chfl_atom_set_charge(self.as_mut_ptr(), charge))?;
+            check_success(chfl_atom_set_charge(self.as_mut_ptr(), charge));
         }
-        return Ok(());
     }
 
     /// Get the atom name.
@@ -210,13 +199,13 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.name(), Ok(String::from("He")));
+    /// let atom = Atom::new("He");
+    /// assert_eq!(atom.name(), "He");
     /// ```
-    pub fn name(&self) -> Result<String> {
+    pub fn name(&self) -> String {
         let get_name = |ptr, len| unsafe { chfl_atom_name(self.as_ptr(), ptr, len) };
-        let name = strings::call_autogrow_buffer(10, get_name)?;
-        return Ok(strings::from_c(name.as_ptr()));
+        let name = strings::call_autogrow_buffer(10, get_name).expect("getting name failed");
+        return strings::from_c(name.as_ptr());
     }
 
     /// Get the atom type.
@@ -224,13 +213,13 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.atomic_type(), Ok(String::from("He")));
+    /// let atom = Atom::new("He");
+    /// assert_eq!(atom.atomic_type(), "He");
     /// ```
-    pub fn atomic_type(&self) -> Result<String> {
+    pub fn atomic_type(&self) -> String {
         let get_type = |ptr, len| unsafe { chfl_atom_type(self.as_ptr(), ptr, len) };
-        let buffer = strings::call_autogrow_buffer(10, get_type)?;
-        return Ok(strings::from_c(buffer.as_ptr()));
+        let buffer = strings::call_autogrow_buffer(10, get_type).expect("getting type failed");
+        return strings::from_c(buffer.as_ptr());
     }
 
     /// Set the atom name to `name`.
@@ -238,20 +227,16 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let mut atom = Atom::new("He").unwrap();
+    /// let mut atom = Atom::new("He");
     ///
-    /// atom.set_name("Zn3").unwrap();
-    /// assert_eq!(atom.name(), Ok(String::from("Zn3")));
+    /// atom.set_name("Zn3");
+    /// assert_eq!(atom.name(), "Zn3");
     /// ```
-    pub fn set_name<'a, S>(&mut self, name: S) -> Result<()>
-    where
-        S: Into<&'a str>,
-    {
+    pub fn set_name<'a>(&mut self, name: impl Into<&'a str>) {
         let buffer = strings::to_c(name.into());
         unsafe {
-            check(chfl_atom_set_name(self.as_mut_ptr(), buffer.as_ptr()))?;
+            check_success(chfl_atom_set_name(self.as_mut_ptr(), buffer.as_ptr()));
         }
-        return Ok(());
     }
 
     /// Set the atom type to `atomic_type`.
@@ -259,20 +244,16 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let mut atom = Atom::new("He").unwrap();
+    /// let mut atom = Atom::new("He");
     ///
-    /// atom.set_atomic_type("F").unwrap();
-    /// assert_eq!(atom.atomic_type(), Ok(String::from("F")));
+    /// atom.set_atomic_type("F");
+    /// assert_eq!(atom.atomic_type(), "F");
     /// ```
-    pub fn set_atomic_type<'a, S>(&mut self, atomic_type: S) -> Result<()>
-    where
-        S: Into<&'a str>,
-    {
+    pub fn set_atomic_type<'a>(&mut self, atomic_type: impl Into<&'a str>) {
         let buffer = strings::to_c(atomic_type.into());
         unsafe {
-            check(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr()))?;
+            check_success(chfl_atom_set_type(self.as_mut_ptr(), buffer.as_ptr()));
         }
-        return Ok(());
     }
 
     /// Try to get the full name of the atom from the atomic type. For example,
@@ -282,64 +263,64 @@ impl Atom {
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("Zn").unwrap();
-    /// assert_eq!(atom.full_name(), Ok(String::from("Zinc")));
+    /// let atom = Atom::new("Zn");
+    /// assert_eq!(atom.full_name(), "Zinc");
     /// ```
-    pub fn full_name(&self) -> Result<String> {
+    pub fn full_name(&self) -> String {
         let get_full_name = |ptr, len| unsafe { chfl_atom_full_name(self.as_ptr(), ptr, len) };
-        let name = strings::call_autogrow_buffer(10, get_full_name)?;
-        return Ok(strings::from_c(name.as_ptr()));
+        let name = strings::call_autogrow_buffer(10, get_full_name).expect("getting full name failed");
+        return strings::from_c(name.as_ptr());
     }
 
     /// Try to get the Van der Waals radius of the atom from the atomic type.
-    /// If the radius can not be found, returns -1.
+    /// If the radius can not be found, returns 0.
     ///
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.vdw_radius(), Ok(1.4));
+    /// assert_eq!(Atom::new("He").vdw_radius(), 1.4);
+    /// assert_eq!(Atom::new("Xxx").vdw_radius(), 0.0);
     /// ```
-    pub fn vdw_radius(&self) -> Result<f64> {
+    pub fn vdw_radius(&self) -> f64 {
         let mut radius: f64 = 0.0;
         unsafe {
-            check(chfl_atom_vdw_radius(self.as_ptr(), &mut radius))?;
+            check_success(chfl_atom_vdw_radius(self.as_ptr(), &mut radius));
         }
-        return Ok(radius);
+        return radius;
     }
 
     /// Try to get the covalent radius of the atom from the atomic type. If the
-    /// radius can not be found, returns -1.
+    /// radius can not be found, returns 0.
     ///
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.covalent_radius(), Ok(0.32));
+    /// assert_eq!(Atom::new("He").covalent_radius(), 0.32);
+    /// assert_eq!(Atom::new("Xxx").covalent_radius(), 0.0);
     /// ```
-    pub fn covalent_radius(&self) -> Result<f64> {
+    pub fn covalent_radius(&self) -> f64 {
         let mut radius: f64 = 0.0;
         unsafe {
-            check(chfl_atom_covalent_radius(self.as_ptr(), &mut radius))?;
+            check_success(chfl_atom_covalent_radius(self.as_ptr(), &mut radius));
         }
-        return Ok(radius);
+        return radius;
     }
 
     /// Try to get the atomic number of the atom from the atomic type. If the
-    /// number can not be found, returns -1.
+    /// number can not be found, returns 0.
     ///
     /// # Example
     /// ```
     /// # use chemfiles::Atom;
-    /// let atom = Atom::new("He").unwrap();
-    /// assert_eq!(atom.atomic_number(), Ok(2));
+    /// assert_eq!(Atom::new("He").atomic_number(), 2);
+    /// assert_eq!(Atom::new("Xxx").atomic_number(), 0);
     /// ```
-    pub fn atomic_number(&self) -> Result<u64> {
+    pub fn atomic_number(&self) -> u64 {
         let mut number = 0;
         unsafe {
-            check(chfl_atom_atomic_number(self.as_ptr(), &mut number))?;
+            check_success(chfl_atom_atomic_number(self.as_ptr(), &mut number));
         }
-        return Ok(number);
+        return number;
     }
 
     /// Add a new `property` with the given `name` to this atom.
@@ -350,21 +331,20 @@ impl Atom {
     /// # Examples
     /// ```
     /// # use chemfiles::{Atom, Property};
-    /// let mut atom = Atom::new("He").unwrap();
+    /// let mut atom = Atom::new("He");
     /// atom.set("a bool value", Property::Bool(true));
     ///
-    /// assert_eq!(atom.get("a bool value").unwrap(), Some(Property::Bool(true)));
+    /// assert_eq!(atom.get("a bool value"), Some(Property::Bool(true)));
     /// ```
     #[allow(needless_pass_by_value)]  // property
-    pub fn set(&mut self, name: &str, property: Property) -> Result<()> {
+    pub fn set(&mut self, name: &str, property: Property) {
         let buffer = strings::to_c(name);
-        let property = property.as_raw()?;
+        let property = property.as_raw();
         unsafe {
-            check(chfl_atom_set_property(
+            check_success(chfl_atom_set_property(
                 self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
-            ))?;
+            ));
         }
-        return Ok(());
     }
 
 
@@ -373,22 +353,22 @@ impl Atom {
     /// # Examples
     /// ```
     /// # use chemfiles::{Atom, Property};
-    /// let mut atom = Atom::new("He").unwrap();
+    /// let mut atom = Atom::new("He");
     /// atom.set("foo", Property::Double(22.2));
     ///
-    /// assert_eq!(atom.get("foo").unwrap(), Some(Property::Double(22.2)));
-    /// assert_eq!(atom.get("Bar").unwrap(), None);
+    /// assert_eq!(atom.get("foo"), Some(Property::Double(22.2)));
+    /// assert_eq!(atom.get("Bar"), None);
     /// ```
-    pub fn get(&mut self, name: &str) -> Result<Option<Property>> {
+    pub fn get(&mut self, name: &str) -> Option<Property> {
         let buffer = strings::to_c(name);
         unsafe {
             let handle = chfl_atom_get_property(self.as_ptr(), buffer.as_ptr());
             if handle.is_null() {
-                Ok(None)
+                None
             } else {
-                let raw = RawProperty::from_ptr(handle)?;
-                let property = Property::from_raw(raw)?;
-                Ok(Some(property))
+                let raw = RawProperty::from_ptr(handle);
+                let property = Property::from_raw(raw);
+                Some(property)
             }
         }
     }
@@ -409,72 +389,86 @@ mod test {
 
     #[test]
     fn clone() {
-        let mut atom = Atom::new("He").unwrap();
-        assert_eq!(atom.name().unwrap(), "He");
+        let mut atom = Atom::new("He");
+        assert_eq!(atom.name(), "He");
 
         let copy = atom.clone();
-        assert_eq!(copy.name().unwrap(), "He");
+        assert_eq!(copy.name(), "He");
 
-        atom.set_name("Na").unwrap();
-        assert_eq!(atom.name().unwrap(), "Na");
-        assert_eq!(copy.name().unwrap(), "He");
+        atom.set_name("Na");
+        assert_eq!(atom.name(), "Na");
+        assert_eq!(copy.name(), "He");
     }
 
     #[test]
     fn mass() {
-        let mut atom = Atom::new("He").unwrap();
-        assert_ulps_eq!(atom.mass().unwrap(), 4.002602);
-
-        assert!(atom.set_mass(15.0).is_ok());
-        assert_eq!(atom.mass(), Ok(15.0));
+        let mut atom = Atom::new("He");
+        assert_ulps_eq!(atom.mass(), 4.002602);
+        atom.set_mass(15.0);
+        assert_eq!(atom.mass(), 15.0);
     }
 
     #[test]
     fn charge() {
-        let mut atom = Atom::new("He").unwrap();
-        assert_eq!(atom.charge(), Ok(0.0));
-
-        assert!(atom.set_charge(-1.5).is_ok());
-        assert_eq!(atom.charge(), Ok(-1.5));
+        let mut atom = Atom::new("He");
+        assert_eq!(atom.charge(), 0.0);
+        atom.set_charge(-1.5);
+        assert_eq!(atom.charge(), -1.5);
     }
 
     #[test]
     fn name() {
-        let mut atom = Atom::new("He").unwrap();
-        assert_eq!(atom.name(), Ok(String::from("He")));
-
-        assert!(atom.set_name("Zn-12").is_ok());
-        assert_eq!(atom.name(), Ok(String::from("Zn-12")));
+        let mut atom = Atom::new("He");
+        assert_eq!(atom.name(), "He");
+        atom.set_name("Zn-12");
+        assert_eq!(atom.name(), "Zn-12");
     }
 
     #[test]
     fn atomic_type() {
-        let mut atom = Atom::new("He").unwrap();
-        assert_eq!(atom.atomic_type(), Ok(String::from("He")));
-        assert_eq!(atom.full_name(), Ok(String::from("Helium")));
+        let mut atom = Atom::new("He");
+        assert_eq!(atom.atomic_type(), "He");
+        atom.set_atomic_type("Zn");
+        assert_eq!(atom.atomic_type(), "Zn");
+    }
 
-        assert!(atom.set_atomic_type("Zn").is_ok());
-        assert_eq!(atom.atomic_type(), Ok(String::from("Zn")));
-        assert_eq!(atom.full_name(), Ok(String::from("Zinc")));
+    #[test]
+    fn full_name() {
+        let mut atom = Atom::new("He");
+        assert_eq!(atom.full_name(), "Helium");
+
+        atom.set_atomic_type("Zn");
+        assert_eq!(atom.full_name(), "Zinc");
+
+        let atom = Atom::new("Unknown");
+        assert_eq!(atom.full_name(), "");
     }
 
     #[test]
     fn radii() {
-        let atom = Atom::new("He").unwrap();
-        assert_ulps_eq!(atom.vdw_radius().unwrap(), 1.4);
-        assert_ulps_eq!(atom.covalent_radius().unwrap(), 0.32);
+        let atom = Atom::new("He");
+        assert_ulps_eq!(atom.vdw_radius(), 1.4);
+        assert_ulps_eq!(atom.covalent_radius(), 0.32);
+
+        let atom = Atom::new("Unknown");
+        assert_eq!(atom.vdw_radius(), 0.0);
+        assert_eq!(atom.covalent_radius(), 0.0);
     }
 
     #[test]
     fn atomic_number() {
-        let atom = Atom::new("He").unwrap();
-        assert_eq!(atom.atomic_number(), Ok(2));
+        let atom = Atom::new("He");
+        assert_eq!(atom.atomic_number(), 2);
+
+        let atom = Atom::new("Unknown");
+        assert_eq!(atom.atomic_number(), 0);
     }
 
     #[test]
     fn property() {
-        let mut atom = Atom::new("F").unwrap();
-        assert_eq!(atom.set("foo", Property::Double(-22.0)), Ok(()));
-        assert_eq!(atom.get("foo"), Ok(Some(Property::Double(-22.0))));
+        let mut atom = Atom::new("F");
+
+        atom.set("foo", Property::Double(-22.0));
+        assert_eq!(atom.get("foo"), Some(Property::Double(-22.0)));
     }
 }

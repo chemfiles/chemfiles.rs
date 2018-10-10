@@ -5,9 +5,8 @@ use std::path::Path;
 use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check, Error};
+use errors::{check, check_success, Error, Status};
 use strings;
-use Result;
 
 use {Frame, Topology, UnitCell};
 
@@ -21,14 +20,18 @@ pub struct Trajectory {
 impl Trajectory {
     /// Create a `Trajectory` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer,
-    /// except for it being non-null.
+    /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory, Error> {
         if ptr.is_null() {
-            Err(Error::null_ptr())
+            Err(Error {
+                status: Status::FileError,
+                message: Error::last_error()
+            })
         } else {
-            Ok(Trajectory { handle: ptr })
+            Ok(Trajectory {
+                handle: ptr
+            })
         }
     }
 
@@ -47,7 +50,7 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open("water.xyz", 'r').unwrap();
     /// ```
-    pub fn open<P>(path: P, mode: char) -> Result<Trajectory>
+    pub fn open<P>(path: P, mode: char) -> Result<Trajectory, Error>
     where
         P: AsRef<Path>,
     {
@@ -76,7 +79,7 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open_with_format("water.zeo", 'r', "XYZ").unwrap();
     /// ```
-    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory>
+    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory, Error>
     where
         P: AsRef<Path>,
         S: Into<&'a str>,
@@ -88,8 +91,9 @@ impl Trajectory {
         let format = strings::to_c(format.into());
         unsafe {
             #[allow(cast_possible_wrap)]
-            let handle =
-                chfl_trajectory_with_format(filename.as_ptr(), mode as i8, format.as_ptr());
+            let handle = chfl_trajectory_with_format(
+                filename.as_ptr(), mode as i8, format.as_ptr()
+            );
             Trajectory::from_ptr(handle)
         }
     }
@@ -103,11 +107,11 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::{Trajectory, Frame};
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
-    /// let mut frame = Frame::new().unwrap();
+    /// let mut frame = Frame::new();
     ///
     /// trajectory.read(&mut frame).unwrap();
     /// ```
-    pub fn read(&mut self, frame: &mut Frame) -> Result<()> {
+    pub fn read(&mut self, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
             check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr()))
         }
@@ -122,11 +126,11 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::{Trajectory, Frame};
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
-    /// let mut frame = Frame::new().unwrap();
+    /// let mut frame = Frame::new();
     ///
     /// trajectory.read_step(10, &mut frame).unwrap();
     /// ```
-    pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<()> {
+    pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
             check(chfl_trajectory_read_step(self.as_mut_ptr(), step, frame.as_mut_ptr()))
         }
@@ -138,11 +142,11 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::{Trajectory, Frame};
     /// let mut trajectory = Trajectory::open("water.pdb", 'w').unwrap();
-    /// let mut frame = Frame::new().unwrap();
+    /// let mut frame = Frame::new();
     ///
     /// trajectory.write(&mut frame).unwrap();
     /// ```
-    pub fn write(&mut self, frame: &Frame) -> Result<()> {
+    pub fn write(&mut self, frame: &Frame) -> Result<(), Error> {
         unsafe {
             check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr()))
         }
@@ -155,19 +159,19 @@ impl Trajectory {
     /// # Example
     /// ```no_run
     /// # use chemfiles::{Trajectory, Atom, Topology};
-    /// let mut topology = Topology::new().unwrap();
-    /// topology.add_atom(&Atom::new("H").unwrap()).unwrap();
-    /// topology.add_atom(&Atom::new("O").unwrap()).unwrap();
-    /// topology.add_atom(&Atom::new("H").unwrap()).unwrap();
-    /// topology.add_bond(0, 1).unwrap();
-    /// topology.add_bond(1, 2).unwrap();
+    /// let mut topology = Topology::new();
+    /// topology.add_atom(&Atom::new("H"));
+    /// topology.add_atom(&Atom::new("O"));
+    /// topology.add_atom(&Atom::new("H"));
+    /// topology.add_bond(0, 1);
+    /// topology.add_bond(1, 2);
     ///
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
-    /// trajectory.set_topology(&topology).unwrap();
+    /// trajectory.set_topology(&topology);
     /// ```
-    pub fn set_topology(&mut self, topology: &Topology) -> Result<()> {
+    pub fn set_topology(&mut self, topology: &Topology) {
         unsafe {
-            check(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()))
+            check_success(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()));
         }
     }
 
@@ -181,7 +185,7 @@ impl Trajectory {
     /// let mut trajectory = Trajectory::open("water.nc", 'r').unwrap();
     /// trajectory.set_topology_file("topology.pdb").unwrap();
     /// ```
-    pub fn set_topology_file<P>(&mut self, path: P) -> Result<()>
+    pub fn set_topology_file<P>(&mut self, path: P) -> Result<(), Error>
     where
         P: AsRef<Path>,
     {
@@ -206,7 +210,7 @@ impl Trajectory {
     /// let mut trajectory = Trajectory::open("water.nc", 'r').unwrap();
     /// trajectory.set_topology_with_format("topology.mol", "PDB").unwrap();
     /// ```
-    pub fn set_topology_with_format<'a, P, S>(&mut self, path: P, format: S) -> Result<()>
+    pub fn set_topology_with_format<'a, P, S>(&mut self, path: P, format: S) -> Result<(), Error>
     where
         P: AsRef<Path>,
         S: Into<&'a str>,
@@ -228,11 +232,11 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::{Trajectory, UnitCell};
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
-    /// trajectory.set_cell(&UnitCell::new([10.0, 11.0, 12.5]).unwrap()).unwrap();
+    /// trajectory.set_cell(&UnitCell::new([10.0, 11.0, 12.5]));
     /// ```
-    pub fn set_cell(&mut self, cell: &UnitCell) -> Result<()> {
+    pub fn set_cell(&mut self, cell: &UnitCell) {
         unsafe {
-            check(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr()))
+            check_success(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr()));
         }
     }
 
@@ -248,7 +252,7 @@ impl Trajectory {
     /// ```
     // FIXME should this take &self instead? The file can be modified by this
     // function, but the format should reset the state.
-    pub fn nsteps(&mut self) -> Result<u64> {
+    pub fn nsteps(&mut self) -> Result<u64, Error> {
         let mut res = 0;
         unsafe {
             check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))?;
@@ -284,83 +288,82 @@ mod test {
 
         assert_eq!(file.nsteps(), Ok(100));
 
-        let mut frame = Frame::new().unwrap();
+        let mut frame = Frame::new();
         assert!(file.read(&mut frame).is_ok());
 
-        assert_eq!(frame.size(), Ok(297));
+        assert_eq!(frame.size(), 297);
 
         {
-            let positions = frame.positions().unwrap();
+            let positions = frame.positions();
             assert_eq!(positions[0], [0.417219, 8.303366, 11.737172]);
             assert_eq!(positions[124], [5.099554, -0.045104, 14.153846]);
         }
 
-        assert_eq!(frame.atom(0).unwrap().name(), Ok(String::from("O")));
+        assert_eq!(frame.atom(0).name(), "O");
 
-        assert!(file.set_cell(&UnitCell::new([30.0, 30.0, 30.0]).unwrap()).is_ok());
-
+        file.set_cell(&UnitCell::new([30.0, 30.0, 30.0]));
         assert!(file.read_step(41, &mut frame).is_ok());
-        let cell = frame.cell().unwrap().clone();
-        assert_eq!(cell.lengths(), Ok([30.0, 30.0, 30.0]));
+        let cell = frame.cell().clone();
+        assert_eq!(cell.lengths(), [30.0, 30.0, 30.0]);
 
         {
-            let positions = frame.positions().unwrap();
+            let positions = frame.positions();
             assert_eq!(positions[0], [0.761277, 8.106125, 10.622949]);
             assert_eq!(positions[124], [5.13242, 0.079862, 14.194161]);
         }
 
         {
-            let topology = frame.topology().unwrap();
-            assert_eq!(topology.size(), Ok(297));
-            assert_eq!(topology.bonds_count(), Ok(0));
+            let topology = frame.topology();
+            assert_eq!(topology.size(), 297);
+            assert_eq!(topology.bonds_count(), 0);
         }
 
         assert!(frame.guess_bonds().is_ok());
         {
-            let topology = frame.topology().unwrap();
-            assert_eq!(topology.size(), Ok(297));
-            assert_eq!(topology.bonds_count(), Ok(181));
-            assert_eq!(topology.angles_count(), Ok(87));
+            let topology = frame.topology();
+            assert_eq!(topology.size(), 297);
+            assert_eq!(topology.bonds_count(), 181);
+            assert_eq!(topology.angles_count(), 87);
         }
 
-        let mut topology = Topology::new().unwrap();
-        let atom = Atom::new("Cs").unwrap();
+        let mut topology = Topology::new();
+        let atom = Atom::new("Cs");
         for _ in 0..297 {
-            topology.add_atom(&atom).unwrap();
+            topology.add_atom(&atom);
         }
 
-        assert!(file.set_topology(&topology).is_ok());
+        file.set_topology(&topology);
         assert!(file.read_step(10, &mut frame).is_ok());
-        assert_eq!(frame.atom(42).unwrap().name(), Ok(String::from("Cs")));
+        assert_eq!(frame.atom(42).name(), "Cs");
 
         let filename = root.join("data").join("topology.xyz");
         assert!(file.set_topology_file(filename.to_str().unwrap()).is_ok());
         assert!(file.read(&mut frame).is_ok());
-        assert_eq!(frame.atom(100).unwrap().name(), Ok(String::from("Rd")));
+        assert_eq!(frame.atom(100).name(), "Rd");
 
         let filename = root.join("data").join("helium.xyz.but.not.really");
         let filename = filename.to_str().unwrap();
         let mut file = Trajectory::open_with_format(filename, 'r', "XYZ").unwrap();
         assert!(file.read(&mut frame).is_ok());
-        assert_eq!(frame.size(), Ok(125));
+        assert_eq!(frame.size(), 125);
     }
 
     fn write_file(path: &str) {
         let mut file = Trajectory::open(path, 'w').unwrap();
-        let mut frame = Frame::new().unwrap();
-        frame.resize(4).unwrap();
+        let mut frame = Frame::new();
+        frame.resize(4);
 
         {
-            let positions = frame.positions_mut().unwrap();
+            let positions = frame.positions_mut();
             for i in 0..positions.len() {
                 positions[i] = [1.0, 2.0, 3.0];
             }
         }
 
-        let mut topology = Topology::new().unwrap();
-        let atom = Atom::new("X").unwrap();
+        let mut topology = Topology::new();
+        let atom = Atom::new("X");
         for _ in 0..4 {
-            topology.add_atom(&atom).unwrap();
+            topology.add_atom(&atom);
         }
         frame.set_topology(&topology).unwrap();
         assert!(file.write(&frame).is_ok());

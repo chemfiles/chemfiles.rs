@@ -6,8 +6,7 @@ use std::ffi::{CStr, CString};
 use std::str;
 
 use chemfiles_sys::chfl_status;
-use errors::check;
-use Result;
+use errors::{check, Error};
 
 /// Create a Rust string from a C string.
 pub fn from_c(buffer: *const i8) -> String {
@@ -42,7 +41,7 @@ fn buffer_was_big_enough(buffer: &[i8]) -> bool {
 /// `initial` as the buffer initial size. If the buffer was filled and the
 /// result truncated by the C library, grow the buffer and try again until we
 /// get all the data. Then return the filled buffer to the caller.
-pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<i8>>
+pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<i8>, Error>
 where
     F: Fn(*mut i8, u64) -> chfl_status,
 {

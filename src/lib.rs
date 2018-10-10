@@ -16,9 +16,6 @@
 //! - The lisf of [supported formats][formats];
 //! - The documentation for the [selection language][selections];
 //!
-//! As all the function call the underlying C library, they all can fail and
-//! thus all return a `Result<_, Error>` value.
-//!
 //! [cxx_doc]: https://chemfiles.org/chemfiles
 //! [overview]: https://chemfiles.org/chemfiles/latest/overview.html
 //! [formats]: https://chemfiles.org/chemfiles/latest/formats.html
@@ -45,9 +42,6 @@ mod strings;
 mod errors;
 pub use errors::{Error, Status};
 pub use errors::set_warning_callback;
-
-/// Custom result type for working with errors in chemfiles
-pub type Result<T> = std::result::Result<T, Error>;
 
 mod atom;
 pub use atom::Atom;
@@ -108,15 +102,14 @@ pub fn version() -> String {
 /// chemfiles::add_configuration("local-config.toml");
 /// // from now on, the data from "local-config.toml" will be used
 /// ```
-pub fn add_configuration<S>(path: S) -> Result<()>
+pub fn add_configuration<S>(path: S) -> Result<(), Error>
 where
     S: AsRef<str>,
 {
     let buffer = strings::to_c(path.as_ref());
     unsafe {
-        errors::check(chfl_add_configuration(buffer.as_ptr()))?;
+        errors::check(chfl_add_configuration(buffer.as_ptr()))
     }
-    Ok(())
 }
 
 #[cfg(test)]

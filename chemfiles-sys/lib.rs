@@ -36,6 +36,7 @@ pub enum CHFL_SELECTION{}
 pub enum CHFL_RESIDUE{}
 pub enum CHFL_PROPERTY{}
 
+#[must_use]
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum chfl_status {
@@ -51,6 +52,7 @@ pub enum chfl_status {
     CHFL_CXX_ERROR = 255,
 }
 
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum chfl_bond_order {
@@ -64,6 +66,7 @@ pub enum chfl_bond_order {
     CHFL_BOND_AROMATIC = 255,
 }
 
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum chfl_property_kind {
@@ -72,6 +75,7 @@ pub enum chfl_property_kind {
     CHFL_PROPERTY_STRING = 2,
     CHFL_PROPERTY_VECTOR3D = 3,
 }
+
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
