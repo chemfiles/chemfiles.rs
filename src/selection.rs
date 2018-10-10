@@ -6,10 +6,9 @@ use std::iter::IntoIterator;
 use std::slice::Iter;
 
 use chemfiles_sys::*;
-use errors::{check, Error};
+use errors::{check, check_not_null, check_success, Error, Status};
 use strings;
 use frame::Frame;
-use Result;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It can
@@ -117,7 +116,7 @@ impl Clone for Selection {
     fn clone(&self) -> Selection {
         unsafe {
             let new_handle = chfl_selection_copy(self.as_ptr());
-            Selection::from_ptr(new_handle).expect("Out of memory when copying a Selection")
+            Selection::from_ptr(new_handle)
         }
     }
 }
@@ -134,14 +133,12 @@ impl Drop for Selection {
 impl Selection {
     /// Create a `Selection` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer,
-    /// except for it being non-null.
+    /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Result<Selection> {
-        if ptr.is_null() {
-            Err(Error::null_ptr())
-        } else {
-            Ok(Selection { handle: ptr })
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Selection {
+        check_not_null(ptr);
+        Selection {
+            handle: ptr
         }
     }
 
@@ -164,11 +161,18 @@ impl Selection {
     /// # use chemfiles::Selection;
     /// let selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
     /// ```
-    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection> {
+    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection, Error> {
         let buffer = strings::to_c(selection.into());
         unsafe {
             let handle = chfl_selection(buffer.as_ptr());
-            Selection::from_ptr(handle)
+            if handle.is_null() {
+                Err(Error {
+                    status: Status::SelectionError,
+                    message: Error::last_error()
+                })
+            } else {
+                Ok(Selection::from_ptr(handle))
+            }
         }
     }
 
@@ -183,14 +187,14 @@ impl Selection {
     /// ```
     /// # use chemfiles::Selection;
     /// let selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
-    /// assert_eq!(selection.size(), Ok(2));
+    /// assert_eq!(selection.size(), 2);
     /// ```
-    pub fn size(&self) -> Result<u64> {
+    pub fn size(&self) -> u64 {
         let mut size = 0;
         unsafe {
-            check(chfl_selection_size(self.as_ptr(), &mut size))?;
+            check_success(chfl_selection_size(self.as_ptr(), &mut size));
         }
-        return Ok(size);
+        return size;
     }
 
     /// Get the selection string used to create this selection.
@@ -199,12 +203,12 @@ impl Selection {
     /// ```
     /// # use chemfiles::Selection;
     /// let selection = Selection::new("name H").unwrap();
-    /// assert_eq!(selection.string(), Ok(String::from("name H")));
+    /// assert_eq!(selection.string(), "name H");
     /// ```
-    pub fn string(&self) -> Result<String> {
+    pub fn string(&self) -> String {
         let get_string = |ptr, len| unsafe { chfl_selection_string(self.as_ptr(), ptr, len) };
-        let selection = strings::call_autogrow_buffer(1024, get_string)?;
-        return Ok(strings::from_c(selection.as_ptr()));
+        let selection = strings::call_autogrow_buffer(1024, get_string).expect("failed to get selection string");
+        return strings::from_c(selection.as_ptr());
     }
 
     /// Evaluate a selection for a given frame, and return the corresponding
@@ -213,10 +217,10 @@ impl Selection {
     /// # Example
     /// ```
     /// # use chemfiles::{Selection, Frame, Atom};
-    /// let mut frame = Frame::new().unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
-    /// frame.add_atom(&Atom::new("O").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), [-1.0, 0.0, 0.0], None).unwrap();
+    /// let mut frame = Frame::new();
+    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("H"), [-1.0, 0.0, 0.0], None);
     ///
     /// let mut selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
     /// let matches = selection.evaluate(&frame).unwrap();
@@ -231,7 +235,7 @@ impl Selection {
     /// assert_eq!(matches[1][0], 2);
     /// assert_eq!(matches[1][1], 1);
     /// ```
-    pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>> {
+    pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>, Error> {
         let mut count = 0;
         unsafe {
             check(chfl_selection_evaluate(
@@ -261,10 +265,10 @@ impl Selection {
     /// # Example
     /// ```
     /// # use chemfiles::{Selection, Frame, Atom};
-    /// let mut frame = Frame::new().unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), [1.0, 0.0, 0.0], None).unwrap();
-    /// frame.add_atom(&Atom::new("O").unwrap(), [0.0, 0.0, 0.0], None).unwrap();
-    /// frame.add_atom(&Atom::new("H").unwrap(), [-1.0, 0.0, 0.0], None).unwrap();
+    /// let mut frame = Frame::new();
+    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("H"), [-1.0, 0.0, 0.0], None);
     ///
     /// let mut selection = Selection::new("name H").unwrap();
     /// let matches = selection.list(&frame).unwrap();
@@ -273,7 +277,7 @@ impl Selection {
     /// assert_eq!(matches[0], 0);
     /// assert_eq!(matches[1], 2);
     /// ```
-    pub fn list(&mut self, frame: &Frame) -> Result<Vec<u64>> {
+    pub fn list(&mut self, frame: &Frame) -> Result<Vec<u64>, Error> {
         let matches = self.evaluate(frame)?;
         let mut list = vec![0; matches.len()];
         for (i, m) in matches.iter().enumerate() {
@@ -295,24 +299,24 @@ mod tests {
         let selection = Selection::new("name H").unwrap();
 
         let copy = selection.clone();
-        assert_eq!(selection.size(), Ok(1));
-        assert_eq!(copy.size(), Ok(1));
+        assert_eq!(selection.size(), 1);
+        assert_eq!(copy.size(), 1);
     }
 
     fn testing_frame() -> Frame {
-        let mut topology = Topology::new().unwrap();
+        let mut topology = Topology::new();
 
-        topology.add_atom(&Atom::new("H").unwrap()).unwrap();
-        topology.add_atom(&Atom::new("O").unwrap()).unwrap();
-        topology.add_atom(&Atom::new("O").unwrap()).unwrap();
-        topology.add_atom(&Atom::new("H").unwrap()).unwrap();
+        topology.add_atom(&Atom::new("H"));
+        topology.add_atom(&Atom::new("O"));
+        topology.add_atom(&Atom::new("O"));
+        topology.add_atom(&Atom::new("H"));
 
-        topology.add_bond(0, 1).unwrap();
-        topology.add_bond(1, 2).unwrap();
-        topology.add_bond(2, 3).unwrap();
+        topology.add_bond(0, 1);
+        topology.add_bond(1, 2);
+        topology.add_bond(2, 3);
 
-        let mut frame = Frame::new().unwrap();
-        frame.resize(4).unwrap();
+        let mut frame = Frame::new();
+        frame.resize(4);
         frame.set_topology(&topology).unwrap();
         return frame;
     }
@@ -368,22 +372,22 @@ mod tests {
     #[test]
     fn size() {
         let selection = Selection::new("name H").unwrap();
-        assert_eq!(selection.size(), Ok(1));
+        assert_eq!(selection.size(), 1);
 
         let selection = Selection::new("angles: name(#1) H").unwrap();
-        assert_eq!(selection.size(), Ok(3));
+        assert_eq!(selection.size(), 3);
 
         let selection = Selection::new("four: name(#1) H").unwrap();
-        assert_eq!(selection.size(), Ok(4));
+        assert_eq!(selection.size(), 4);
     }
 
     #[test]
     fn string() {
         let selection = Selection::new("name H").unwrap();
-        assert_eq!(selection.string().unwrap(), "name H");
+        assert_eq!(selection.string(), "name H");
 
         let selection = Selection::new("angles: name(#1) H").unwrap();
-        assert_eq!(selection.string().unwrap(), "angles: name(#1) H");
+        assert_eq!(selection.string(), "angles: name(#1) H");
     }
 
     #[test]

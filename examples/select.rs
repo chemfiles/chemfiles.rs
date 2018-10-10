@@ -4,23 +4,25 @@
 extern crate chemfiles;
 use chemfiles::{Frame, Selection, Trajectory};
 
-fn main() {
-    let mut input = Trajectory::open("input.arc", 'r').unwrap();
-    let mut output = Trajectory::open("output.pdb", 'w').unwrap();
+fn main() -> Result<(), Box<std::error::Error>> {
+    let mut input = Trajectory::open("input.arc", 'r')?;
+    let mut output = Trajectory::open("output.pdb", 'w')?;
 
-    let mut selection = Selection::new("name Zn or name N").unwrap();
+    let mut selection = Selection::new("name Zn or name N")?;
 
-    let mut frame = Frame::new().unwrap();
-    for _ in 0..input.nsteps().unwrap() {
-        input.read(&mut frame).unwrap();
+    let mut frame = Frame::new();
+    for _ in 0..input.nsteps()? {
+        input.read(&mut frame)?;
 
-        let mut to_remove = selection.list(&frame).unwrap();
+        let mut to_remove = selection.list(&frame)?;
         to_remove.sort();
         to_remove.reverse();
         for i in to_remove {
-            frame.remove(i as usize).unwrap();
+            frame.remove(i as usize);
         }
 
-        output.write(&frame).unwrap();
+        output.write(&frame)?;
     }
+
+    Ok(())
 }

@@ -5,14 +5,12 @@ extern crate libc;
 use std::error;
 use std::fmt;
 use std::panic::{self, RefUnwindSafe};
-use std::result;
 use std::path::Path;
 
 use self::libc::c_char;
 
 use chemfiles_sys::*;
 use strings;
-use Result;
 
 #[derive(Clone, Debug, PartialEq)]
 /// Error type for Chemfiles.
@@ -48,8 +46,6 @@ pub enum Status {
     PropertyError,
     /// The given path is not valid UTF8
     UTF8PathError,
-    /// We got a null pointer from C++
-    NullPtr,
 }
 
 impl From<chfl_status> for Error {
@@ -82,14 +78,6 @@ impl Error {
         }
     }
 
-    /// Create a new error because we got a null pointer from C++
-    pub(crate) fn null_ptr() -> Error {
-        Error {
-            status: Status::NullPtr,
-            message: Error::last_error(),
-        }
-    }
-
     /// Get the last error message from the C++ library.
     pub fn last_error() -> String {
         unsafe { strings::from_c(chfl_last_error()) }
@@ -104,13 +92,27 @@ impl Error {
 }
 
 /// Check return value of a C function, and get the error if needed.
-pub fn check(status: chfl_status) -> Result<()> {
+pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
     if status != chfl_status::CHFL_SUCCESS {
-        return Err(Error::from(status));
+        Err(Error::from(status))
+    } else {
+        Ok(())
     }
-    return Ok(());
 }
 
+/// Check return value of a C function, panic if it failed.
+pub(crate) fn check_success(status: chfl_status) {
+    if status != chfl_status::CHFL_SUCCESS {
+        panic!("unexpected failure: {}", Error::last_error());
+    }
+}
+
+/// Check a pointer for null.
+pub(crate) fn check_not_null<T>(ptr: *const T) {
+    if ptr.is_null() {
+        panic!("unexpected null pointer: {}", Error::last_error());
+    }
+}
 
 pub trait WarningCallback: RefUnwindSafe + Fn(&str) -> () {}
 impl<T> WarningCallback for T
@@ -132,11 +134,8 @@ extern "C" fn warning_callback(message: *const c_char) {
 }
 
 /// Use `callback` for every chemfiles warning. The callback will be passed
-/// the warning message.
-pub fn set_warning_callback<F>(callback: F) -> Result<()>
-where
-    F: WarningCallback + 'static,
-{
+/// the warning message. This will drop any previous warning callback.
+pub fn set_warning_callback<F>(callback: F) where F: WarningCallback + 'static {
     // box callback to ensure it stays accessible
     let callback = Box::into_raw(Box::new(callback));
     unsafe {
@@ -149,15 +148,14 @@ where
             // set the LOGGING_CALLBACK
             LOGGING_CALLBACK = Some(callback);
             // Tell C code to use Rust-provided callback
-            check(chfl_set_warning_callback(warning_callback))?;
+            check_success(chfl_set_warning_callback(warning_callback));
         }
     }
-    return Ok(());
 }
 
 
 impl fmt::Display for Error {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(fmt, "{}", self.message)
     }
 }
@@ -176,7 +174,6 @@ impl error::Error for Error {
             Status::ConfigurationError => "Error in configuration files",
             Status::OutOfBounds => "Out of bounds indexing",
             Status::PropertyError => "Error in property",
-            Status::NullPtr => "We got a NULL pointer from C++",
         }
     }
 }
