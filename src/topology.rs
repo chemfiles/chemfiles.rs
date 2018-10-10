@@ -335,7 +335,7 @@ impl Topology {
         let size = count as usize;
         let mut bonds = vec![[u64::max_value(); 2]; size];
         unsafe {
-            check_success(chfl_topology_bonds(self.handle, bonds.as_mut_ptr(), count));
+            check_success(chfl_topology_bonds(self.as_ptr(), bonds.as_mut_ptr(), count));
         }
         return bonds;
     }

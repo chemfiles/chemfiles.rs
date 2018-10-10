@@ -10,7 +10,7 @@ use errors::{check_not_null, check_success, check, Error};
 use super::{Atom, AtomRef, AtomMut};
 use super::{Topology, TopologyRef, Residue};
 use super::{UnitCell, UnitCellRef, UnitCellMut};
-use property::{Property, RawProperty};
+use property::{Property, RawProperty, PropertiesIter};
 
 /// A `Frame` contains data from one simulation step: the current unit
 /// cell, the topology, the positions, and the velocities of the particles in
@@ -724,7 +724,6 @@ impl Frame {
         }
     }
 
-
     /// Add a new `property` with the given `name` to this frame.
     ///
     /// If a property with the same name already exists, this function override
@@ -770,6 +769,47 @@ impl Frame {
                 let raw = RawProperty::from_ptr(handle);
                 Some(Property::from_raw(raw))
             }
+        }
+    }
+
+    /// Get an iterator over all (name, property) pairs for this frame
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Frame, Property};
+    /// let mut frame = Frame::new();
+    /// frame.set("foo", Property::Double(22.2));
+    /// frame.set("bar", Property::Bool(false));
+    ///
+    /// for (name, property) in frame.properties() {
+    ///     if name == "foo" {
+    ///         assert_eq!(property, Property::Double(22.2));
+    ///     } else if name == "bar" {
+    ///         assert_eq!(property, Property::Bool(false));
+    ///     }
+    /// }
+    /// ```
+    pub fn properties(&self) -> PropertiesIter {
+        let mut count = 0;
+        unsafe {
+            check_success(chfl_frame_properties_count(self.as_ptr(), &mut count));
+        }
+
+        #[allow(cast_possible_truncation)]
+        let size = count as usize;
+        let mut cnames = vec![ptr::null_mut(); size];
+        unsafe {
+            check_success(chfl_frame_list_properties(self.as_ptr(), cnames.as_mut_ptr(), count));
+        }
+
+        let mut names = Vec::new();
+        for ptr in cnames {
+            names.push(strings::from_c(ptr));
+        }
+
+        PropertiesIter {
+            names: names.into_iter(),
+            getter: Box::new(move |name| self.get(&*name).expect("failed to get property"))
         }
     }
 }
@@ -979,6 +1019,16 @@ mod test {
         frame.set("foo", Property::Double(-22.0));
         assert_eq!(frame.get("foo"), Some(Property::Double(-22.0)));
         assert_eq!(frame.get("bar"), None);
+
+        frame.set("bar", Property::String("here".into()));
+        for (name, property) in frame.properties() {
+            if name == "foo" {
+                assert_eq!(property, Property::Double(-22.0));
+            } else if name == "bar" {
+                assert_eq!(property, Property::String("here".into()));
+
+            }
+        }
     }
 
     #[test]

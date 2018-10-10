@@ -119,7 +119,7 @@ extern "C" {
     pub fn chfl_atom_covalent_radius(atom: *const CHFL_ATOM, radius: *mut c_double) -> chfl_status;
     pub fn chfl_atom_atomic_number(atom: *const CHFL_ATOM, number: *mut uint64_t) -> chfl_status;
     pub fn chfl_atom_properties_count(atom: *const CHFL_ATOM, count: *mut uint64_t) -> chfl_status;
-    pub fn chfl_atom_list_properties(atom: *const CHFL_ATOM, names: *mut c_char, count: uint64_t) -> chfl_status;
+    pub fn chfl_atom_list_properties(atom: *const CHFL_ATOM, names: *mut *mut c_char, count: uint64_t) -> chfl_status;
     pub fn chfl_atom_set_property(atom: *mut CHFL_ATOM, name: *const c_char, property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_atom_get_property(atom: *const CHFL_ATOM, name: *const c_char) -> *mut CHFL_PROPERTY;
     pub fn chfl_atom_free(atom: *const CHFL_ATOM) -> chfl_status;
@@ -135,7 +135,7 @@ extern "C" {
     pub fn chfl_residue_add_atom(residue: *mut CHFL_RESIDUE, i: uint64_t) -> chfl_status;
     pub fn chfl_residue_contains(residue: *const CHFL_RESIDUE, i: uint64_t, result: *mut c_bool) -> chfl_status;
     pub fn chfl_residue_properties_count(residue: *const CHFL_RESIDUE, count: *mut uint64_t) -> chfl_status;
-    pub fn chfl_residue_list_properties(residue: *const CHFL_RESIDUE, names: *mut c_char, count: uint64_t) -> chfl_status;
+    pub fn chfl_residue_list_properties(residue: *const CHFL_RESIDUE, names: *mut *mut c_char, count: uint64_t) -> chfl_status;
     pub fn chfl_residue_set_property(residue: *mut CHFL_RESIDUE, name: *const c_char, property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_residue_get_property(residue: *const CHFL_RESIDUE, name: *const c_char) -> *mut CHFL_PROPERTY;
     pub fn chfl_residue_free(residue: *const CHFL_RESIDUE) -> chfl_status;
@@ -197,7 +197,7 @@ extern "C" {
     pub fn chfl_frame_dihedral(frame: *const CHFL_FRAME, i: uint64_t, j: uint64_t, k: uint64_t, m: uint64_t, dihedral: *mut c_double) -> chfl_status;
     pub fn chfl_frame_out_of_plane(frame: *const CHFL_FRAME, i: uint64_t, j: uint64_t, k: uint64_t, m: uint64_t, distance: *mut c_double) -> chfl_status;
     pub fn chfl_frame_properties_count(frame: *const CHFL_FRAME, count: *mut uint64_t) -> chfl_status;
-    pub fn chfl_frame_list_properties(frame: *const CHFL_FRAME, names: *mut c_char, count: uint64_t) -> chfl_status;
+    pub fn chfl_frame_list_properties(frame: *const CHFL_FRAME, names: *mut *mut c_char, count: uint64_t) -> chfl_status;
     pub fn chfl_frame_set_property(frame: *mut CHFL_FRAME, name: *const c_char, property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_frame_get_property(frame: *const CHFL_FRAME, name: *const c_char) -> *mut CHFL_PROPERTY;
     pub fn chfl_frame_add_bond(frame: *mut CHFL_FRAME, i: uint64_t, j: uint64_t) -> chfl_status;
