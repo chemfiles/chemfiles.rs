@@ -359,7 +359,7 @@ impl Atom {
     /// assert_eq!(atom.get("foo"), Some(Property::Double(22.2)));
     /// assert_eq!(atom.get("Bar"), None);
     /// ```
-    pub fn get(&mut self, name: &str) -> Option<Property> {
+    pub fn get(&self, name: &str) -> Option<Property> {
         let buffer = strings::to_c(name);
         unsafe {
             let handle = chfl_atom_get_property(self.as_ptr(), buffer.as_ptr());
