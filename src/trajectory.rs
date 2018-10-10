@@ -35,6 +35,12 @@ impl Trajectory {
         }
     }
 
+    /// Get the underlying C pointer as a pointer.
+    #[inline]
+    pub(crate) fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
+        self.handle
+    }
+
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
     pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
@@ -259,6 +265,23 @@ impl Trajectory {
         }
         Ok(res)
     }
+
+    /// Get file path for this trajectory.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use chemfiles::Trajectory;
+    /// let trajectory = Trajectory::open("water.xyz", 'r').unwrap();
+    ///
+    /// assert_eq!(trajectory.path(), "water.xyz");
+    /// ```
+    pub fn path(&self) -> String {
+        let mut path = ::std::ptr::null_mut();
+        unsafe {
+            check_success(chfl_trajectory_path(self.as_ptr(), &mut path));
+        }
+        return strings::from_c(path);
+    }
 }
 
 impl Drop for Trajectory {
@@ -286,6 +309,7 @@ mod test {
         let filename = root.join("data").join("water.xyz");
         let mut file = Trajectory::open(filename.to_str().unwrap(), 'r').unwrap();
 
+        assert_eq!(file.path(), "src/../data/water.xyz");
         assert_eq!(file.nsteps(), Ok(100));
 
         let mut frame = Frame::new();
