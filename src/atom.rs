@@ -2,12 +2,13 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::ops::{Drop, Deref, DerefMut};
 use std::marker::PhantomData;
+use std::ptr;
 
 use chemfiles_sys::*;
 use errors::{check_success, check_not_null};
 use strings;
 
-use property::{Property, RawProperty};
+use property::{Property, RawProperty, PropertiesIter};
 
 /// An `Atom` is a particle in the current `Frame`. It stores the following
 /// atomic properties:
@@ -372,6 +373,47 @@ impl Atom {
             }
         }
     }
+
+    /// Get an iterator over all (name, property) pairs for this atom
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Atom, Property};
+    /// let mut atom = Atom::new("He");
+    /// atom.set("foo", Property::Double(22.2));
+    /// atom.set("bar", Property::Bool(false));
+    ///
+    /// for (name, property) in atom.properties() {
+    ///     if name == "foo" {
+    ///         assert_eq!(property, Property::Double(22.2));
+    ///     } else if name == "bar" {
+    ///         assert_eq!(property, Property::Bool(false));
+    ///     }
+    /// }
+    /// ```
+    pub fn properties(&self) -> PropertiesIter {
+        let mut count = 0;
+        unsafe {
+            check_success(chfl_atom_properties_count(self.as_ptr(), &mut count));
+        }
+
+        #[allow(cast_possible_truncation)]
+        let size = count as usize;
+        let mut cnames = vec![ptr::null_mut(); size];
+        unsafe {
+            check_success(chfl_atom_list_properties(self.as_ptr(), cnames.as_mut_ptr(), count));
+        }
+
+        let mut names = Vec::new();
+        for ptr in cnames {
+            names.push(strings::from_c(ptr));
+        }
+
+        PropertiesIter {
+            names: names.into_iter(),
+            getter: Box::new(move |name| self.get(&*name).expect("failed to get property"))
+        }
+    }
 }
 
 impl Drop for Atom {
@@ -470,5 +512,16 @@ mod test {
 
         atom.set("foo", Property::Double(-22.0));
         assert_eq!(atom.get("foo"), Some(Property::Double(-22.0)));
+        assert_eq!(atom.get("bar"), None);
+
+        atom.set("bar", Property::String("here".into()));
+        for (name, property) in atom.properties() {
+            if name == "foo" {
+                assert_eq!(property, Property::Double(-22.0));
+            } else if name == "bar" {
+                assert_eq!(property, Property::String("here".into()));
+
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::ops::Drop;
+use std::vec::IntoIter;
 
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error};
@@ -150,6 +151,30 @@ impl Property {
                 Property::Vector3D(raw.get_vector3d().expect("should be a vector3d"))
             }
         }
+    }
+}
+
+/// An iterator over the properties in an atom/frame/residue
+pub struct PropertiesIter<'a> where  {
+    pub(crate) names: IntoIter<String>,
+    pub(crate) getter: Box<Fn(&str) -> Property + 'a>,
+}
+
+impl<'a> Iterator for PropertiesIter<'a> {
+    type Item = (String, Property);
+    fn next(&mut self) -> Option<Self::Item> {
+        self.names.next().map(|name| {
+            let property = (self.getter)(&*name);
+            (name, property)
+        })
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.names.size_hint()
+    }
+
+    fn count(self) -> usize {
+        self.names.count()
     }
 }
 

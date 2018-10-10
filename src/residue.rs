@@ -3,9 +3,11 @@
 use std::ops::{Drop, Deref};
 use std::marker::PhantomData;
 use std::u64;
+use std::ptr;
 
 use chemfiles_sys::*;
 use errors::{check_not_null, check_success, Error};
+use property::{Property, RawProperty, PropertiesIter};
 use strings;
 
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
@@ -209,6 +211,95 @@ impl Residue {
         }
         return inside != 0;
     }
+
+    /// Add a new `property` with the given `name` to this residue.
+    ///
+    /// If a property with the same name already exists, this function override
+    /// the existing property with the new one.
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Residue, Property};
+    /// let mut residue = Residue::new("ALA");
+    /// residue.set("a string", Property::String("hello".into()));
+    ///
+    /// assert_eq!(residue.get("a string"), Some(Property::String("hello".into())));
+    /// ```
+    #[allow(needless_pass_by_value)]  // property
+    pub fn set(&mut self, name: &str, property: Property) {
+        let buffer = strings::to_c(name);
+        let property = property.as_raw();
+        unsafe {
+            check_success(chfl_residue_set_property(
+                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+            ));
+        }
+    }
+
+    /// Get a property with the given `name` in this frame, if it exist.
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Residue, Property};
+    /// let mut residue = Residue::new("ALA");
+    /// residue.set("foo", Property::Double(22.2));
+    ///
+    /// assert_eq!(residue.get("foo"), Some(Property::Double(22.2)));
+    /// assert_eq!(residue.get("Bar"), None);
+    /// ```
+    pub fn get(&self, name: &str) -> Option<Property> {
+        let buffer = strings::to_c(name);
+        unsafe {
+            let handle = chfl_residue_get_property(self.as_ptr(), buffer.as_ptr());
+            if handle.is_null() {
+                None
+            } else {
+                let raw = RawProperty::from_ptr(handle);
+                Some(Property::from_raw(raw))
+            }
+        }
+    }
+
+    /// Get an iterator over all (name, property) pairs for this frame
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Residue, Property};
+    /// let mut residue = Residue::new("ALA");
+    /// residue.set("foo", Property::Double(22.2));
+    /// residue.set("bar", Property::Bool(false));
+    ///
+    /// for (name, property) in residue.properties() {
+    ///     if name == "foo" {
+    ///         assert_eq!(property, Property::Double(22.2));
+    ///     } else if name == "bar" {
+    ///         assert_eq!(property, Property::Bool(false));
+    ///     }
+    /// }
+    /// ```
+    pub fn properties(&self) -> PropertiesIter {
+        let mut count = 0;
+        unsafe {
+            check_success(chfl_residue_properties_count(self.as_ptr(), &mut count));
+        }
+
+        #[allow(cast_possible_truncation)]
+        let size = count as usize;
+        let mut cnames = vec![ptr::null_mut(); size];
+        unsafe {
+            check_success(chfl_residue_list_properties(self.as_ptr(), cnames.as_mut_ptr(), count));
+        }
+
+        let mut names = Vec::new();
+        for ptr in cnames {
+            names.push(strings::from_c(ptr));
+        }
+
+        PropertiesIter {
+            names: names.into_iter(),
+            getter: Box::new(move |name| self.get(&*name).expect("failed to get property"))
+        }
+    }
 }
 
 impl Drop for Residue {
@@ -265,5 +356,24 @@ mod tests {
 
         assert_eq!(residue.contains(3), true);
         assert_eq!(residue.contains(5), false);
+    }
+
+    #[test]
+    fn property() {
+        let mut residue = Residue::new("ALA");
+
+        residue.set("foo", Property::Double(-22.0));
+        assert_eq!(residue.get("foo"), Some(Property::Double(-22.0)));
+        assert_eq!(residue.get("bar"), None);
+
+        residue.set("bar", Property::String("here".into()));
+        for (name, property) in residue.properties() {
+            if name == "foo" {
+                assert_eq!(property, Property::Double(-22.0));
+            } else if name == "bar" {
+                assert_eq!(property, Property::String("here".into()));
+
+            }
+        }
     }
 }

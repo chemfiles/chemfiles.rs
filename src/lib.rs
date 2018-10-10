@@ -77,6 +77,7 @@ pub use selection::{Match, Selection};
 
 mod property;
 pub use property::Property;
+pub use property::PropertiesIter;
 
 /// Get the version of the chemfiles library.
 ///
