@@ -22,38 +22,41 @@ pub struct Error {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+#[repr(C)]
 /// Possible causes of error in chemfiles
 pub enum Status {
     /// No error
-    Success,
-    /// Exception in the C++ standard library
-    CppStdError,
-    /// Exception in the C++ chemfiles library
-    ChemfilesCppError,
+    Success = chfl_status::CHFL_SUCCESS as isize,
     /// Error in memory allocations
-    MemoryError,
+    MemoryError = chfl_status::CHFL_MEMORY_ERROR as isize,
     /// Error while reading or writing a file
-    FileError,
+    FileError = chfl_status::CHFL_FILE_ERROR as isize,
     /// Error in file formatting, *i.e.* the file is invalid
-    FormatError,
+    FormatError = chfl_status::CHFL_FORMAT_ERROR as isize,
     /// Error in selection string syntax
-    SelectionError,
+    SelectionError = chfl_status::CHFL_SELECTION_ERROR as isize,
     /// Error in configuration files syntax
-    ConfigurationError,
+    ConfigurationError = chfl_status::CHFL_CONFIGURATION_ERROR as isize,
     /// Error for out of bounds indexing
-    OutOfBounds,
+    OutOfBounds = chfl_status::CHFL_OUT_OF_BOUNDS as isize,
     /// Error related to properties
-    PropertyError,
+    PropertyError = chfl_status::CHFL_PROPERTY_ERROR as isize,
+    /// Exception in the C++ chemfiles library
+    ChemfilesError = chfl_status::CHFL_GENERIC_ERROR as isize,
+    /// Exception in the C++ standard library
+    StdCppError = chfl_status::CHFL_CXX_ERROR as isize,
     /// The given path is not valid UTF8
     UTF8PathError,
+    #[doc(hidden)]
+    __Nonexhaustive,
 }
 
 impl From<chfl_status> for Error {
     fn from(status: chfl_status) -> Error {
         let status = match status {
             chfl_status::CHFL_SUCCESS => Status::Success,
-            chfl_status::CHFL_CXX_ERROR => Status::CppStdError,
-            chfl_status::CHFL_GENERIC_ERROR => Status::ChemfilesCppError,
+            chfl_status::CHFL_CXX_ERROR => Status::StdCppError,
+            chfl_status::CHFL_GENERIC_ERROR => Status::ChemfilesError,
             chfl_status::CHFL_MEMORY_ERROR => Status::MemoryError,
             chfl_status::CHFL_FILE_ERROR => Status::FileError,
             chfl_status::CHFL_FORMAT_ERROR => Status::FormatError,
@@ -164,8 +167,8 @@ impl error::Error for Error {
     fn description(&self) -> &str {
         match self.status {
             Status::Success => "Success",
-            Status::CppStdError => "Exception from the C++ standard library",
-            Status::ChemfilesCppError => "Exception from the chemfiles library",
+            Status::StdCppError => "Exception from the C++ standard library",
+            Status::ChemfilesError => "Exception from the chemfiles library",
             Status::MemoryError => "Error in memory allocations",
             Status::FileError => "Error while reading or writing a file",
             Status::FormatError => "Error in file formatting, i.e. the file is invalid",
@@ -174,6 +177,7 @@ impl error::Error for Error {
             Status::ConfigurationError => "Error in configuration files",
             Status::OutOfBounds => "Out of bounds indexing",
             Status::PropertyError => "Error in property",
+            _ => "unsupported error code",
         }
     }
 }
@@ -200,8 +204,8 @@ mod test {
     #[test]
     fn codes() {
         assert_eq!(Error::from(chfl_status::CHFL_SUCCESS).status, Status::Success);
-        assert_eq!(Error::from(chfl_status::CHFL_CXX_ERROR).status, Status::CppStdError);
-        assert_eq!(Error::from(chfl_status::CHFL_GENERIC_ERROR).status, Status::ChemfilesCppError);
+        assert_eq!(Error::from(chfl_status::CHFL_CXX_ERROR).status, Status::StdCppError);
+        assert_eq!(Error::from(chfl_status::CHFL_GENERIC_ERROR).status, Status::ChemfilesError);
         assert_eq!(Error::from(chfl_status::CHFL_MEMORY_ERROR).status, Status::MemoryError);
         assert_eq!(Error::from(chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
         assert_eq!(Error::from(chfl_status::CHFL_FORMAT_ERROR).status, Status::FormatError);
