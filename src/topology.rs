@@ -9,6 +9,61 @@ use errors::{check, check_not_null, check_success, Error};
 use super::{Atom, AtomRef, AtomMut};
 use super::{Residue, ResidueRef};
 
+/// Possible bond order associated with bonds
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum BondOrder {
+    /// Unknown or unspecified bond order
+    Unknown = chfl_bond_order::CHFL_BOND_UNKNOWN as isize,
+    /// Single bond
+    Single = chfl_bond_order::CHFL_BOND_SINGLE as isize,
+    /// Double bond
+    Double = chfl_bond_order::CHFL_BOND_DOUBLE as isize,
+    /// Triple bond
+    Triple = chfl_bond_order::CHFL_BOND_TRIPLE as isize,
+    /// Quadruple bond (present in some metals)
+    Quadruple = chfl_bond_order::CHFL_BOND_QUADRUPLE as isize,
+    /// Qintuplet bond (present in some metals)
+    Qintuplet = chfl_bond_order::CHFL_BOND_QINTUPLET as isize,
+    /// Amide bond (required by some file formats)
+    Amide = chfl_bond_order::CHFL_BOND_AMIDE as isize,
+    /// Aromatic bond (required by some file formats)
+    Aromatic = chfl_bond_order::CHFL_BOND_AROMATIC as isize,
+    #[doc(hidden)]
+    __Nonexhaustive,
+}
+
+impl BondOrder {
+    pub(crate) fn as_raw(&self) -> chfl_bond_order {
+        match *self {
+            BondOrder::Unknown => chfl_bond_order::CHFL_BOND_UNKNOWN,
+            BondOrder::Single => chfl_bond_order::CHFL_BOND_SINGLE,
+            BondOrder::Double => chfl_bond_order::CHFL_BOND_DOUBLE,
+            BondOrder::Triple => chfl_bond_order::CHFL_BOND_TRIPLE,
+            BondOrder::Quadruple => chfl_bond_order::CHFL_BOND_QUADRUPLE,
+            BondOrder::Qintuplet => chfl_bond_order::CHFL_BOND_QINTUPLET,
+            BondOrder::Amide => chfl_bond_order::CHFL_BOND_AMIDE,
+            BondOrder::Aromatic => chfl_bond_order::CHFL_BOND_AROMATIC,
+            BondOrder::__Nonexhaustive => panic!("invalid BondOrder"),
+        }
+    }
+}
+
+impl From<chfl_bond_order> for BondOrder {
+    fn from(order: chfl_bond_order) -> BondOrder {
+        match order {
+            chfl_bond_order::CHFL_BOND_UNKNOWN => BondOrder::Unknown,
+            chfl_bond_order::CHFL_BOND_SINGLE => BondOrder::Single,
+            chfl_bond_order::CHFL_BOND_DOUBLE => BondOrder::Double,
+            chfl_bond_order::CHFL_BOND_TRIPLE => BondOrder::Triple,
+            chfl_bond_order::CHFL_BOND_QUADRUPLE => BondOrder::Quadruple,
+            chfl_bond_order::CHFL_BOND_QINTUPLET => BondOrder::Qintuplet,
+            chfl_bond_order::CHFL_BOND_AMIDE => BondOrder::Amide,
+            chfl_bond_order::CHFL_BOND_AROMATIC => BondOrder::Aromatic,
+        }
+    }
+}
+
 /// A `Topology` contains the definition of all the atoms in the system, and
 /// the liaisons between the atoms (bonds, angles, dihedrals, ...). It will
 /// also contain all the residues information if it is available.
@@ -420,9 +475,11 @@ impl Topology {
 
     /// Add a bond between the atoms at indexes `i` and `j` in the topology.
     ///
+    /// The bond order is set to `BondOrder::Unknown`.
+    ///
     /// # Example
     /// ```
-    /// # use chemfiles::Topology;
+    /// # use chemfiles::{Topology, BondOrder};
     /// let mut topology = Topology::new();
     /// assert_eq!(topology.bonds_count(), 0);
     /// topology.resize(4);
@@ -430,11 +487,88 @@ impl Topology {
     /// topology.add_bond(0, 1);
     /// topology.add_bond(0, 2);
     /// assert_eq!(topology.bonds_count(), 2);
+    ///
+    /// assert_eq!(topology.bond_order(0, 1), BondOrder::Unknown);
     /// ```
     pub fn add_bond(&mut self, i: u64, j: u64) {
         unsafe {
             check_success(chfl_topology_add_bond(self.as_mut_ptr(), i, j));
         }
+    }
+
+    /// Add a bond between the atoms at indexes `i` and `j` in the topology
+    /// with the given bond `order`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, BondOrder};
+    /// let mut topology = Topology::new();
+    /// assert_eq!(topology.bonds_count(), 0);
+    /// topology.resize(2);
+    ///
+    /// topology.add_bond_with_order(0, 1, BondOrder::Double);
+    /// assert_eq!(topology.bond_order(0, 1), BondOrder::Double);
+    /// ```
+    pub fn add_bond_with_order(&mut self, i: u64, j: u64, order: BondOrder) {
+        unsafe {
+            check_success(chfl_topology_bond_with_order(
+                self.as_mut_ptr(), i, j, order.as_raw()
+            ));
+        }
+    }
+
+    /// Get the bond order for the bond between the atoms at indexes `i` and
+    /// `j`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, BondOrder};
+    /// let mut topology = Topology::new();
+    /// assert_eq!(topology.bonds_count(), 0);
+    /// topology.resize(2);
+    ///
+    /// topology.add_bond_with_order(0, 1, BondOrder::Double);
+    /// assert_eq!(topology.bond_order(0, 1), BondOrder::Double);
+    /// ```
+    pub fn bond_order(&self, i: u64, j: u64) -> BondOrder {
+        let mut order = chfl_bond_order::CHFL_BOND_UNKNOWN;
+        unsafe {
+            check_success(chfl_topology_bond_order(
+                self.as_ptr(), i, j, &mut order
+            ));
+        }
+        return order.into()
+    }
+
+    /// Get the bond order for all the bonds in the topology
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Topology, BondOrder};
+    /// let mut topology = Topology::new();
+    /// assert_eq!(topology.bonds_count(), 0);
+    /// topology.resize(3);
+    ///
+    /// topology.add_bond_with_order(0, 1, BondOrder::Double);
+    /// topology.add_bond_with_order(0, 2, BondOrder::Single);
+    ///
+    /// assert_eq!(topology.bond_orders(), &[BondOrder::Double, BondOrder::Single]);
+    /// ```
+    pub fn bond_orders(&self) -> Vec<BondOrder> {
+        let count = self.bonds_count();
+        #[allow(cast_possible_truncation)]
+        let size = count as usize;
+        let mut bonds = vec![BondOrder::Unknown; size];
+        unsafe {
+            check_success(chfl_topology_bond_orders(
+                self.as_ptr(),
+                // Casting BondOrder to chfl_bond_order is safe, as they are
+                // both `repr(C)` enums with the same values.
+                bonds.as_mut_ptr() as *mut _,
+                count
+            ));
+        }
+        return bonds;
     }
 
     /// Remove any existing bond between the atoms at indexes `i` and `j` in
@@ -682,13 +816,18 @@ mod test {
 
         topology.add_bond(0, 1);
         topology.add_bond(9, 2);
-        topology.add_bond(3, 7);
+        topology.add_bond_with_order(3, 7, BondOrder::Aromatic);
         assert_eq!(topology.bonds_count(), 3);
 
         assert_eq!(topology.bonds(), vec![[0, 1], [2, 9], [3, 7]]);
+        let expected = vec![BondOrder::Unknown, BondOrder::Unknown, BondOrder::Aromatic];
+        assert_eq!(topology.bond_orders(), expected);
+
+        assert_eq!(topology.bond_order(0, 1), BondOrder::Unknown);
+        assert_eq!(topology.bond_order(3, 7), BondOrder::Aromatic);
 
         topology.remove_bond(3, 7);
-        // Removing unexisting bond is OK
+        // Removing unexisting bond is OK if both indexes are in bounds
         topology.remove_bond(8, 7);
         assert_eq!(topology.bonds_count(), 2);
     }
@@ -698,8 +837,23 @@ mod test {
     fn out_of_bounds_bonds() {
         let mut topology = Topology::new();
         topology.resize(12);
-        // Adding a bond between non-existing atoms is Ok
         topology.add_bond(300, 7);
+    }
+
+    #[test]
+    #[should_panic]
+    fn out_of_bounds_remove_bond() {
+        let mut topology = Topology::new();
+        topology.resize(12);
+        topology.remove_bond(300, 7);
+    }
+
+    #[test]
+    #[should_panic]
+    fn out_of_bounds_bonds_with_order() {
+        let mut topology = Topology::new();
+        topology.resize(12);
+        topology.add_bond_with_order(300, 7, BondOrder::Unknown);
     }
 
     #[test]

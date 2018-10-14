@@ -65,6 +65,7 @@ pub use residue::ResidueRef;
 mod topology;
 pub use topology::Topology;
 pub use topology::TopologyRef;
+pub use topology::BondOrder;
 
 mod frame;
 pub use frame::Frame;
