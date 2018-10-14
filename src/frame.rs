@@ -252,11 +252,9 @@ impl Frame {
     ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Frame, Atom};
+    /// # use chemfiles::Frame;
     /// let mut frame = Frame::new();
-    /// for i in 0..5 {
-    ///    frame.add_atom(&Atom::new("C"), [0.0; 3], None);
-    /// }
+    /// frame.resize(5);
     ///
     /// frame.add_bond(0, 1);
     /// frame.add_bond(3, 1);
@@ -335,7 +333,7 @@ impl Frame {
     /// let mut frame = Frame::new();
     /// frame.add_atom(&Atom::new("A"), [1.0, 0.0, 0.0], None);
     /// frame.add_atom(&Atom::new("B"), [0.0, 0.0, 0.0], None);
-    /// frame.add_atom(&Atom::new("B"), [0.0, 1.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("C"), [0.0, 1.0, 0.0], None);
     ///
     /// assert_eq!(frame.angle(0, 1, 2), f64::consts::PI / 2.0);
     /// ```
@@ -360,8 +358,8 @@ impl Frame {
     /// let mut frame = Frame::new();
     /// frame.add_atom(&Atom::new("A"), [1.0, 0.0, 0.0], None);
     /// frame.add_atom(&Atom::new("B"), [0.0, 0.0, 0.0], None);
-    /// frame.add_atom(&Atom::new("B"), [0.0, 1.0, 0.0], None);
-    /// frame.add_atom(&Atom::new("B"), [0.0, 1.0, 1.0], None);
+    /// frame.add_atom(&Atom::new("C"), [0.0, 1.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("D"), [0.0, 1.0, 1.0], None);
     ///
     /// assert_eq!(frame.dihedral(0, 1, 2, 3), f64::consts::PI / 2.0);
     /// ```
@@ -393,8 +391,8 @@ impl Frame {
     /// let mut frame = Frame::new();
     /// frame.add_atom(&Atom::new("A"), [0.0, 0.0, 0.0], None);
     /// frame.add_atom(&Atom::new("B"), [0.0, 0.0, 2.0], None);
-    /// frame.add_atom(&Atom::new("B"), [1.0, 0.0, 0.0], None);
-    /// frame.add_atom(&Atom::new("B"), [0.0, 1.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("C"), [1.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("D"), [0.0, 1.0, 0.0], None);
     ///
     /// assert_eq!(frame.out_of_plane(0, 1, 2, 3), 2.0);
     /// ```
