@@ -8,7 +8,7 @@ use chemfiles_sys::*;
 use strings;
 use errors::{check_not_null, check_success, check, Error};
 use super::{Atom, AtomRef, AtomMut};
-use super::{Topology, TopologyRef, Residue};
+use super::{Topology, TopologyRef, Residue, BondOrder};
 use super::{UnitCell, UnitCellRef, UnitCellMut};
 use property::{Property, RawProperty, PropertiesIter};
 
@@ -224,24 +224,47 @@ impl Frame {
 
     /// Add a bond between the atoms at indexes `i` and `j` in the frame.
     ///
+    /// The bond order is set to `BondOrder::Unknown`.
+    ///
     /// # Example
     /// ```
-    /// # use chemfiles::{Frame, Atom};
+    /// # use chemfiles::{Frame, BondOrder};
     /// let mut frame = Frame::new();
-    /// for i in 0..5 {
-    ///    frame.add_atom(&Atom::new("C"), [0.0; 3], None);
-    /// }
+    /// assert_eq!(frame.topology().bonds_count(), 0);
+    /// frame.resize(5);
     ///
     /// frame.add_bond(0, 1);
     /// frame.add_bond(3, 1);
     /// frame.add_bond(2, 4);
+    /// assert_eq!(frame.topology().bonds_count(), 3);
     ///
-    /// let bonds = frame.topology().bonds();
-    /// assert_eq!(bonds, vec![[0, 1], [1, 3], [2, 4]]);
+    /// assert_eq!(frame.topology().bond_order(0, 1), BondOrder::Unknown);
+    /// assert_eq!(frame.topology().bonds(), vec![[0, 1], [1, 3], [2, 4]]);
     /// ```
-    pub fn add_bond(&mut self, i: usize, j: usize) {
+    pub fn add_bond(&mut self, i: u64, j: u64) {
         unsafe {
-            check_success(chfl_frame_add_bond(self.as_mut_ptr(), i as u64, j as u64));
+            check_success(chfl_frame_add_bond(self.as_mut_ptr(), i, j));
+        }
+    }
+
+    /// Add a bond between the atoms at indexes `i` and `j` in the frame
+    /// with the given bond `order`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Frame, BondOrder};
+    /// let mut frame = Frame::new();
+    /// assert_eq!(frame.topology().bonds_count(), 0);
+    /// frame.resize(2);
+    ///
+    /// frame.add_bond_with_order(0, 1, BondOrder::Double);
+    /// assert_eq!(frame.topology().bond_order(0, 1), BondOrder::Double);
+    /// ```
+    pub fn add_bond_with_order(&mut self, i: u64, j: u64, order: BondOrder) {
+        unsafe {
+            check_success(chfl_frame_bond_with_order(
+                self.as_mut_ptr(), i, j, order.as_raw()
+            ));
         }
     }
 
@@ -967,26 +990,49 @@ mod test {
     #[test]
     fn bonds() {
         let mut frame = Frame::new();
-        frame.resize(3);
+        frame.resize(12);
+        assert_eq!(frame.topology().bonds_count(), 0);
+
         frame.add_bond(0, 1);
-        frame.add_bond(2, 1);
+        frame.add_bond(9, 2);
+        frame.add_bond_with_order(3, 7, BondOrder::Aromatic);
+        assert_eq!(frame.topology().bonds_count(), 3);
 
-        assert_eq!(frame.topology().bonds(), vec![[0, 1], [1, 2]]);
+        assert_eq!(frame.topology().bonds(), vec![[0, 1], [2, 9], [3, 7]]);
+        let expected = vec![BondOrder::Unknown, BondOrder::Unknown, BondOrder::Aromatic];
+        assert_eq!(frame.topology().bond_orders(), expected);
 
-        frame.remove_bond(2, 1);
-        // Various useless operations to make sure they don't crash
-        frame.remove_bond(2, 1);
-        frame.remove_bond(2, 0);
+        assert_eq!(frame.topology().bond_order(0, 1), BondOrder::Unknown);
+        assert_eq!(frame.topology().bond_order(3, 7), BondOrder::Aromatic);
 
-        assert_eq!(frame.topology().bonds(), vec![[0, 1]]);
+        frame.remove_bond(3, 7);
+        // Removing unexisting bond is OK if both indexes are in bounds
+        frame.remove_bond(8, 7);
+        assert_eq!(frame.topology().bonds_count(), 2);
     }
 
     #[test]
     #[should_panic]
     fn out_of_bounds_bonds() {
         let mut frame = Frame::new();
-        frame.resize(3);
-        frame.add_bond(100, 2);
+        frame.resize(12);
+        frame.add_bond(300, 7);
+    }
+
+    #[test]
+    #[should_panic]
+    fn out_of_bounds_remove_bond() {
+        let mut frame = Frame::new();
+        frame.resize(12);
+        frame.remove_bond(300, 7);
+    }
+
+    #[test]
+    #[should_panic]
+    fn out_of_bounds_bonds_with_order() {
+        let mut frame = Frame::new();
+        frame.resize(12);
+        frame.add_bond_with_order(300, 7, BondOrder::Unknown);
     }
 
     #[test]
