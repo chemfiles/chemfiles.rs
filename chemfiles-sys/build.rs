@@ -54,6 +54,6 @@ fn is_excluded_lib(name: &str) -> bool {
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-fn is_excluded_lib(name: &str) -> bool {
+fn is_excluded_lib(_: &str) -> bool {
     false
 }
