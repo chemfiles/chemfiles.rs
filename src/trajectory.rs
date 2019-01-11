@@ -287,8 +287,7 @@ impl Trajectory {
 impl Drop for Trajectory {
     fn drop(&mut self) {
         unsafe {
-            let status = chfl_trajectory_close(self.as_mut_ptr());
-            debug_assert_eq!(status, chfl_status::CHFL_SUCCESS);
+            let _ = chfl_trajectory_close(self.as_ptr());
         }
     }
 }
