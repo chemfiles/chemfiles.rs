@@ -28,11 +28,6 @@ impl RawProperty {
         self.handle
     }
 
-    /// Get the underlying C pointer as a mutable pointer.
-    pub fn as_mut_ptr(&mut self) -> *mut CHFL_PROPERTY {
-        self.handle
-    }
-
     fn double(value: f64) -> RawProperty {
         unsafe {
             let handle = chfl_property_double(value);
@@ -105,8 +100,7 @@ impl RawProperty {
 impl Drop for RawProperty {
     fn drop(&mut self) {
         unsafe {
-            let status = chfl_property_free(self.as_mut_ptr());
-            debug_assert_eq!(status, chfl_status::CHFL_SUCCESS);
+            let _ = chfl_free(self.as_ptr() as *const _);
         }
     }
 }

@@ -11,7 +11,7 @@
 
 #![allow(non_camel_case_types)]
 extern crate libc;
-use libc::{c_double, c_char, uint64_t};
+use libc::{c_double, c_char, uint64_t, c_void};
 
 // Manual definitions. Edit the bindgen code to make sure this matches the
 // chemfiles.h header
@@ -88,6 +88,7 @@ pub enum chfl_cellshape {
 #[link(name="chemfiles", kind="static")]
 extern "C" {
     pub fn chfl_version() -> *const c_char;
+    pub fn chfl_free(objet: *const c_void) -> c_void;
     pub fn chfl_last_error() -> *const c_char;
     pub fn chfl_clear_errors() -> chfl_status;
     pub fn chfl_set_warning_callback(callback: chfl_warning_callback) -> chfl_status;
@@ -101,7 +102,6 @@ extern "C" {
     pub fn chfl_property_get_double(property: *const CHFL_PROPERTY, value: *mut c_double) -> chfl_status;
     pub fn chfl_property_get_string(property: *const CHFL_PROPERTY, buffer: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_property_get_vector3d(property: *const CHFL_PROPERTY, value: *mut c_double) -> chfl_status;
-    pub fn chfl_property_free(property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_atom(name: *const c_char) -> *mut CHFL_ATOM;
     pub fn chfl_atom_copy(atom: *const CHFL_ATOM) -> *mut CHFL_ATOM;
     pub fn chfl_atom_from_frame(frame: *mut CHFL_FRAME, index: uint64_t) -> *mut CHFL_ATOM;
@@ -122,7 +122,6 @@ extern "C" {
     pub fn chfl_atom_list_properties(atom: *const CHFL_ATOM, names: *mut *mut c_char, count: uint64_t) -> chfl_status;
     pub fn chfl_atom_set_property(atom: *mut CHFL_ATOM, name: *const c_char, property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_atom_get_property(atom: *const CHFL_ATOM, name: *const c_char) -> *mut CHFL_PROPERTY;
-    pub fn chfl_atom_free(atom: *const CHFL_ATOM) -> chfl_status;
     pub fn chfl_residue(name: *const c_char) -> *mut CHFL_RESIDUE;
     pub fn chfl_residue_with_id(name: *const c_char, resid: uint64_t) -> *mut CHFL_RESIDUE;
     pub fn chfl_residue_from_topology(topology: *const CHFL_TOPOLOGY, i: uint64_t) -> *const CHFL_RESIDUE;
@@ -138,7 +137,6 @@ extern "C" {
     pub fn chfl_residue_list_properties(residue: *const CHFL_RESIDUE, names: *mut *mut c_char, count: uint64_t) -> chfl_status;
     pub fn chfl_residue_set_property(residue: *mut CHFL_RESIDUE, name: *const c_char, property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_residue_get_property(residue: *const CHFL_RESIDUE, name: *const c_char) -> *mut CHFL_PROPERTY;
-    pub fn chfl_residue_free(residue: *const CHFL_RESIDUE) -> chfl_status;
     pub fn chfl_topology() -> *mut CHFL_TOPOLOGY;
     pub fn chfl_topology_from_frame(frame: *const CHFL_FRAME) -> *const CHFL_TOPOLOGY;
     pub fn chfl_topology_copy(topology: *const CHFL_TOPOLOGY) -> *mut CHFL_TOPOLOGY;
@@ -162,7 +160,6 @@ extern "C" {
     pub fn chfl_topology_bond_with_order(topology: *mut CHFL_TOPOLOGY, i: uint64_t, j: uint64_t, bond_order: chfl_bond_order) -> chfl_status;
     pub fn chfl_topology_bond_orders(topology: *const CHFL_TOPOLOGY, orders: *mut chfl_bond_order, nbonds: uint64_t) -> chfl_status;
     pub fn chfl_topology_bond_order(topology: *const CHFL_TOPOLOGY, i: uint64_t, j: uint64_t, order: *mut chfl_bond_order) -> chfl_status;
-    pub fn chfl_topology_free(topology: *const CHFL_TOPOLOGY) -> chfl_status;
     pub fn chfl_cell(lengths: *const c_double) -> *mut CHFL_CELL;
     pub fn chfl_cell_triclinic(lengths: *const c_double, angles: *const c_double) -> *mut CHFL_CELL;
     pub fn chfl_cell_from_frame(frame: *mut CHFL_FRAME) -> *mut CHFL_CELL;
@@ -176,7 +173,6 @@ extern "C" {
     pub fn chfl_cell_shape(cell: *const CHFL_CELL, shape: *mut chfl_cellshape) -> chfl_status;
     pub fn chfl_cell_set_shape(cell: *mut CHFL_CELL, shape: chfl_cellshape) -> chfl_status;
     pub fn chfl_cell_wrap(cell: *const CHFL_CELL, vector: *mut c_double) -> chfl_status;
-    pub fn chfl_cell_free(cell: *const CHFL_CELL) -> chfl_status;
     pub fn chfl_frame() -> *mut CHFL_FRAME;
     pub fn chfl_frame_copy(frame: *const CHFL_FRAME) -> *mut CHFL_FRAME;
     pub fn chfl_frame_atoms_count(frame: *const CHFL_FRAME, count: *mut uint64_t) -> chfl_status;
@@ -204,7 +200,6 @@ extern "C" {
     pub fn chfl_frame_bond_with_order(frame: *mut CHFL_FRAME, i: uint64_t, j: uint64_t, bond_order: chfl_bond_order) -> chfl_status;
     pub fn chfl_frame_remove_bond(frame: *mut CHFL_FRAME, i: uint64_t, j: uint64_t) -> chfl_status;
     pub fn chfl_frame_add_residue(frame: *mut CHFL_FRAME, residue: *const CHFL_RESIDUE) -> chfl_status;
-    pub fn chfl_frame_free(frame: *const CHFL_FRAME) -> chfl_status;
     pub fn chfl_trajectory_open(path: *const c_char, mode: c_char) -> *mut CHFL_TRAJECTORY;
     pub fn chfl_trajectory_with_format(path: *const c_char, mode: c_char, format: *const c_char) -> *mut CHFL_TRAJECTORY;
     pub fn chfl_trajectory_path(trajectory: *const CHFL_TRAJECTORY, path: *mut *mut c_char) -> chfl_status;
@@ -215,12 +210,11 @@ extern "C" {
     pub fn chfl_trajectory_topology_file(trajectory: *mut CHFL_TRAJECTORY, path: *const c_char, format: *const c_char) -> chfl_status;
     pub fn chfl_trajectory_set_cell(trajectory: *mut CHFL_TRAJECTORY, cell: *const CHFL_CELL) -> chfl_status;
     pub fn chfl_trajectory_nsteps(trajectory: *mut CHFL_TRAJECTORY, nsteps: *mut uint64_t) -> chfl_status;
-    pub fn chfl_trajectory_close(trajectory: *const CHFL_TRAJECTORY) -> chfl_status;
+    pub fn chfl_trajectory_close(trajectory: *const CHFL_TRAJECTORY) -> c_void;
     pub fn chfl_selection(selection: *const c_char) -> *mut CHFL_SELECTION;
     pub fn chfl_selection_copy(selection: *const CHFL_SELECTION) -> *mut CHFL_SELECTION;
     pub fn chfl_selection_size(selection: *const CHFL_SELECTION, size: *mut uint64_t) -> chfl_status;
     pub fn chfl_selection_string(selection: *const CHFL_SELECTION, string: *mut c_char, buffsize: uint64_t) -> chfl_status;
     pub fn chfl_selection_evaluate(selection: *mut CHFL_SELECTION, frame: *const CHFL_FRAME, n_matches: *mut uint64_t) -> chfl_status;
     pub fn chfl_selection_matches(selection: *const CHFL_SELECTION, matches: *mut chfl_match, n_matches: uint64_t) -> chfl_status;
-    pub fn chfl_selection_free(selection: *const CHFL_SELECTION) -> chfl_status;
 }

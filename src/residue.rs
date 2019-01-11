@@ -305,8 +305,7 @@ impl Residue {
 impl Drop for Residue {
     fn drop(&mut self) {
         unsafe {
-            let status = chfl_residue_free(self.as_mut_ptr());
-            debug_assert_eq!(status, chfl_status::CHFL_SUCCESS);
+            let _ = chfl_free(self.as_ptr() as *const _);
         }
     }
 }

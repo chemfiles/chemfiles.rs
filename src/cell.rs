@@ -383,8 +383,7 @@ impl UnitCell {
 impl Drop for UnitCell {
     fn drop(&mut self) {
         unsafe {
-            let status = chfl_cell_free(self.as_mut_ptr());
-            debug_assert_eq!(status, chfl_status::CHFL_SUCCESS);
+            let _ = chfl_free(self.as_ptr() as *const _);
         }
     }
 }
