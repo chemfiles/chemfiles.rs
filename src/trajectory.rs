@@ -308,7 +308,14 @@ mod test {
         let filename = root.join("data").join("water.xyz");
         let mut file = Trajectory::open(filename.to_str().unwrap(), 'r').unwrap();
 
-        assert_eq!(file.path(), "src/../data/water.xyz");
+        if cfg!(target_family = "unix") {
+            assert_eq!(file.path(), "src/../data/water.xyz");
+        } else if cfg!(target_family = "windows") {
+            assert_eq!(file.path(), "src\\..\\data\\water.xyz");
+        } else {
+            panic!("please add test for this OS!");
+        }
+
         assert_eq!(file.nsteps(), Ok(100));
 
         let mut frame = Frame::new();
