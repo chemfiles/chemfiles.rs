@@ -96,10 +96,10 @@ impl Error {
 
 /// Check return value of a C function, and get the error if needed.
 pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
-    if status != chfl_status::CHFL_SUCCESS {
-        Err(Error::from(status))
-    } else {
+    if status == chfl_status::CHFL_SUCCESS {
         Ok(())
+    } else {
+        Err(Error::from(status))
     }
 }
 

@@ -18,6 +18,7 @@ pub struct Residue {
 }
 
 /// An analog to a reference to a residue (`&Residue`)
+#[allow(clippy::stutter)]
 pub struct ResidueRef<'a> {
     inner: Residue,
     marker: PhantomData<&'a Residue>
@@ -284,15 +285,15 @@ impl Residue {
             check_success(chfl_residue_properties_count(self.as_ptr(), &mut count));
         }
 
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut cnames = vec![ptr::null_mut(); size];
+        let mut c_names = vec![ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_residue_list_properties(self.as_ptr(), cnames.as_mut_ptr(), count));
+            check_success(chfl_residue_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
 
         let mut names = Vec::new();
-        for ptr in cnames {
+        for ptr in c_names {
             names.push(strings::from_c(ptr));
         }
 
