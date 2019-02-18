@@ -221,14 +221,15 @@ impl Residue {
     /// ```
     /// # use chemfiles::{Residue, Property};
     /// let mut residue = Residue::new("ALA");
-    /// residue.set("a string", Property::String("hello".into()));
+    /// residue.set("a string", "hello");
+    /// residue.set("a double", 3.2);
     ///
     /// assert_eq!(residue.get("a string"), Some(Property::String("hello".into())));
+    /// assert_eq!(residue.get("a double"), Some(Property::Double(3.2)));
     /// ```
-    #[allow(needless_pass_by_value)]  // property
-    pub fn set(&mut self, name: &str, property: Property) {
+    pub fn set(&mut self, name: &str, property: impl Into<Property>) {
         let buffer = strings::to_c(name);
-        let property = property.as_raw();
+        let property = property.into().as_raw();
         unsafe {
             check_success(chfl_residue_set_property(
                 self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
@@ -361,7 +362,7 @@ mod tests {
     fn property() {
         let mut residue = Residue::new("ALA");
 
-        residue.set("foo", Property::Double(-22.0));
+        residue.set("foo", -22.0);
         assert_eq!(residue.get("foo"), Some(Property::Double(-22.0)));
         assert_eq!(residue.get("bar"), None);
 
@@ -371,7 +372,6 @@ mod tests {
                 assert_eq!(property, Property::Double(-22.0));
             } else if name == "bar" {
                 assert_eq!(property, Property::String("here".into()));
-
             }
         }
     }
