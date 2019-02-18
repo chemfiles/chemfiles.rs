@@ -24,11 +24,10 @@
 #![deny(missing_docs)]
 #![warn(trivial_casts, unused_import_braces, variant_size_differences)]
 #![warn(unused_qualifications, unused_results)]
-// Configuration fro clippy lints
-#![allow(unknown_lints)]
-#![warn(clippy, clippy_pedantic)]
-#![allow(needless_return, redundant_field_names, use_self)]
-#![allow(missing_docs_in_private_items, or_fun_call, indexing_slicing)]
+// Configuration for clippy lints
+#![warn(clippy::all, clippy::pedantic)]
+#![allow(clippy::needless_return, clippy::redundant_field_names, clippy::use_self)]
+#![allow(clippy::missing_docs_in_private_items, clippy::or_fun_call, clippy::indexing_slicing)]
 
 // deny(warnings) in doc tests
 #![doc(test(attr(deny(warnings))))]

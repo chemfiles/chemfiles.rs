@@ -26,6 +26,7 @@ pub struct Atom {
 }
 
 /// An analog to a reference to an atom (`&Atom`)
+#[allow(clippy::stutter)]
 pub struct AtomRef<'a> {
     inner: Atom,
     marker: PhantomData<&'a Atom>
@@ -39,6 +40,7 @@ impl<'a> Deref for AtomRef<'a> {
 }
 
 /// An analog to a mutable reference to an atom (`&mut Atom`)
+#[allow(clippy::stutter)]
 pub struct AtomMut<'a> {
     inner: Atom,
     marker: PhantomData<&'a mut Atom>
@@ -398,15 +400,15 @@ impl Atom {
             check_success(chfl_atom_properties_count(self.as_ptr(), &mut count));
         }
 
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut cnames = vec![ptr::null_mut(); size];
+        let mut c_names = vec![ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_atom_list_properties(self.as_ptr(), cnames.as_mut_ptr(), count));
+            check_success(chfl_atom_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
 
         let mut names = Vec::new();
-        for ptr in cnames {
+        for ptr in c_names {
             names.push(strings::from_c(ptr));
         }
 

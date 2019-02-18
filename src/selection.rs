@@ -15,7 +15,7 @@ use frame::Frame;
 /// mostly be used like a `&[u64]`.
 pub struct Match(chfl_match);
 
-#[allow(len_without_is_empty)]
+#[allow(clippy::len_without_is_empty)]
 impl Match {
     fn zero() -> Match {
         Match(chfl_match {
@@ -33,7 +33,7 @@ impl Match {
     /// let atomic_match = Match::new(&[3, 4, 5]);
     /// assert_eq!(atomic_match.len(), 3);
     /// ```
-    #[allow(cast_possible_truncation)]
+    #[allow(clippy::cast_possible_truncation)]
     pub fn len(&self) -> usize {
         self.0.size as usize
     }
@@ -99,7 +99,7 @@ impl<'a> IntoIterator for &'a Match {
     type Item = &'a u64;
     type IntoIter = Iter<'a, u64>;
     fn into_iter(self) -> Iter<'a, u64> {
-        self.0.atoms[..self.len()].into_iter()
+        self.0.atoms[..self.len()].iter()
     }
 }
 
@@ -242,7 +242,7 @@ impl Selection {
             ))?;
         }
 
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let mut matches = vec![Match::zero(); count as usize];
         unsafe {
             check(chfl_selection_matches(

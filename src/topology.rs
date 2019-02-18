@@ -34,8 +34,8 @@ pub enum BondOrder {
 }
 
 impl BondOrder {
-    pub(crate) fn as_raw(&self) -> chfl_bond_order {
-        match *self {
+    pub(crate) fn as_raw(self) -> chfl_bond_order {
+        match self {
             BondOrder::Unknown => chfl_bond_order::CHFL_BOND_UNKNOWN,
             BondOrder::Single => chfl_bond_order::CHFL_BOND_SINGLE,
             BondOrder::Double => chfl_bond_order::CHFL_BOND_DOUBLE,
@@ -72,6 +72,7 @@ pub struct Topology {
 }
 
 /// An analog to a reference to a topology (`&Topology`)
+#[allow(clippy::stutter)]
 pub struct TopologyRef<'a> {
     inner: Topology,
     marker: PhantomData<&'a Topology>
@@ -386,7 +387,7 @@ impl Topology {
     /// ```
     pub fn bonds(&self) -> Vec<[u64; 2]> {
         let count = self.bonds_count();
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
         let mut bonds = vec![[u64::max_value(); 2]; size];
         unsafe {
@@ -410,7 +411,7 @@ impl Topology {
     /// ```
     pub fn angles(&self) -> Vec<[u64; 3]> {
         let count = self.angles_count();
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
         let mut angles = vec![[u64::max_value(); 3]; size];
         unsafe {
@@ -435,7 +436,7 @@ impl Topology {
     /// ```
     pub fn dihedrals(&self) -> Vec<[u64; 4]> {
         let count = self.dihedrals_count();
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
         let mut dihedrals = vec![[u64::max_value(); 4]; size];
         unsafe {
@@ -462,7 +463,7 @@ impl Topology {
     /// ```
     pub fn impropers(&self) -> Vec<[u64; 4]> {
         let count = self.impropers_count();
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
         let mut impropers = vec![[u64::max_value(); 4]; size];
         unsafe {
@@ -556,7 +557,7 @@ impl Topology {
     /// ```
     pub fn bond_orders(&self) -> Vec<BondOrder> {
         let count = self.bonds_count();
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
         let mut bonds = vec![BondOrder::Unknown; size];
         unsafe {

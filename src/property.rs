@@ -159,7 +159,7 @@ impl Property {
         }
     }
 
-    #[allow(needless_pass_by_value)]  // raw property
+    #[allow(clippy::needless_pass_by_value)]  // raw property
     pub(crate) fn from_raw(raw: RawProperty) -> Property {
         match raw.get_kind() {
             chfl_property_kind::CHFL_PROPERTY_BOOL => {

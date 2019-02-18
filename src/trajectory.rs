@@ -64,7 +64,7 @@ impl Trajectory {
 
         let path = strings::to_c(path);
         unsafe {
-            #[allow(cast_possible_wrap)]
+            #[allow(clippy::cast_possible_wrap)]
             let handle = chfl_trajectory_open(path.as_ptr(), mode as i8);
             Trajectory::from_ptr(handle)
         }
@@ -96,7 +96,7 @@ impl Trajectory {
         let filename = strings::to_c(filename);
         let format = strings::to_c(format.into());
         unsafe {
-            #[allow(cast_possible_wrap)]
+            #[allow(clippy::cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(
                 filename.as_ptr(), mode as i8, format.as_ptr()
             );

@@ -8,7 +8,7 @@ use errors::{check_success, check_not_null, check, Error};
 
 /// Available unit cell shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[allow(stutter)]
+#[allow(clippy::stutter)]
 pub enum CellShape {
     /// Orthorhombic cell, with the three angles equals to 90°.
     Orthorhombic,
@@ -38,7 +38,7 @@ impl From<CellShape> for chfl_cellshape {
     }
 }
 
-/// An `UnitCell` represent the box containing the UnitCells, and its periodicity.
+/// An `UnitCell` represent the box containing the atoms, and its periodicity.
 ///
 /// An unit cell is fully represented by three lengths (a, b, c); and three
 /// angles (alpha, beta, gamma). The angles are stored in degrees, and the
@@ -53,7 +53,7 @@ impl From<CellShape> for chfl_cellshape {
 /// |  0    b_y   c_y |
 /// |  0     0    c_z |
 /// ```
-#[allow(stutter)]
+#[allow(clippy::stutter)]
 pub struct UnitCell {
     handle: *mut CHFL_CELL,
 }

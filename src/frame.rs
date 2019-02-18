@@ -457,7 +457,7 @@ impl Frame {
             ));
         }
 
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
             return slice::from_raw_parts(ptr, size);
@@ -486,7 +486,7 @@ impl Frame {
         unsafe {
             check_success(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms));
         }
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
             return slice::from_raw_parts_mut(ptr, size);
@@ -516,7 +516,7 @@ impl Frame {
                 &mut natoms
             ));
         }
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
             return slice::from_raw_parts(ptr, size);
@@ -546,7 +546,7 @@ impl Frame {
         unsafe {
             check_success(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms));
         }
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
             return slice::from_raw_parts_mut(ptr, size);
@@ -817,15 +817,15 @@ impl Frame {
             check_success(chfl_frame_properties_count(self.as_ptr(), &mut count));
         }
 
-        #[allow(cast_possible_truncation)]
+        #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut cnames = vec![ptr::null_mut(); size];
+        let mut c_names = vec![ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_frame_list_properties(self.as_ptr(), cnames.as_mut_ptr(), count));
+            check_success(chfl_frame_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
 
         let mut names = Vec::new();
-        for ptr in cnames {
+        for ptr in c_names {
             names.push(strings::from_c(ptr));
         }
 
