@@ -754,14 +754,15 @@ impl Frame {
     /// ```
     /// # use chemfiles::{Frame, Property};
     /// let mut frame = Frame::new();
-    /// frame.set("a string", Property::String("hello".into()));
+    /// frame.set("a string", "hello");
+    /// frame.set("a double", 4.3);
     ///
     /// assert_eq!(frame.get("a string"), Some(Property::String("hello".into())));
+    /// assert_eq!(frame.get("a double"), Some(Property::Double(4.3)));
     /// ```
-    #[allow(needless_pass_by_value)]  // property
-    pub fn set(&mut self, name: &str, property: Property) {
+    pub fn set(&mut self, name: &str, property: impl Into<Property>) {
         let buffer = strings::to_c(name);
-        let property = property.as_raw();
+        let property = property.into().as_raw();
         unsafe {
             check_success(chfl_frame_set_property(
                 self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
@@ -1059,7 +1060,7 @@ mod test {
     #[test]
     fn property() {
         let mut frame = Frame::new();
-        frame.set("foo", Property::Double(-22.0));
+        frame.set("foo", -22.0);
         assert_eq!(frame.get("foo"), Some(Property::Double(-22.0)));
         assert_eq!(frame.get("bar"), None);
 
@@ -1069,7 +1070,6 @@ mod test {
                 assert_eq!(property, Property::Double(-22.0));
             } else if name == "bar" {
                 assert_eq!(property, Property::String("here".into()));
-
             }
         }
     }

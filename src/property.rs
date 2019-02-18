@@ -119,6 +119,36 @@ pub enum Property {
     Vector3D([f64; 3]),
 }
 
+impl From<bool> for Property {
+    fn from(value: bool) -> Self {
+        Property::Bool(value)
+    }
+}
+
+impl From<f64> for Property {
+    fn from(value: f64) -> Self {
+        Property::Double(value)
+    }
+}
+
+impl From<String> for Property {
+    fn from(value: String) -> Self {
+        Property::String(value)
+    }
+}
+
+impl<'a> From<&'a str> for Property {
+    fn from(value: &'a str) -> Self {
+        Property::String(value.into())
+    }
+}
+
+impl From<[f64; 3]> for Property {
+    fn from(value: [f64; 3]) -> Self {
+        Property::Vector3D(value)
+    }
+}
+
 impl Property {
     pub(crate) fn as_raw(&self) -> RawProperty {
         match *self {
@@ -240,6 +270,10 @@ mod tests {
             assert_eq!(raw.get_string(), Ok("test".into()));
 
             assert_eq!(Property::from_raw(raw), property);
+
+            let property = Property::String("long string ".repeat(128));
+            let raw = property.as_raw();
+            assert_eq!(raw.get_string(), Ok("long string ".repeat(128)));
         }
 
         #[test]

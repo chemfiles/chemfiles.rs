@@ -333,14 +333,15 @@ impl Atom {
     /// ```
     /// # use chemfiles::{Atom, Property};
     /// let mut atom = Atom::new("He");
-    /// atom.set("a bool value", Property::Bool(true));
+    /// atom.set("a bool", true);
+    /// atom.set("a string", "test");
     ///
-    /// assert_eq!(atom.get("a bool value"), Some(Property::Bool(true)));
+    /// assert_eq!(atom.get("a bool"), Some(Property::Bool(true)));
+    /// assert_eq!(atom.get("a string"), Some(Property::String("test".into())));
     /// ```
-    #[allow(needless_pass_by_value)]  // property
-    pub fn set(&mut self, name: &str, property: Property) {
+    pub fn set(&mut self, name: &str, property: impl Into<Property>) {
         let buffer = strings::to_c(name);
-        let property = property.as_raw();
+        let property = property.into().as_raw();
         unsafe {
             check_success(chfl_atom_set_property(
                 self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
@@ -509,7 +510,7 @@ mod test {
     fn property() {
         let mut atom = Atom::new("F");
 
-        atom.set("foo", Property::Double(-22.0));
+        atom.set("foo", -22.0);
         assert_eq!(atom.get("foo"), Some(Property::Double(-22.0)));
         assert_eq!(atom.get("bar"), None);
 
@@ -519,7 +520,6 @@ mod test {
                 assert_eq!(property, Property::Double(-22.0));
             } else if name == "bar" {
                 assert_eq!(property, Property::String("here".into()));
-
             }
         }
     }
