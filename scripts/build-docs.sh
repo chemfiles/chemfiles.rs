@@ -9,7 +9,7 @@ rm -rf gh-pages/.git
 cd gh-pages
 
 # Copy the right directory
-if [[ "$TRAVIS_TAG" != "" ]]; then
+if [[ "$TRAVIS_TAG" != "" && "${TRAVIS_OS_NAME}" == "linux" ]]; then
     mv ../target/doc/ $TRAVIS_TAG
     cp _redirect.html $TRAVIS_TAG/index.html
 else
