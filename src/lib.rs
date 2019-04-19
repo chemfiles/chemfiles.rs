@@ -83,7 +83,6 @@ pub use property::PropertiesIter;
 ///
 /// # Example
 /// ```
-/// # use chemfiles;
 /// let version = chemfiles::version();
 /// assert!(version.starts_with("0.9"));
 /// ```
