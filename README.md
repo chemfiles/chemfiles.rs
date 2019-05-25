@@ -32,14 +32,14 @@ extern crate chemfiles;
 use chemfiles::{Trajectory, Frame};
 
 fn main() {
-    let mut trajectory = Trajectory::new("filename.xyz").unwrap();
-    let mut frame = Frame::new(0).unwrap();
+    let mut trajectory = Trajectory::open("filename.xyz", 'r').unwrap();
+    let mut frame = Frame::new();
 
     trajectory.read(&mut frame).unwrap();
 
-    println!("There are {} atoms in the frame", frame.natoms().unwrap())
+    println!("There are {} atoms in the frame", frame.size());
 
-    let positions = frame.positions().unwrap();
+    let positions = frame.positions();
 
     // Do awesome things with the positions here !
 }
