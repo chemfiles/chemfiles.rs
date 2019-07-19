@@ -10,6 +10,7 @@ fn main() {
     });
 
     cfg.skip_signededness(|s| s == "chfl_warning_callback" || s == "chfl_vector3d");
+    cfg.skip_roundtrip(|s| s == "chfl_vector3d" || s == "c_bool");
 
     // ctest does not know what to do with some pointers to pointer types
     const SKIPED_FNS: &[&str] = &[
