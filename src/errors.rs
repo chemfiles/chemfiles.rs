@@ -124,7 +124,7 @@ where
 {
 }
 
-static mut LOGGING_CALLBACK: Option<*mut WarningCallback<Output = ()>> = None;
+static mut LOGGING_CALLBACK: Option<*mut dyn WarningCallback<Output = ()>> = None;
 
 extern "C" fn warning_callback(message: *const c_char) {
     unsafe {

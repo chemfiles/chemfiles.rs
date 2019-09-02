@@ -181,7 +181,7 @@ impl Property {
 /// An iterator over the properties in an atom/frame/residue
 pub struct PropertiesIter<'a> where  {
     pub(crate) names: IntoIter<String>,
-    pub(crate) getter: Box<Fn(&str) -> Property + 'a>,
+    pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }
 
 impl<'a> Iterator for PropertiesIter<'a> {
