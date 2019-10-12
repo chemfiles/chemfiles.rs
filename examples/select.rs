@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         to_remove.sort();
         to_remove.reverse();
         for i in to_remove {
-            frame.remove(i as usize);
+            frame.remove(i);
         }
 
         output.write(&frame)?;

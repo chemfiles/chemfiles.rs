@@ -216,9 +216,9 @@ impl Frame {
     /// assert_eq!(frame.size(), 2);
     /// assert_eq!(frame.atom(1).name(), "Sn");
     /// ```
-    pub fn remove(&mut self, i: usize) {
+    pub fn remove(&mut self, i: u64) {
         unsafe {
-            check_success(chfl_frame_remove(self.as_mut_ptr(), i as u64));
+            check_success(chfl_frame_remove(self.as_mut_ptr(), i));
         }
     }
 
@@ -290,10 +290,10 @@ impl Frame {
     /// let bonds = frame.topology().bonds();
     /// assert_eq!(bonds, vec![[0, 1], [1, 3]]);
     /// ```
-    pub fn remove_bond(&mut self, i: usize, j: usize) {
+    pub fn remove_bond(&mut self, i: u64, j: u64) {
         unsafe {
             check_success(chfl_frame_remove_bond(
-                self.as_mut_ptr(), i as u64, j as u64
+                self.as_mut_ptr(), i, j
             ));
         }
     }
@@ -335,11 +335,11 @@ impl Frame {
     ///
     /// assert_eq!(frame.distance(0, 1), f64::sqrt(14.0));
     /// ```
-    pub fn distance(&self, i: usize, j: usize) -> f64 {
+    pub fn distance(&self, i: u64, j: u64) -> f64 {
         let mut distance = 0.0;
         unsafe {
             check_success(chfl_frame_distance(
-                self.as_ptr(), i as u64, j as u64, &mut distance
+                self.as_ptr(), i, j, &mut distance
             ));
         }
         return distance;
@@ -360,11 +360,11 @@ impl Frame {
     ///
     /// assert_eq!(frame.angle(0, 1, 2), f64::consts::PI / 2.0);
     /// ```
-    pub fn angle(&self, i: usize, j: usize, k: usize) -> f64 {
+    pub fn angle(&self, i: u64, j: u64, k: u64) -> f64 {
         let mut angle = 0.0;
         unsafe {
             check_success(chfl_frame_angle(
-                self.as_ptr(), i as u64, j as u64, k as u64, &mut angle
+                self.as_ptr(), i, j, k, &mut angle
             ));
         }
         return angle;
@@ -386,15 +386,15 @@ impl Frame {
     ///
     /// assert_eq!(frame.dihedral(0, 1, 2, 3), f64::consts::PI / 2.0);
     /// ```
-    pub fn dihedral(&self, i: usize, j: usize, k: usize, m: usize) -> f64 {
+    pub fn dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> f64 {
         let mut dihedral = 0.0;
         unsafe {
             check_success(chfl_frame_dihedral(
                 self.as_ptr(),
-                i as u64,
-                j as u64,
-                k as u64,
-                m as u64,
+                i,
+                j,
+                k,
+                m,
                 &mut dihedral
             ));
         }
@@ -419,15 +419,15 @@ impl Frame {
     ///
     /// assert_eq!(frame.out_of_plane(0, 1, 2, 3), 2.0);
     /// ```
-    pub fn out_of_plane(&self, i: usize, j: usize, k: usize, m: usize) -> f64 {
+    pub fn out_of_plane(&self, i: u64, j: u64, k: u64, m: u64) -> f64 {
         let mut distance = 0.0;
         unsafe {
             check_success(chfl_frame_out_of_plane(
                 self.as_ptr(),
-                i as u64,
-                j as u64,
-                k as u64,
-                m as u64,
+                i,
+                j,
+                k,
+                m,
                 &mut distance
             ));
         }
