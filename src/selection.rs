@@ -179,8 +179,8 @@ impl Selection {
     /// together.
     ///
     /// This value is 1 for the 'atom' context, 2 for the 'pair' and 'bond'
-    /// context, 3 for the 'three' and 'angles' contextes and 4 for the 'four'
-    /// and 'dihedral' contextes.
+    /// context, 3 for the 'three' and 'angles' context and 4 for the 'four'
+    /// and 'dihedral' context.
     ///
     /// # Example
     /// ```

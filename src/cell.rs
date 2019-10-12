@@ -8,7 +8,6 @@ use errors::{check_success, check_not_null, check, Error};
 
 /// Available unit cell shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[allow(clippy::stutter)]
 pub enum CellShape {
     /// Orthorhombic cell, with the three angles equals to 90°.
     Orthorhombic,
@@ -53,7 +52,6 @@ impl From<CellShape> for chfl_cellshape {
 /// |  0    b_y   c_y |
 /// |  0     0    c_z |
 /// ```
-#[allow(clippy::stutter)]
 pub struct UnitCell {
     handle: *mut CHFL_CELL,
 }

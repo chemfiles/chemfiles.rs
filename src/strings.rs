@@ -1,7 +1,7 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 
-//! String convertions between C and Rust
+//! String conversions between C and Rust
 use std::ffi::{CStr, CString};
 use std::str;
 

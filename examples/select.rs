@@ -4,7 +4,7 @@
 extern crate chemfiles;
 use chemfiles::{Frame, Selection, Trajectory};
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut input = Trajectory::open("input.arc", 'r')?;
     let mut output = Trajectory::open("output.pdb", 'w')?;
 
