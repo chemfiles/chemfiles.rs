@@ -405,7 +405,7 @@ impl Frame {
     /// `k` and `m` in this frame, accounting for periodic boundary conditions.
     /// The result is expressed in angstroms.
     ///
-    /// This is the distance betweent the atom j and the ikm plane. The j atom
+    /// This is the distance between the atom j and the ikm plane. The j atom
     /// is the center of the improper dihedral angle formed by i, j, k and m.
     ///
     /// # Example

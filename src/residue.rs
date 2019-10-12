@@ -18,7 +18,6 @@ pub struct Residue {
 }
 
 /// An analog to a reference to a residue (`&Residue`)
-#[allow(clippy::stutter)]
 pub struct ResidueRef<'a> {
     inner: Residue,
     marker: PhantomData<&'a Residue>

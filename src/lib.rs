@@ -3,17 +3,17 @@
 
 //! Chemfiles is a multi-language library written in modern C++ for reading and
 //! writing from and to molecular trajectory files. These files are created by
-//! your favorite theoretical chemistry program, and contains informations about
+//! your favorite theoretical chemistry program, and contains information about
 //! atomic or residues names and positions. Some format also have additional
-//! informations, such as velocities, forces, energy, …
+//! information, such as velocities, forces, energy, …
 //!
 //! This crate expose the C API of chemfiles to Rust, and make all the
-//! functionalities accessibles. For more informations on the C++ library,
+//! functionalities accessible. For more information on the C++ library,
 //! please see its [documentation][cxx_doc]. Specifically, the following pages
 //! are worth reading:
 //!
 //! - The [overview][overview] of the classes organisation;
-//! - The lisf of [supported formats][formats];
+//! - The list of [supported formats][formats];
 //! - The documentation for the [selection language][selections];
 //!
 //! [cxx_doc]: https://chemfiles.org/chemfiles
@@ -28,6 +28,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::redundant_field_names, clippy::use_self)]
 #![allow(clippy::missing_docs_in_private_items, clippy::or_fun_call, clippy::indexing_slicing)]
+#![allow(clippy::module_name_repetitions)]
 
 // deny(warnings) in doc tests
 #![doc(test(attr(deny(warnings))))]
@@ -97,7 +98,7 @@ pub fn version() -> String {
 /// to add data from another configuration file.
 ///
 /// This function will fail if there is no file at `path`, or if the file is
-/// incorectly formatted. Data from the new configuration file will overwrite
+/// incorrectly formatted. Data from the new configuration file will overwrite
 /// any existing data.
 ///
 /// # Example

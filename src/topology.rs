@@ -72,7 +72,6 @@ pub struct Topology {
 }
 
 /// An analog to a reference to a topology (`&Topology`)
-#[allow(clippy::stutter)]
 pub struct TopologyRef<'a> {
     inner: Topology,
     marker: PhantomData<&'a Topology>

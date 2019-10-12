@@ -26,7 +26,6 @@ pub struct Atom {
 }
 
 /// An analog to a reference to an atom (`&Atom`)
-#[allow(clippy::stutter)]
 pub struct AtomRef<'a> {
     inner: Atom,
     marker: PhantomData<&'a Atom>
@@ -40,7 +39,6 @@ impl<'a> Deref for AtomRef<'a> {
 }
 
 /// An analog to a mutable reference to an atom (`&mut Atom`)
-#[allow(clippy::stutter)]
 pub struct AtomMut<'a> {
     inner: Atom,
     marker: PhantomData<&'a mut Atom>
