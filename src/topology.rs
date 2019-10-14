@@ -2,7 +2,6 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::ops::{Drop, Deref};
 use std::marker::PhantomData;
-use std::u64;
 
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error};
@@ -171,10 +170,10 @@ impl Topology {
     /// let atom = topology.atom(4);
     /// assert_eq!(atom.name(), "");
     /// ```
-    pub fn atom(&self, index: u64) -> AtomRef {
+    pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
             let handle = chfl_atom_from_topology(
-                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index
+                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64
             );
             Atom::ref_from_ptr(handle)
         }
@@ -197,10 +196,10 @@ impl Topology {
     /// topology.atom_mut(4).set_name("Fe");
     /// assert_eq!(topology.atom(4).name(), "Fe");
     /// ```
-    pub fn atom_mut(&mut self, index: u64) -> AtomMut {
+    pub fn atom_mut(&mut self, index: usize) -> AtomMut {
         unsafe {
             let handle = chfl_atom_from_topology(
-                self.as_mut_ptr(), index
+                self.as_mut_ptr(), index as u64
             );
             Atom::ref_mut_from_ptr(handle)
         }
@@ -217,12 +216,13 @@ impl Topology {
     /// topology.resize(6);
     /// assert_eq!(topology.size(), 6);
     /// ```
-    pub fn size(&self) -> u64 {
+    pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
             check_success(chfl_topology_atoms_count(self.as_ptr(), &mut size));
         }
-        return size;
+        #[allow(clippy::cast_possible_truncation)]
+        return size as usize;
     }
 
     /// Resize this topology to hold `natoms` atoms, inserting dummy atoms if
@@ -237,9 +237,9 @@ impl Topology {
     /// topology.resize(6);
     /// assert_eq!(topology.size(), 6);
     /// ```
-    pub fn resize(&mut self, natoms: u64) {
+    pub fn resize(&mut self, natoms: usize) {
         unsafe {
-            check_success(chfl_topology_resize(self.as_mut_ptr(), natoms));
+            check_success(chfl_topology_resize(self.as_mut_ptr(), natoms as u64));
         }
     }
 
@@ -277,9 +277,9 @@ impl Topology {
     /// topology.remove(7);
     /// assert_eq!(topology.size(), 8);
     /// ```
-    pub fn remove(&mut self, index: u64) {
+    pub fn remove(&mut self, index: usize) {
         unsafe {
-            check_success(chfl_topology_remove(self.as_mut_ptr(), index));
+            check_success(chfl_topology_remove(self.as_mut_ptr(), index as u64));
         }
     }
 
@@ -297,12 +297,13 @@ impl Topology {
     /// topology.add_bond(2, 3);
     /// assert_eq!(topology.bonds_count(), 3);
     /// ```
-    pub fn bonds_count(&self) -> u64 {
+    pub fn bonds_count(&self) -> usize {
         let mut count = 0;
         unsafe {
             check_success(chfl_topology_bonds_count(self.as_ptr(), &mut count));
         }
-        return count;
+        #[allow(clippy::cast_possible_truncation)]
+        return count as usize;
     }
 
     /// Get the number of angles in the topology.
@@ -319,12 +320,13 @@ impl Topology {
     /// topology.add_bond(2, 3);
     /// assert_eq!(topology.angles_count(), 2);
     /// ```
-    pub fn angles_count(&self) -> u64 {
+    pub fn angles_count(&self) -> usize {
         let mut count = 0;
         unsafe {
             check_success(chfl_topology_angles_count(self.as_ptr(), &mut count));
         }
-        return count;
+        #[allow(clippy::cast_possible_truncation)]
+        return count as usize;
     }
 
     /// Get the number of dihedral angles in the topology.
@@ -341,12 +343,13 @@ impl Topology {
     /// topology.add_bond(2, 3);
     /// assert_eq!(topology.dihedrals_count(), 1);
     /// ```
-    pub fn dihedrals_count(&self) -> u64 {
+    pub fn dihedrals_count(&self) -> usize {
         let mut count = 0;
         unsafe {
             check_success(chfl_topology_dihedrals_count(self.as_ptr(), &mut count));
         }
-        return count;
+        #[allow(clippy::cast_possible_truncation)]
+        return count as usize;
     }
 
     /// Get the number of improper dihedral angles in the topology.
@@ -363,12 +366,13 @@ impl Topology {
     /// topology.add_bond(0, 3);
     /// assert_eq!(topology.impropers_count(), 1);
     /// ```
-    pub fn impropers_count(&self) -> u64 {
+    pub fn impropers_count(&self) -> usize {
         let mut count = 0;
         unsafe {
             check_success(chfl_topology_impropers_count(self.as_ptr(), &mut count));
         }
-        return count;
+        #[allow(clippy::cast_possible_truncation)]
+        return count as usize;
     }
 
     /// Get the list of bonds in the topology.
@@ -384,15 +388,18 @@ impl Topology {
     /// topology.add_bond(2, 3);
     /// assert_eq!(topology.bonds(), vec![[0, 1], [1, 2], [2, 3]]);
     /// ```
-    pub fn bonds(&self) -> Vec<[u64; 2]> {
-        let count = self.bonds_count();
-        #[allow(clippy::cast_possible_truncation)]
-        let size = count as usize;
+    pub fn bonds(&self) -> Vec<[usize; 2]> {
+        let size = self.bonds_count();
+        let count = size as u64;
         let mut bonds = vec![[u64::max_value(); 2]; size];
         unsafe {
             check_success(chfl_topology_bonds(self.as_ptr(), bonds.as_mut_ptr(), count));
         }
-        return bonds;
+        #[allow(clippy::cast_possible_truncation)]
+        return bonds
+            .into_iter()
+            .map(|bond| [bond[0] as usize, bond[1] as usize])
+            .collect();
     }
 
     /// Get the list of angles in the topology.
@@ -408,15 +415,18 @@ impl Topology {
     /// topology.add_bond(2, 3);
     /// assert_eq!(topology.angles(), vec![[0, 1, 2], [1, 2, 3]]);
     /// ```
-    pub fn angles(&self) -> Vec<[u64; 3]> {
-        let count = self.angles_count();
-        #[allow(clippy::cast_possible_truncation)]
-        let size = count as usize;
+    pub fn angles(&self) -> Vec<[usize; 3]> {
+        let size = self.angles_count();
+        let count = size as u64;
         let mut angles = vec![[u64::max_value(); 3]; size];
         unsafe {
             check_success(chfl_topology_angles(self.as_ptr(), angles.as_mut_ptr(), count));
         }
-        return angles;
+        #[allow(clippy::cast_possible_truncation)]
+        return angles
+            .into_iter()
+            .map(|angle| [angle[0] as usize, angle[1] as usize, angle[2] as usize])
+            .collect();
     }
 
     /// Get the list of dihedral angles in the topology.
@@ -433,17 +443,27 @@ impl Topology {
     ///
     /// assert_eq!(topology.dihedrals(), vec![[0, 1, 2, 3]]);
     /// ```
-    pub fn dihedrals(&self) -> Vec<[u64; 4]> {
-        let count = self.dihedrals_count();
-        #[allow(clippy::cast_possible_truncation)]
-        let size = count as usize;
+    pub fn dihedrals(&self) -> Vec<[usize; 4]> {
+        let size = self.dihedrals_count();
+        let count = size as u64;
         let mut dihedrals = vec![[u64::max_value(); 4]; size];
         unsafe {
             check_success(chfl_topology_dihedrals(
                 self.as_ptr(), dihedrals.as_mut_ptr(), count
             ));
         }
-        return dihedrals;
+        #[allow(clippy::cast_possible_truncation)]
+        return dihedrals
+            .into_iter()
+            .map(|dihedral| {
+                [
+                    dihedral[0] as usize,
+                    dihedral[1] as usize,
+                    dihedral[2] as usize,
+                    dihedral[3] as usize,
+                ]
+            })
+            .collect();
     }
 
     /// Get the list of improper dihedral angles in the topology.
@@ -460,17 +480,27 @@ impl Topology {
     ///
     /// assert_eq!(topology.impropers(), vec![[1, 0, 2, 3]]);
     /// ```
-    pub fn impropers(&self) -> Vec<[u64; 4]> {
-        let count = self.impropers_count();
-        #[allow(clippy::cast_possible_truncation)]
-        let size = count as usize;
+    pub fn impropers(&self) -> Vec<[usize; 4]> {
+        let size = self.impropers_count();
+        let count = size as u64;
         let mut impropers = vec![[u64::max_value(); 4]; size];
         unsafe {
             check_success(chfl_topology_impropers(
                 self.as_ptr(), impropers.as_mut_ptr(), count
             ));
         }
-        return impropers;
+        #[allow(clippy::cast_possible_truncation)]
+        return impropers
+            .into_iter()
+            .map(|improper| {
+                [
+                    improper[0] as usize,
+                    improper[1] as usize,
+                    improper[2] as usize,
+                    improper[3] as usize,
+                ]
+            })
+            .collect();
     }
 
     /// Add a bond between the atoms at indexes `i` and `j` in the topology.
@@ -490,9 +520,9 @@ impl Topology {
     ///
     /// assert_eq!(topology.bond_order(0, 1), BondOrder::Unknown);
     /// ```
-    pub fn add_bond(&mut self, i: u64, j: u64) {
+    pub fn add_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_topology_add_bond(self.as_mut_ptr(), i, j));
+            check_success(chfl_topology_add_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -509,10 +539,10 @@ impl Topology {
     /// topology.add_bond_with_order(0, 1, BondOrder::Double);
     /// assert_eq!(topology.bond_order(0, 1), BondOrder::Double);
     /// ```
-    pub fn add_bond_with_order(&mut self, i: u64, j: u64, order: BondOrder) {
+    pub fn add_bond_with_order(&mut self, i: usize, j: usize, order: BondOrder) {
         unsafe {
             check_success(chfl_topology_bond_with_order(
-                self.as_mut_ptr(), i, j, order.as_raw()
+                self.as_mut_ptr(), i as u64, j as u64, order.as_raw()
             ));
         }
     }
@@ -530,11 +560,11 @@ impl Topology {
     /// topology.add_bond_with_order(0, 1, BondOrder::Double);
     /// assert_eq!(topology.bond_order(0, 1), BondOrder::Double);
     /// ```
-    pub fn bond_order(&self, i: u64, j: u64) -> BondOrder {
+    pub fn bond_order(&self, i: usize, j: usize) -> BondOrder {
         let mut order = chfl_bond_order::CHFL_BOND_UNKNOWN;
         unsafe {
             check_success(chfl_topology_bond_order(
-                self.as_ptr(), i, j, &mut order
+                self.as_ptr(), i as u64, j as u64, &mut order
             ));
         }
         return order.into()
@@ -555,9 +585,8 @@ impl Topology {
     /// assert_eq!(topology.bond_orders(), &[BondOrder::Double, BondOrder::Single]);
     /// ```
     pub fn bond_orders(&self) -> Vec<BondOrder> {
-        let count = self.bonds_count();
-        #[allow(clippy::cast_possible_truncation)]
-        let size = count as usize;
+        let size = self.bonds_count();
+        let count = size as u64;
         let mut bonds = vec![BondOrder::Unknown; size];
         unsafe {
             check_success(chfl_topology_bond_orders(
@@ -594,9 +623,9 @@ impl Topology {
     /// topology.remove_bond(0, 2);
     /// assert_eq!(topology.bonds_count(), 1);
     /// ```
-    pub fn remove_bond(&mut self, i: u64, j: u64) {
+    pub fn remove_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_topology_remove_bond(self.as_mut_ptr(), i, j));
+            check_success(chfl_topology_remove_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -616,7 +645,7 @@ impl Topology {
     /// ```
     pub fn residue(&self, index: u64) -> Option<ResidueRef> {
         unsafe {
-            let handle = chfl_residue_from_topology(self.as_ptr(), index);
+            let handle = chfl_residue_from_topology(self.as_ptr(), index as u64);
             if handle.is_null() {
                 None
             } else {
@@ -645,9 +674,9 @@ impl Topology {
     ///
     /// assert!(topology.residue_for_atom(6).is_none());
     /// ```
-    pub fn residue_for_atom(&self, index: u64) -> Option<ResidueRef> {
+    pub fn residue_for_atom(&self, index: usize) -> Option<ResidueRef> {
         let handle = unsafe {
-            chfl_residue_for_atom(self.as_ptr(), index)
+            chfl_residue_for_atom(self.as_ptr(), index as u64)
         };
         if handle.is_null() {
             None

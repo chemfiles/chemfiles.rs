@@ -2,7 +2,6 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::ops::{Drop, Deref};
 use std::marker::PhantomData;
-use std::u64;
 use std::ptr;
 
 use chemfiles_sys::*;
@@ -123,12 +122,13 @@ impl Residue {
     /// residue.add_atom(2);
     /// assert_eq!(residue.size(), 3);
     /// ```
-    pub fn size(&self) -> u64 {
+    pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
             check_success(chfl_residue_atoms_count(self.as_ptr(), &mut size));
         }
-        return size;
+        #[allow(clippy::cast_possible_truncation)]
+        return size as usize;
     }
 
     /// Get the identifier of this residue in the initial topology file.
@@ -187,9 +187,9 @@ impl Residue {
     /// residue.add_atom(56);
     /// assert_eq!(residue.size(), 1);
     /// ```
-    pub fn add_atom(&mut self, atom: u64) {
+    pub fn add_atom(&mut self, atom: usize) {
         unsafe {
-            check_success(chfl_residue_add_atom(self.as_mut_ptr(), atom));
+            check_success(chfl_residue_add_atom(self.as_mut_ptr(), atom as u64));
         }
     }
 
@@ -204,10 +204,10 @@ impl Residue {
     /// residue.add_atom(56);
     /// assert_eq!(residue.contains(56), true);
     /// ```
-    pub fn contains(&self, atom: u64) -> bool {
+    pub fn contains(&self, atom: usize) -> bool {
         let mut inside = 0;
         unsafe {
-            check_success(chfl_residue_contains(self.as_ptr(), atom, &mut inside));
+            check_success(chfl_residue_contains(self.as_ptr(), atom as u64, &mut inside));
         }
         return inside != 0;
     }

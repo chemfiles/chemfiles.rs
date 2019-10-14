@@ -95,11 +95,11 @@ impl Frame {
     /// let atom = frame.atom(0);
     /// assert_eq!(atom.name(), "Zn");
     /// ```
-    pub fn atom(&self, index: u64) -> AtomRef {
+    pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
             let handle = chfl_atom_from_frame(
                 self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
-                index
+                index as u64
             );
             Atom::ref_from_ptr(handle)
         }
@@ -122,9 +122,9 @@ impl Frame {
     /// frame.atom_mut(0).set_name("Fe");
     /// assert_eq!(frame.atom(0).name(), "Fe");
     /// ```
-    pub fn atom_mut(&mut self, index: u64) -> AtomMut {
+    pub fn atom_mut(&mut self, index: usize) -> AtomMut {
         unsafe {
-            let handle = chfl_atom_from_frame(self.as_mut_ptr(), index);
+            let handle = chfl_atom_from_frame(self.as_mut_ptr(), index as u64);
             Atom::ref_mut_from_ptr(handle)
         }
     }
@@ -140,12 +140,13 @@ impl Frame {
     /// frame.resize(67);
     /// assert_eq!(frame.size(), 67);
     /// ```
-    pub fn size(&self) -> u64 {
+    pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
             check_success(chfl_frame_atoms_count(self.as_ptr(), &mut size));
         }
-        return size;
+        #[allow(clippy::cast_possible_truncation)]
+        return size as usize;
     }
 
     /// Resize the positions and the velocities in this frame, to make space for
@@ -159,9 +160,9 @@ impl Frame {
     /// frame.resize(67);
     /// assert_eq!(frame.size(), 67);
     /// ```
-    pub fn resize(&mut self, natoms: u64) {
+    pub fn resize(&mut self, natoms: usize) {
         unsafe {
-            check_success(chfl_frame_resize(self.as_mut_ptr(), natoms));
+            check_success(chfl_frame_resize(self.as_mut_ptr(), natoms as u64));
         }
     }
 
@@ -216,9 +217,9 @@ impl Frame {
     /// assert_eq!(frame.size(), 2);
     /// assert_eq!(frame.atom(1).name(), "Sn");
     /// ```
-    pub fn remove(&mut self, i: u64) {
+    pub fn remove(&mut self, i: usize) {
         unsafe {
-            check_success(chfl_frame_remove(self.as_mut_ptr(), i));
+            check_success(chfl_frame_remove(self.as_mut_ptr(), i as u64));
         }
     }
 
@@ -241,9 +242,9 @@ impl Frame {
     /// assert_eq!(frame.topology().bond_order(0, 1), BondOrder::Unknown);
     /// assert_eq!(frame.topology().bonds(), vec![[0, 1], [1, 3], [2, 4]]);
     /// ```
-    pub fn add_bond(&mut self, i: u64, j: u64) {
+    pub fn add_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_frame_add_bond(self.as_mut_ptr(), i, j));
+            check_success(chfl_frame_add_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -260,10 +261,13 @@ impl Frame {
     /// frame.add_bond_with_order(0, 1, BondOrder::Double);
     /// assert_eq!(frame.topology().bond_order(0, 1), BondOrder::Double);
     /// ```
-    pub fn add_bond_with_order(&mut self, i: u64, j: u64, order: BondOrder) {
+    pub fn add_bond_with_order(&mut self, i: usize, j: usize, order: BondOrder) {
         unsafe {
             check_success(chfl_frame_bond_with_order(
-                self.as_mut_ptr(), i, j, order.as_raw()
+                self.as_mut_ptr(),
+                i as u64,
+                j as u64,
+                order.as_raw(),
             ));
         }
     }
@@ -290,10 +294,12 @@ impl Frame {
     /// let bonds = frame.topology().bonds();
     /// assert_eq!(bonds, vec![[0, 1], [1, 3]]);
     /// ```
-    pub fn remove_bond(&mut self, i: u64, j: u64) {
+    pub fn remove_bond(&mut self, i: usize, j: usize) {
         unsafe {
             check_success(chfl_frame_remove_bond(
-                self.as_mut_ptr(), i, j
+                self.as_mut_ptr(),
+                i as u64,
+                j as u64,
             ));
         }
     }
@@ -335,11 +341,14 @@ impl Frame {
     ///
     /// assert_eq!(frame.distance(0, 1), f64::sqrt(14.0));
     /// ```
-    pub fn distance(&self, i: u64, j: u64) -> f64 {
+    pub fn distance(&self, i: usize, j: usize) -> f64 {
         let mut distance = 0.0;
         unsafe {
             check_success(chfl_frame_distance(
-                self.as_ptr(), i, j, &mut distance
+                self.as_ptr(),
+                i as u64,
+                j as u64,
+                &mut distance,
             ));
         }
         return distance;
@@ -360,11 +369,15 @@ impl Frame {
     ///
     /// assert_eq!(frame.angle(0, 1, 2), f64::consts::PI / 2.0);
     /// ```
-    pub fn angle(&self, i: u64, j: u64, k: u64) -> f64 {
+    pub fn angle(&self, i: usize, j: usize, k: usize) -> f64 {
         let mut angle = 0.0;
         unsafe {
             check_success(chfl_frame_angle(
-                self.as_ptr(), i, j, k, &mut angle
+                self.as_ptr(),
+                i as u64,
+                j as u64,
+                k as u64,
+                &mut angle,
             ));
         }
         return angle;
@@ -386,16 +399,16 @@ impl Frame {
     ///
     /// assert_eq!(frame.dihedral(0, 1, 2, 3), f64::consts::PI / 2.0);
     /// ```
-    pub fn dihedral(&self, i: u64, j: u64, k: u64, m: u64) -> f64 {
+    pub fn dihedral(&self, i: usize, j: usize, k: usize, m: usize) -> f64 {
         let mut dihedral = 0.0;
         unsafe {
             check_success(chfl_frame_dihedral(
                 self.as_ptr(),
-                i,
-                j,
-                k,
-                m,
-                &mut dihedral
+                i as u64,
+                j as u64,
+                k as u64,
+                m as u64,
+                &mut dihedral,
             ));
         }
         return dihedral;
@@ -419,16 +432,16 @@ impl Frame {
     ///
     /// assert_eq!(frame.out_of_plane(0, 1, 2, 3), 2.0);
     /// ```
-    pub fn out_of_plane(&self, i: u64, j: u64, k: u64, m: u64) -> f64 {
+    pub fn out_of_plane(&self, i: usize, j: usize, k: usize, m: usize) -> f64 {
         let mut distance = 0.0;
         unsafe {
             check_success(chfl_frame_out_of_plane(
                 self.as_ptr(),
-                i,
-                j,
-                k,
-                m,
-                &mut distance
+                i as u64,
+                j as u64,
+                k as u64,
+                m as u64,
+                &mut distance,
             ));
         }
         return distance;
@@ -694,12 +707,13 @@ impl Frame {
     /// let frame = Frame::new();
     /// assert_eq!(frame.step(), 0);
     /// ```
-    pub fn step(&self) -> u64 {
+    pub fn step(&self) -> usize {
         let mut step = 0;
         unsafe {
             check_success(chfl_frame_step(self.as_ptr(), &mut step));
         }
-        return step;
+        #[allow(clippy::cast_possible_truncation)]
+        return step as usize;
     }
 
     /// Set this frame step to `step`.
@@ -713,9 +727,9 @@ impl Frame {
     /// frame.set_step(10);
     /// assert_eq!(frame.step(), 10);
     /// ```
-    pub fn set_step(&mut self, step: u64) {
+    pub fn set_step(&mut self, step: usize) {
         unsafe {
-            check_success(chfl_frame_set_step(self.as_mut_ptr(), step));
+            check_success(chfl_frame_set_step(self.as_mut_ptr(), step as u64));
         }
     }
 
