@@ -136,9 +136,9 @@ impl Trajectory {
     ///
     /// trajectory.read_step(10, &mut frame).unwrap();
     /// ```
-    pub fn read_step(&mut self, step: u64, frame: &mut Frame) -> Result<(), Error> {
+    pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
-            check(chfl_trajectory_read_step(self.as_mut_ptr(), step, frame.as_mut_ptr()))
+            check(chfl_trajectory_read_step(self.as_mut_ptr(), step as u64, frame.as_mut_ptr()))
         }
     }
 
@@ -258,12 +258,13 @@ impl Trajectory {
     /// ```
     // FIXME should this take &self instead? The file can be modified by this
     // function, but the format should reset the state.
-    pub fn nsteps(&mut self) -> Result<u64, Error> {
+    pub fn nsteps(&mut self) -> Result<usize, Error> {
         let mut res = 0;
         unsafe {
             check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))?;
         }
-        Ok(res)
+        #[allow(clippy::cast_possible_truncation)]
+        Ok(res as usize)
     }
 
     /// Get file path for this trajectory.

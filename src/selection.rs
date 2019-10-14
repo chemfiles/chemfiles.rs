@@ -1,7 +1,6 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::ops::{Drop, Index};
-use std::u64;
 use std::iter::IntoIterator;
 use std::slice::Iter;
 
@@ -12,18 +11,14 @@ use frame::Frame;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It can
-/// mostly be used like a `&[u64]`.
-pub struct Match(chfl_match);
+/// mostly be used like a `&[usize]`.
+pub struct Match {
+    size: usize,
+    atoms: [usize; 4],
+}
 
 #[allow(clippy::len_without_is_empty)]
 impl Match {
-    fn zero() -> Match {
-        Match(chfl_match {
-            size: 0,
-            atoms: [0; 4],
-        })
-    }
-
     /// Get the length of the Match.
     ///
     /// # Example
@@ -33,9 +28,8 @@ impl Match {
     /// let atomic_match = Match::new(&[3, 4, 5]);
     /// assert_eq!(atomic_match.len(), 3);
     /// ```
-    #[allow(clippy::cast_possible_truncation)]
     pub fn len(&self) -> usize {
-        self.0.size as usize
+        self.size
     }
 
     /// Create a new match containing the atoms in the `atoms` slice.
@@ -55,17 +49,17 @@ impl Match {
     /// assert_eq!(atomic_match[1], 4);
     /// assert_eq!(atomic_match[2], 5);
     /// ```
-    pub fn new(atoms: &[u64]) -> Match {
+    pub fn new(atoms: &[usize]) -> Match {
         assert!(atoms.len() <= 4);
         let size = atoms.len();
-        let mut matches = [u64::max_value(); 4];
+        let mut matches = [usize::max_value(); 4];
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Match(chfl_match {
-            size: size as u64,
+        Match {
+            size,
             atoms: matches,
-        })
+        }
     }
 
     /// Iterate over the atomic indexes in the match.
@@ -82,24 +76,24 @@ impl Match {
     /// assert_eq!(iter.next(), Some(&5));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter(&self) -> Iter<u64> {
-        self.0.atoms[..self.len()].iter()
+    pub fn iter(&self) -> Iter<usize> {
+        self.atoms[..self.len()].iter()
     }
 }
 
 impl Index<usize> for Match {
-    type Output = u64;
-    fn index(&self, i: usize) -> &u64 {
+    type Output = usize;
+    fn index(&self, i: usize) -> &Self::Output {
         assert!(i < self.len());
-        &self.0.atoms[i]
+        &self.atoms[i]
     }
 }
 
 impl<'a> IntoIterator for &'a Match {
-    type Item = &'a u64;
-    type IntoIter = Iter<'a, u64>;
-    fn into_iter(self) -> Iter<'a, u64> {
-        self.0.atoms[..self.len()].iter()
+    type Item = &'a usize;
+    type IntoIter = Iter<'a, usize>;
+    fn into_iter(self) -> Iter<'a, usize> {
+        self.atoms[..self.len()].iter()
     }
 }
 
@@ -188,12 +182,13 @@ impl Selection {
     /// let selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
     /// assert_eq!(selection.size(), 2);
     /// ```
-    pub fn size(&self) -> u64 {
+    pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
             check_success(chfl_selection_size(self.as_ptr(), &mut size));
         }
-        return size;
+        #[allow(clippy::cast_possible_truncation)]
+        return size as usize;
     }
 
     /// Get the selection string used to create this selection.
@@ -235,6 +230,7 @@ impl Selection {
     /// assert_eq!(matches[1][1], 1);
     /// ```
     pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>, Error> {
+        #![allow(clippy::cast_possible_truncation)]
         let mut count = 0;
         unsafe {
             check(chfl_selection_evaluate(
@@ -242,15 +238,27 @@ impl Selection {
             ))?;
         }
 
-        #[allow(clippy::cast_possible_truncation)]
-        let mut matches = vec![Match::zero(); count as usize];
+        let size = count as usize;
+        let mut chfl_matches = vec![chfl_match { size: 0, atoms: [0; 4] }; size];
         unsafe {
             check(chfl_selection_matches(
                 self.handle,
-                matches.as_mut_ptr() as *mut _,
+                chfl_matches.as_mut_ptr(),
                 count
             ))?;
         }
+        let matches = chfl_matches
+            .into_iter()
+            .map(|chfl_match| Match {
+                size: chfl_match.size as usize,
+                atoms: [
+                    chfl_match.atoms[0] as usize,
+                    chfl_match.atoms[1] as usize,
+                    chfl_match.atoms[2] as usize,
+                    chfl_match.atoms[3] as usize,
+                ],
+            })
+            .collect();
         return Ok(matches);
     }
 
@@ -276,11 +284,12 @@ impl Selection {
     /// assert_eq!(matches[0], 0);
     /// assert_eq!(matches[1], 2);
     /// ```
-    pub fn list(&mut self, frame: &Frame) -> Result<Vec<u64>, Error> {
+    pub fn list(&mut self, frame: &Frame) -> Result<Vec<usize>, Error> {
         let matches = self.evaluate(frame)?;
         let mut list = vec![0; matches.len()];
+        #[allow(clippy::cast_possible_truncation)]
         for (i, m) in matches.iter().enumerate() {
-            list[i] = m[0];
+            list[i] = m[0] as usize;
         }
         Ok(list)
     }
@@ -324,11 +333,6 @@ mod tests {
         use super::*;
 
         #[test]
-        fn size_of() {
-            assert_eq!(::std::mem::size_of::<chfl_match>(), ::std::mem::size_of::<Match>())
-        }
-
-        #[test]
         fn index() {
             let m = Match::new(&[1, 2, 3, 4]);
             assert_eq!(m[0], 1);
@@ -344,7 +348,7 @@ mod tests {
         #[test]
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
-            assert_eq!(match_.iter().cloned().collect::<Vec<u64>>(), vec![1, 2, 3, 4]);
+            assert_eq!(match_.iter().cloned().collect::<Vec<usize>>(), vec![1, 2, 3, 4]);
 
             let v = vec![1, 2, 3, 4];
             let mut i = 0;
