@@ -265,10 +265,6 @@ impl Selection {
     /// Evaluates a selection of size 1 on a given `frame`. This function
     /// returns the list of atomic indexes in the frame matching this selection.
     ///
-    /// # Panics
-    ///
-    /// If the selection size is not 1.
-    ///
     /// # Example
     /// ```
     /// # use chemfiles::{Selection, Frame, Atom};
@@ -285,6 +281,12 @@ impl Selection {
     /// assert_eq!(matches[1], 2);
     /// ```
     pub fn list(&mut self, frame: &Frame) -> Result<Vec<usize>, Error> {
+        if self.size() != 1 {
+            return Err(Error{
+                status: Status::SelectionError,
+                message: "can not call `Selection::list` on a multiple selection".into()
+            });
+        }
         let matches = self.evaluate(frame)?;
         let mut list = vec![0; matches.len()];
         #[allow(clippy::cast_possible_truncation)]
@@ -415,5 +417,9 @@ mod tests {
         let mut selection = Selection::new("name H").unwrap();
         let res = selection.list(&frame).unwrap();
         assert_eq!(res, vec![0, 3]);
+
+        // Using it with a multiple selection
+        let mut selection = Selection::new("pairs: name(#1) H").unwrap();
+        assert!(selection.list(&frame).is_err());
     }
 }
