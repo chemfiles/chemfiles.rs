@@ -9,8 +9,7 @@ fn main() {
         ty.to_string()
     });
 
-    cfg.skip_signededness(|s| s == "chfl_warning_callback" || s == "chfl_vector3d");
-    cfg.skip_roundtrip(|s| s == "chfl_vector3d" || s == "c_bool");
+    cfg.skip_roundtrip(|s| s == "chfl_vector3d" || s == "c_bool" || s == "chfl_warning_callback");
 
     // ctest does not know what to do with some pointers to pointer types
     const SKIPED_FNS: &[&str] = &[
