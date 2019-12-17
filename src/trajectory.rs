@@ -301,6 +301,8 @@ mod test {
     use std::path::Path;
     use std::io::Read;
 
+    use approx::assert_ulps_eq;
+
     use {Atom, Frame, Topology, UnitCell};
 
     #[test]
@@ -323,12 +325,12 @@ mod test {
         assert!(file.read(&mut frame).is_ok());
 
         assert_eq!(frame.size(), 297);
-
-        {
-            let positions = frame.positions();
-            assert_eq!(positions[0], [0.417219, 8.303366, 11.737172]);
-            assert_eq!(positions[124], [5.099554, -0.045104, 14.153846]);
-        }
+        assert_ulps_eq!(frame.positions()[0][0], 0.417219);
+        assert_ulps_eq!(frame.positions()[0][1], 8.303366);
+        assert_ulps_eq!(frame.positions()[0][2], 11.737172);
+        assert_ulps_eq!(frame.positions()[124][0], 5.099554);
+        assert_ulps_eq!(frame.positions()[124][1], -0.045104);
+        assert_ulps_eq!(frame.positions()[124][2], 14.153846);
 
         assert_eq!(frame.atom(0).name(), "O");
 
@@ -337,11 +339,13 @@ mod test {
         let cell = frame.cell().clone();
         assert_eq!(cell.lengths(), [30.0, 30.0, 30.0]);
 
-        {
-            let positions = frame.positions();
-            assert_eq!(positions[0], [0.761277, 8.106125, 10.622949]);
-            assert_eq!(positions[124], [5.13242, 0.079862, 14.194161]);
-        }
+
+        assert_ulps_eq!(frame.positions()[0][0], 0.761277);
+        assert_ulps_eq!(frame.positions()[0][1], 8.106125);
+        assert_ulps_eq!(frame.positions()[0][2], 10.622949);
+        assert_ulps_eq!(frame.positions()[124][0], 5.13242);
+        assert_ulps_eq!(frame.positions()[124][1], 0.079862);
+        assert_ulps_eq!(frame.positions()[124][2], 14.194161);
 
         {
             let topology = frame.topology();
@@ -407,10 +411,10 @@ mod test {
 
         let expected_content = "4
 Written by the chemfiles library
-X 1 2 3
-X 1 2 3
-X 1 2 3
-X 1 2 3".lines().collect::<Vec<_>>();
+X 1.0 2.0 3.0
+X 1.0 2.0 3.0
+X 1.0 2.0 3.0
+X 1.0 2.0 3.0".lines().collect::<Vec<_>>();
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();
