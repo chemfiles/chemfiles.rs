@@ -411,10 +411,10 @@ mod test {
 
         let expected_content = "4
 Written by the chemfiles library
-X 1.0 2.0 3.0
-X 1.0 2.0 3.0
-X 1.0 2.0 3.0
-X 1.0 2.0 3.0".lines().collect::<Vec<_>>();
+X 1 2 3
+X 1 2 3
+X 1 2 3
+X 1 2 3".lines().collect::<Vec<_>>();
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();

@@ -465,9 +465,9 @@ mod test {
         let cell = UnitCell::triclinic([1.0, 2.0, 3.0], [80.0, 90.0, 100.0]);
         assert_eq!(cell.shape(), CellShape::Triclinic);
 
-        let mut cell = UnitCell::new([0.0, 0.0, 0.0]);
+        let mut cell = UnitCell::new([10.0, 10.0, 10.0]);
         assert_eq!(cell.shape(), CellShape::Orthorhombic);
-        cell.set_shape(CellShape::Infinite).unwrap();
-        assert_eq!(cell.shape(), CellShape::Infinite);
+        cell.set_shape(CellShape::Triclinic).unwrap();
+        assert_eq!(cell.shape(), CellShape::Triclinic);
     }
 }
