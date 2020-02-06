@@ -15,7 +15,7 @@ exclude = ["data/*"]
 name = "chemfiles"
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.9.2"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.9.3"}
 libc = "0.2"
 
 [dev-dependencies]
