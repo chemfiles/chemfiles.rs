@@ -5,6 +5,7 @@ effectivelly used in the chemfiles binding.
 """
 import os
 import sys
+import re
 
 ERROR = False
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -33,25 +34,27 @@ def functions_list():
     return functions
 
 
-def read_all_source():
-    source = ""
+def read_all_binding_functions():
+    binding_functions = set()
     for (dirpath, _, pathes) in os.walk(os.path.join(ROOT, "src")):
         for path in pathes:
             with open(os.path.join(ROOT, dirpath, path)) as fd:
-                source += fd.read()
-    return source
+                # https://doc.rust-lang.org/nightly/reference/identifiers.html
+                file_functions = re.findall(r"(chfl_[a-z A-Z 0-9 _]*)\(", fd.read())
+                binding_functions.update(file_functions)
+    return binding_functions
 
 
-def check_functions(functions, source):
+def check_functions(functions, binding_functions):
     for function in functions:
-        if function not in source:
+        if function not in binding_functions:
             error("Missing: " + function)
 
 
 if __name__ == '__main__':
     functions = functions_list()
-    source = read_all_source()
-    check_functions(functions, source)
+    binding_functions = read_all_binding_functions()
+    check_functions(functions, binding_functions)
 
     if ERROR:
         sys.exit(1)
