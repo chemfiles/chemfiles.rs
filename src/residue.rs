@@ -212,6 +212,32 @@ impl Residue {
         return inside != 0;
     }
 
+    /// Get the list of atoms of this residue.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Residue;
+    /// let mut residue = Residue::new("water");
+    /// assert_eq!(residue.atoms(), vec![]);
+    ///
+    /// residue.add_atom(56);
+    /// assert_eq!(residue.atoms(), vec![56]);
+    /// ```
+    pub fn atoms(&self) -> Vec<usize> {
+        let size = self.size();
+        let count = size as u64;
+        let mut indices = vec![u64::max_value(); size];
+        unsafe {
+            check_success(chfl_residue_atoms(
+                self.as_ptr(),
+                indices.as_mut_ptr(),
+                count,
+            ));
+        }
+        #[allow(clippy::cast_possible_truncation)]
+        return indices.into_iter().map(|idx| idx as usize).collect();
+    }
+
     /// Add a new `property` with the given `name` to this residue.
     ///
     /// If a property with the same name already exists, this function override
@@ -356,6 +382,8 @@ mod tests {
 
         assert_eq!(residue.contains(3), true);
         assert_eq!(residue.contains(5), false);
+
+        assert_eq!(residue.atoms(), vec![0, 3, 45]);
     }
 
     #[test]
