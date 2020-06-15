@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
 Check that all the functions defined in the chemfiles-sys crate are
-effectivelly used in the chemfiles binding.
+effectively used in the chemfiles binding.
 """
 import os
 import sys
 import re
 
 ERROR = False
-ROOT = os.path.join(os.path.dirname(__file__), "..")
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
 
 def error(message):
@@ -36,8 +36,8 @@ def functions_list():
 
 def read_all_binding_functions():
     binding_functions = set()
-    for (dirpath, _, pathes) in os.walk(os.path.join(ROOT, "src")):
-        for path in pathes:
+    for (dirpath, _, paths) in os.walk(os.path.join(ROOT, "src")):
+        for path in paths:
             with open(os.path.join(ROOT, dirpath, path)) as fd:
                 # https://doc.rust-lang.org/nightly/reference/identifiers.html
                 file_functions = re.findall(r"(chfl_[a-z A-Z 0-9 _]*)\(", fd.read())
