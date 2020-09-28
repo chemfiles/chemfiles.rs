@@ -85,7 +85,7 @@ pub use property::PropertiesIter;
 /// # Example
 /// ```
 /// let version = chemfiles::version();
-/// assert!(version.starts_with("0.9"));
+/// assert!(version.starts_with("0.10"));
 /// ```
 pub fn version() -> String {
     unsafe { strings::from_c(chfl_version()) }
@@ -121,6 +121,6 @@ mod tests {
     #[test]
     fn version() {
         assert!(::version().len() > 0);
-        assert!(::version().starts_with("0.9"));
+        assert!(::version().starts_with("0.10"));
     }
 }

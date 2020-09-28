@@ -277,11 +277,9 @@ impl Trajectory {
     /// assert_eq!(trajectory.path(), "water.xyz");
     /// ```
     pub fn path(&self) -> String {
-        let mut path = ::std::ptr::null_mut();
-        unsafe {
-            check_success(chfl_trajectory_path(self.as_ptr(), &mut path));
-        }
-        return strings::from_c(path);
+        let get_string = |ptr, len| unsafe { chfl_trajectory_path(self.as_ptr(), ptr, len) };
+        let path = strings::call_autogrow_buffer(1024, get_string).expect("failed to get path string");
+        return strings::from_c(path.as_ptr());
     }
 }
 
@@ -357,8 +355,8 @@ mod test {
         {
             let topology = frame.topology();
             assert_eq!(topology.size(), 297);
-            assert_eq!(topology.bonds_count(), 181);
-            assert_eq!(topology.angles_count(), 87);
+            assert_eq!(topology.bonds_count(), 180);
+            assert_eq!(topology.angles_count(), 84);
         }
 
         let mut topology = Topology::new();
@@ -410,7 +408,7 @@ mod test {
         write_file(filename);
 
         let expected_content = "4
-Written by the chemfiles library
+Properties=species:S:1:pos:R:3
 X 1 2 3
 X 1 2 3
 X 1 2 3

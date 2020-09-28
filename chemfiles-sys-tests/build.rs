@@ -23,7 +23,6 @@ fn main() {
         "chfl_frame_list_properties",
         "chfl_residue_list_properties",
         "chfl_atom_list_properties",
-        "chfl_trajectory_path",
     ];
     cfg.skip_fn(|name| SKIPED_FNS.contains(&name));
 
