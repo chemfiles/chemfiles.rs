@@ -1,11 +1,5 @@
-// Chemfiles.jl, a modern library for chemistry file reading and writing
+// Chemfiles.rs, a modern library for chemistry file reading and writing
 // Copyright (C) Guillaume Fraux and contributors -- BSD license
-//
-// ========================================================================= //
-//                       !!!! AUTO-GENERATED FILE !!!!
-// Do not edit. See the bindgen repository for the generation code
-//                   https://github.com/chemfiles/bindgen
-// ========================================================================= //
 
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
@@ -202,7 +196,7 @@ extern "C" {
     pub fn chfl_frame_add_residue(frame: *mut CHFL_FRAME, residue: *const CHFL_RESIDUE) -> chfl_status;
     pub fn chfl_trajectory_open(path: *const c_char, mode: c_char) -> *mut CHFL_TRAJECTORY;
     pub fn chfl_trajectory_with_format(path: *const c_char, mode: c_char, format: *const c_char) -> *mut CHFL_TRAJECTORY;
-    pub fn chfl_trajectory_path(trajectory: *const CHFL_TRAJECTORY, path: *mut *mut c_char) -> chfl_status;
+    pub fn chfl_trajectory_path(trajectory: *const CHFL_TRAJECTORY, path: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_trajectory_read(trajectory: *mut CHFL_TRAJECTORY, frame: *mut CHFL_FRAME) -> chfl_status;
     pub fn chfl_trajectory_read_step(trajectory: *mut CHFL_TRAJECTORY, step: u64, frame: *mut CHFL_FRAME) -> chfl_status;
     pub fn chfl_trajectory_write(trajectory: *mut CHFL_TRAJECTORY, frame: *const CHFL_FRAME) -> chfl_status;
