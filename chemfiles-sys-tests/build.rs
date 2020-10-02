@@ -17,6 +17,7 @@ fn main() {
         "chfl_topology_angles",
         "chfl_topology_dihedrals",
         "chfl_cell_matrix",
+        "chfl_cell_from_matrix",
         "chfl_frame_positions",
         "chfl_frame_velocities",
         "chfl_topology_impropers",

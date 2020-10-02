@@ -124,3 +124,10 @@ mod tests {
         assert!(::version().starts_with("0.10"));
     }
 }
+
+#[cfg(test)]
+fn assert_vector3d_eq(lhs: &[f64; 3], rhs: &[f64; 3], eps: f64) {
+    lhs.iter()
+        .zip(rhs)
+        .for_each(|(l, r)| assert_ulps_eq!(l, r, epsilon = eps));
+}

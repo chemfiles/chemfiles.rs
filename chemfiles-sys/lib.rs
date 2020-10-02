@@ -154,8 +154,8 @@ extern "C" {
     pub fn chfl_topology_bond_with_order(topology: *mut CHFL_TOPOLOGY, i: u64, j: u64, bond_order: chfl_bond_order) -> chfl_status;
     pub fn chfl_topology_bond_orders(topology: *const CHFL_TOPOLOGY, orders: *mut chfl_bond_order, nbonds: u64) -> chfl_status;
     pub fn chfl_topology_bond_order(topology: *const CHFL_TOPOLOGY, i: u64, j: u64, order: *mut chfl_bond_order) -> chfl_status;
-    pub fn chfl_cell(lengths: *const c_double) -> *mut CHFL_CELL;
-    pub fn chfl_cell_triclinic(lengths: *const c_double, angles: *const c_double) -> *mut CHFL_CELL;
+    pub fn chfl_cell(lengths: *const c_double, angles: *const c_double) -> *mut CHFL_CELL;
+    pub fn chfl_cell_from_matrix(matrix: *const [c_double; 3]) -> *mut CHFL_CELL;
     pub fn chfl_cell_from_frame(frame: *mut CHFL_FRAME) -> *mut CHFL_CELL;
     pub fn chfl_cell_copy(cell: *const CHFL_CELL) -> *mut CHFL_CELL;
     pub fn chfl_cell_volume(cell: *const CHFL_CELL, volume: *mut c_double) -> chfl_status;
