@@ -146,6 +146,7 @@ extern "C" {
     pub fn chfl_topology_angles(topology: *const CHFL_TOPOLOGY, data: *mut [u64; 3], count: u64) -> chfl_status;
     pub fn chfl_topology_dihedrals(topology: *const CHFL_TOPOLOGY, data: *mut [u64; 4], count: u64) -> chfl_status;
     pub fn chfl_topology_impropers(topology: *const CHFL_TOPOLOGY, data: *mut [u64; 4], count: u64) -> chfl_status;
+    pub fn chfl_topology_clear_bonds(topology: *mut CHFL_TOPOLOGY) -> chfl_status;
     pub fn chfl_topology_add_bond(topology: *mut CHFL_TOPOLOGY, i: u64, j: u64) -> chfl_status;
     pub fn chfl_topology_remove_bond(topology: *mut CHFL_TOPOLOGY, i: u64, j: u64) -> chfl_status;
     pub fn chfl_topology_residues_count(topology: *const CHFL_TOPOLOGY, count: *mut u64) -> chfl_status;
@@ -182,6 +183,7 @@ extern "C" {
     pub fn chfl_frame_step(frame: *const CHFL_FRAME, step: *mut u64) -> chfl_status;
     pub fn chfl_frame_set_step(frame: *mut CHFL_FRAME, step: u64) -> chfl_status;
     pub fn chfl_frame_guess_bonds(frame: *mut CHFL_FRAME) -> chfl_status;
+    pub fn chfl_frame_clear_bonds(frame: *mut CHFL_FRAME) -> chfl_status;
     pub fn chfl_frame_distance(frame: *const CHFL_FRAME, i: u64, j: u64, distance: *mut c_double) -> chfl_status;
     pub fn chfl_frame_angle(frame: *const CHFL_FRAME, i: u64, j: u64, k: u64, angle: *mut c_double) -> chfl_status;
     pub fn chfl_frame_dihedral(frame: *const CHFL_FRAME, i: u64, j: u64, k: u64, m: u64, dihedral: *mut c_double) -> chfl_status;
