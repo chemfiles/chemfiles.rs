@@ -104,6 +104,61 @@ impl Trajectory {
         }
     }
 
+    /// Read a memory buffer as though it was a formatted file.
+    ///
+    /// The memory buffer used to store the file is given using the `data`
+    /// argument. The `format` parameter is required and should follow the
+    /// same rules as in the main `Trajectory` constructor.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Trajectory, Frame};
+    /// let aromatics = "c1ccccc1\nc1ccco1\nc1ccccn1\n";
+    /// let mut trajectory = Trajectory::memory_reader(aromatics, "SMI").unwrap();
+    /// let mut frame = Frame::new();
+    /// trajectory.read(&mut frame).unwrap();
+    /// assert_eq!(frame.size(), 6);
+    /// ```
+    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Trajectory, Error>
+    where S: Into<&'a str>,
+    {
+        let data = strings::to_c(data.into());
+        let format = strings::to_c(format.into());
+        unsafe {
+            let handle = chfl_trajectory_memory_reader(
+                data.as_ptr(), data.as_bytes().len() as u64, format.as_ptr()
+            );
+            Trajectory::from_ptr(handle)
+        }
+    }
+
+    /// Write to a memory buffer as though it was a formatted file.
+    ///
+    /// The `format` parameter should follow the same rules as in the main
+    /// `Trajectory` constructor, except that compression specification
+    /// is not supported.
+    ///
+    /// The `memory_buffer` function can be used to retrieve the data written
+    /// to memory of the `Trajectory`.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Trajectory;
+    /// let trajectory_memory = Trajectory::memory_writer("SMI");
+    ///
+    /// // Binary formats typically do not support this feature
+    /// assert!(Trajectory::memory_writer("XTC").is_err());
+    /// ```
+    pub fn memory_writer<'a, S>(format: S) -> Result<Trajectory, Error>
+    where S: Into<&'a str>,
+    {
+        let format = strings::to_c(format.into());
+        unsafe {
+            let handle = chfl_trajectory_memory_writer(format.as_ptr());
+            Trajectory::from_ptr(handle)
+        }
+    }
+
     /// Read the next step of this trajectory into a `frame`.
     ///
     /// If the number of atoms in frame does not correspond to the number of atom
@@ -267,6 +322,34 @@ impl Trajectory {
         Ok(res as usize)
     }
 
+    /// Obtain the memory buffer written to by the trajectory.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Atom, BondOrder, Frame, Trajectory};
+    /// let mut trajectory_memory = Trajectory::memory_writer("SMI").unwrap();
+    ///
+    /// let mut frame = Frame::new();
+    /// frame.add_atom(&Atom::new("C"), [0.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("C"), [0.0, 0.0, 0.0], None);
+    /// frame.add_bond_with_order(0, 1, BondOrder::Single);
+    ///
+    /// trajectory_memory.write(&frame).unwrap();
+    ///
+    /// let result = trajectory_memory.memory_buffer();
+    /// assert_eq!(result.unwrap(), "CC\n");
+    /// ```
+    pub fn memory_buffer(&self) -> Result<&str, Error> {
+            let mut raw_str: *const i8 = std::ptr::null();
+            let mut strlen: u64 = 0;
+            unsafe {
+                check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut raw_str, &mut strlen))?;
+                let mem_buf = std::ffi::CStr::from_ptr(raw_str);
+                assert_eq!(mem_buf.to_bytes().len(), strlen as usize);
+                Ok(mem_buf.to_str().unwrap())
+            }
+    }
+
     /// Get file path for this trajectory.
     ///
     /// # Example
@@ -301,7 +384,7 @@ mod test {
 
     use approx::assert_ulps_eq;
 
-    use {Atom, Frame, Topology, UnitCell};
+    use {Atom, CellShape, Frame, Topology, UnitCell};
 
     #[test]
     fn read() {
@@ -420,5 +503,32 @@ X 1 2 3".lines().collect::<Vec<_>>();
 
         assert_eq!(expected_content, content.lines().collect::<Vec<_>>());
         fs::remove_file(filename).unwrap();
+    }
+
+    #[test]
+    fn memory() {
+        // formats in decreasing order of their memory buffer length to check null termination
+        for format in &["CSSR", "GRO", "XYZ"] {
+            let mut frame_write = Frame::new();
+            frame_write.add_atom(&Atom::new("H"), [1.5, 3.0, -10.0], None);
+            frame_write.add_atom(&Atom::new("O"), [2.3, -1.4, 50.0], None);
+            frame_write.add_atom(&Atom::new("H"), [-1.5, 10.0, 0.0], None);
+            let cell = UnitCell::new([10.0, 11.0, 12.5]);
+
+            let mut traj_write = Trajectory::memory_writer(*format).unwrap();
+            traj_write.set_cell(&cell);
+            traj_write.write(&frame_write).unwrap();
+
+            let traj_content = traj_write.memory_buffer().unwrap();
+            let mut traj_read = Trajectory::memory_reader(traj_content, *format).unwrap();
+            let mut frame_read = Frame::new();
+            traj_read.read(&mut frame_read).unwrap();
+
+            assert_eq!(traj_read.nsteps().unwrap(), 1);
+            assert_eq!(frame_read.cell().shape(), CellShape::Orthorhombic);
+            assert_eq!(frame_read.size(), 3);
+            assert_eq!(frame_read.atom(1).name(), "O");
+            ::assert_vector3d_eq(&frame_read.positions()[2], &[-1.5, 10.0, 0.0], 1e-4);
+        }
     }
 }
