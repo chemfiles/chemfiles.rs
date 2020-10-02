@@ -2,6 +2,7 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::ops::{Drop, Deref, DerefMut};
 use std::marker::PhantomData;
+use std::ptr;
 
 use chemfiles_sys::*;
 use errors::{check_success, check_not_null, check, Error};
@@ -159,7 +160,7 @@ impl UnitCell {
     /// ```
     pub fn new(lengths: [f64; 3]) -> UnitCell {
         unsafe {
-            let handle = chfl_cell(lengths.as_ptr());
+            let handle = chfl_cell(lengths.as_ptr(), ptr::null());
             UnitCell::from_ptr(handle)
         }
     }
@@ -192,12 +193,38 @@ impl UnitCell {
     /// let cell = UnitCell::triclinic([10.0, 10.0, 10.0], [98.0, 99.0, 90.0]);
     ///
     /// assert_eq!(cell.lengths(), [10.0, 10.0, 10.0]);
-    /// assert_eq!(cell.angles(), [98.0, 99.0, 90.0]);
+    /// assert_eq!(cell.angles()[0], 98.0);
+    /// // Rounding errors might occur due to internal representation
+    /// assert!((cell.angles()[1] - 99.0).abs() < 1e-12);
+    /// assert_eq!(cell.angles()[2], 90.0);
     /// assert_eq!(cell.shape(), CellShape::Triclinic);
     /// ```
     pub fn triclinic(lengths: [f64; 3], angles: [f64; 3]) -> UnitCell {
         unsafe {
-            let handle = chfl_cell_triclinic(lengths.as_ptr(), angles.as_ptr());
+            let handle = chfl_cell(lengths.as_ptr(), angles.as_ptr());
+            UnitCell::from_ptr(handle)
+        }
+    }
+
+    /// Create an `UnitCell` from a cell matrix. If `matrix` contains only
+    /// zeros, then an `Infinite` cell is created. If only the diagonal of the
+    /// matrix is non-zero, then the cell is `Orthorhombic`. Else a
+    /// `Triclinic` cell is created. The matrix entries should be in Angstroms.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{UnitCell, CellShape};
+    /// let cell = UnitCell::from_matrix([
+    ///     [1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]
+    /// ]);
+    ///
+    /// assert_eq!(cell.lengths(), [1.0, 2.0, 3.0]);
+    /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
+    /// assert_eq!(cell.shape(), CellShape::Orthorhombic);
+    /// ```
+    pub fn from_matrix(matrix: [[f64; 3]; 3]) -> UnitCell {
+        unsafe {
+            let handle = chfl_cell_from_matrix(matrix.as_ptr());
             UnitCell::from_ptr(handle)
         }
     }
@@ -247,7 +274,10 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     ///
     /// let cell = UnitCell::triclinic([20.0, 20.0, 20.0], [100.0, 120.0, 90.0]);
-    /// assert_eq!(cell.angles(), [100.0, 120.0, 90.0]);
+    /// assert_eq!(cell.angles()[0], 100.0);
+    /// // Rounding errors might occur due to internal representation
+    /// assert!((cell.angles()[1] - 120.0).abs() < 1e-12);
+    /// assert_eq!(cell.angles()[2], 90.0);
     /// ```
     pub fn angles(&self) -> [f64; 3] {
         let mut angles = [0.0; 3];
@@ -264,7 +294,10 @@ impl UnitCell {
     /// ```
     /// # use chemfiles::UnitCell;
     /// let mut cell = UnitCell::triclinic([20.0, 20.0, 20.0], [100.0, 120.0, 90.0]);
-    /// assert_eq!(cell.angles(), [100.0, 120.0, 90.0]);
+    /// assert_eq!(cell.angles()[0], 100.0);
+    /// // Rounding errors might occur due to internal representation
+    /// assert!((cell.angles()[1] - 120.0).abs() < 1e-12);
+    /// assert_eq!(cell.angles()[2], 90.0);
     ///
     /// cell.set_angles([90.0, 90.0, 90.0]).unwrap();
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
@@ -415,15 +448,15 @@ mod test {
     #[test]
     fn angles() {
         let mut cell = UnitCell::new([2.0, 3.0, 4.0]);
-        assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
+        crate::assert_vector3d_eq(&cell.angles(), &[90.0, 90.0, 90.0], 1e-6);
 
         cell.set_shape(CellShape::Triclinic).unwrap();
         cell.set_angles([80.0, 89.0, 100.0]).unwrap();
 
-        assert_eq!(cell.angles(), [80.0, 89.0, 100.0]);
+        crate::assert_vector3d_eq(&cell.angles(), &[80.0, 89.0, 100.0], 1e-6);
 
         let cell = UnitCell::triclinic([1., 2., 3.], [80., 90., 100.]);
-        assert_eq!(cell.angles(), [80.0, 90.0, 100.0]);
+        crate::assert_vector3d_eq(&cell.angles(), &[80.0, 90.0, 100.0], 1e-6);
     }
 
     #[test]
@@ -437,7 +470,7 @@ mod test {
         let cell = UnitCell::new([10.0, 20.0, 30.0]);
         let mut vector = [12.0, 5.2, -45.3];
         cell.wrap(&mut vector);
-        assert_eq!(vector, [2.0, 5.2, 14.700000000000003]);
+        crate::assert_vector3d_eq(&vector, &[2.0, 5.2, 14.7], 1e-6);
     }
 
     #[test]
@@ -450,6 +483,37 @@ mod test {
         for i in 0..3 {
             for j in 0..3 {
                 assert_ulps_eq!(matrix[i][j], result[i][j], epsilon = 1e-12);
+            }
+        }
+    }
+
+    #[test]
+    fn from_matrix() {
+        let cell = UnitCell::from_matrix([[10.0, 0.0, 0.0], [0.0, 21.0, 0.0], [0.0, 0.0, 32.0]]);
+        assert_eq!(cell.shape(), CellShape::Orthorhombic);
+        assert_eq!(cell.lengths(), [10.0, 21.0, 32.0]);
+
+        let result_matrix = [
+            [123.0, 4.08386, 71.7295],
+            [0.0, 233.964, 133.571],
+            [0.0, 0.0, 309.901],
+        ];
+        let cell = UnitCell::from_matrix(result_matrix);
+
+        assert_eq!(cell.shape(), CellShape::Triclinic);
+        for i in 0..3 {
+            assert_ulps_eq!(
+                cell.lengths()[i],
+                [123.0, 234.0, 345.0][i],
+                epsilon = 1e-3
+            );
+            assert_ulps_eq!(cell.angles()[i], [67.0, 78.0, 89.0][i], epsilon = 1e-3);
+        }
+
+        let matrix = cell.matrix();
+        for i in 0..3 {
+            for j in 0..3 {
+                assert_ulps_eq!(matrix[i][j], result_matrix[i][j], epsilon = 1e-12);
             }
         }
     }
