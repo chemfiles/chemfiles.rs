@@ -198,6 +198,8 @@ extern "C" {
     pub fn chfl_frame_add_residue(frame: *mut CHFL_FRAME, residue: *const CHFL_RESIDUE) -> chfl_status;
     pub fn chfl_trajectory_open(path: *const c_char, mode: c_char) -> *mut CHFL_TRAJECTORY;
     pub fn chfl_trajectory_with_format(path: *const c_char, mode: c_char, format: *const c_char) -> *mut CHFL_TRAJECTORY;
+    pub fn chfl_trajectory_memory_reader(data: *const c_char, size: u64, format: *const c_char) -> *mut CHFL_TRAJECTORY;
+    pub fn chfl_trajectory_memory_writer(format: *const c_char) -> *mut CHFL_TRAJECTORY;
     pub fn chfl_trajectory_path(trajectory: *const CHFL_TRAJECTORY, path: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_trajectory_read(trajectory: *mut CHFL_TRAJECTORY, frame: *mut CHFL_FRAME) -> chfl_status;
     pub fn chfl_trajectory_read_step(trajectory: *mut CHFL_TRAJECTORY, step: u64, frame: *mut CHFL_FRAME) -> chfl_status;
@@ -206,6 +208,7 @@ extern "C" {
     pub fn chfl_trajectory_topology_file(trajectory: *mut CHFL_TRAJECTORY, path: *const c_char, format: *const c_char) -> chfl_status;
     pub fn chfl_trajectory_set_cell(trajectory: *mut CHFL_TRAJECTORY, cell: *const CHFL_CELL) -> chfl_status;
     pub fn chfl_trajectory_nsteps(trajectory: *mut CHFL_TRAJECTORY, nsteps: *mut u64) -> chfl_status;
+    pub fn chfl_trajectory_memory_buffer(trajectory: *const CHFL_TRAJECTORY, data: *mut *const c_char, max_size: *mut u64) -> chfl_status;
     pub fn chfl_trajectory_close(trajectory: *const CHFL_TRAJECTORY) -> c_void;
     pub fn chfl_selection(selection: *const c_char) -> *mut CHFL_SELECTION;
     pub fn chfl_selection_copy(selection: *const CHFL_SELECTION) -> *mut CHFL_SELECTION;
