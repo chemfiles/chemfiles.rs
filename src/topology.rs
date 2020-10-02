@@ -503,6 +503,30 @@ impl Topology {
             .collect();
     }
 
+    /// Remove all existing bonds, angles, dihedral angles and improper
+    /// dihedral angles in the topology.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::Topology;
+    /// let mut topology = Topology::new();
+    /// assert_eq!(topology.bonds_count(), 0);
+    /// topology.resize(4);
+    /// topology.add_bond(0, 1);
+    /// topology.add_bond(0, 2);
+    /// assert_eq!(topology.bonds_count(), 2);
+    /// assert_eq!(topology.angles().len(), 1);
+    ///
+    /// topology.clear_bonds();
+    /// assert!(topology.bonds().is_empty());
+    /// assert!(topology.angles().is_empty());
+    /// ```
+    pub fn clear_bonds(&mut self) {
+        unsafe {
+            check_success(chfl_topology_clear_bonds(self.as_mut_ptr()));
+        }
+    }
+
     /// Add a bond between the atoms at indexes `i` and `j` in the topology.
     ///
     /// The bond order is set to `BondOrder::Unknown`.
@@ -858,6 +882,9 @@ mod test {
         // Removing unexisting bond is OK if both indexes are in bounds
         topology.remove_bond(8, 7);
         assert_eq!(topology.bonds_count(), 2);
+
+        topology.clear_bonds();
+        assert_eq!(topology.bonds_count(), 0);
     }
 
     #[test]
@@ -897,6 +924,9 @@ mod test {
         assert_eq!(topology.angles_count(), 2);
 
         assert_eq!(topology.angles(), vec![[0, 1, 2], [5, 3, 7]]);
+
+        topology.clear_bonds();
+        assert_eq!(topology.angles_count(), 0);
     }
 
     #[test]
@@ -914,6 +944,9 @@ mod test {
         assert_eq!(topology.dihedrals_count(), 2);
 
         assert_eq!(topology.dihedrals(), vec![[0, 1, 2, 3], [5, 4, 7, 10]]);
+
+        topology.clear_bonds();
+        assert_eq!(topology.dihedrals_count(), 0);
     }
 
     #[test]
@@ -931,6 +964,9 @@ mod test {
         assert_eq!(topology.impropers_count(), 2);
 
         assert_eq!(topology.impropers(), vec![[1, 0, 2, 3], [5, 4, 7, 8]]);
+
+        topology.clear_bonds();
+        assert_eq!(topology.impropers_count(), 0);
     }
 
     #[test]

@@ -759,6 +759,33 @@ impl Frame {
         }
     }
 
+    /// Remove all existing bonds, angles, dihedral angles and improper
+    /// dihedral angles in the topology of the frame.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Atom, Frame};
+    /// let mut frame = Frame::new();
+    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("H"), [0.0, 1.0, 0.0], None);
+    ///
+    /// frame.add_bond(0, 1);
+    /// frame.add_bond(1, 2);
+    ///
+    /// assert_eq!(frame.topology().bonds().len(), 2);
+    /// assert_eq!(frame.topology().angles().len(), 1);
+    ///
+    /// frame.clear_bonds();
+    /// assert!(frame.topology().bonds().is_empty());
+    /// assert!(frame.topology().angles().is_empty());
+    /// ```
+    pub fn clear_bonds(&mut self) {
+        unsafe {
+            check_success(chfl_frame_clear_bonds(self.as_mut_ptr()));
+        }
+    }
+
     /// Add a new `property` with the given `name` to this frame.
     ///
     /// If a property with the same name already exists, this function override
@@ -1023,6 +1050,9 @@ mod test {
         // Removing unexisting bond is OK if both indexes are in bounds
         frame.remove_bond(8, 7);
         assert_eq!(frame.topology().bonds_count(), 2);
+
+        frame.clear_bonds();
+        assert_eq!(frame.topology().bonds_count(), 0);
     }
 
     #[test]
