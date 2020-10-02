@@ -117,13 +117,13 @@ extern "C" {
     pub fn chfl_atom_set_property(atom: *mut CHFL_ATOM, name: *const c_char, property: *const CHFL_PROPERTY) -> chfl_status;
     pub fn chfl_atom_get_property(atom: *const CHFL_ATOM, name: *const c_char) -> *mut CHFL_PROPERTY;
     pub fn chfl_residue(name: *const c_char) -> *mut CHFL_RESIDUE;
-    pub fn chfl_residue_with_id(name: *const c_char, resid: u64) -> *mut CHFL_RESIDUE;
+    pub fn chfl_residue_with_id(name: *const c_char, resid: i64) -> *mut CHFL_RESIDUE;
     pub fn chfl_residue_from_topology(topology: *const CHFL_TOPOLOGY, i: u64) -> *const CHFL_RESIDUE;
     pub fn chfl_residue_for_atom(topology: *const CHFL_TOPOLOGY, i: u64) -> *const CHFL_RESIDUE;
     pub fn chfl_residue_copy(residue: *const CHFL_RESIDUE) -> *mut CHFL_RESIDUE;
     pub fn chfl_residue_atoms_count(residue: *const CHFL_RESIDUE, count: *mut u64) -> chfl_status;
     pub fn chfl_residue_atoms(residue: *const CHFL_RESIDUE, atoms: *mut u64, natoms: u64) -> chfl_status;
-    pub fn chfl_residue_id(residue: *const CHFL_RESIDUE, id: *mut u64) -> chfl_status;
+    pub fn chfl_residue_id(residue: *const CHFL_RESIDUE, id: *mut i64) -> chfl_status;
     pub fn chfl_residue_name(residue: *const CHFL_RESIDUE, name: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_residue_add_atom(residue: *mut CHFL_RESIDUE, i: u64) -> chfl_status;
     pub fn chfl_residue_contains(residue: *const CHFL_RESIDUE, i: u64, result: *mut c_bool) -> chfl_status;

@@ -101,7 +101,7 @@ impl Residue {
     /// assert_eq!(residue.name(), "ALA");
     /// assert_eq!(residue.id(), Some(67));
     /// ```
-    pub fn with_id<'a>(name: impl Into<&'a str>, id: u64) -> Residue {
+    pub fn with_id<'a>(name: impl Into<&'a str>, id: i64) -> Residue {
         let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_residue_with_id(buffer.as_ptr(), id);
@@ -139,7 +139,7 @@ impl Residue {
     /// let residue = Residue::with_id("", 42);
     /// assert_eq!(residue.id(), Some(42));
     /// ```
-    pub fn id(&self) -> Option<u64> {
+    pub fn id(&self) -> Option<i64> {
         let mut resid = 0;
         let status = unsafe {
             chfl_residue_id(self.as_ptr(), &mut resid)
@@ -368,6 +368,9 @@ mod tests {
 
         let residue = Residue::with_id("A", 42);
         assert_eq!(residue.id(), Some(42));
+
+        let residue = Residue::with_id("A", -3);
+        assert_eq!(residue.id(), Some(-3));
     }
 
     #[test]
