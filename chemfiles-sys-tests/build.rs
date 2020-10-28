@@ -1,7 +1,7 @@
-extern crate ctest;
+extern crate ctest2;
 
 fn main() {
-    let mut cfg = ctest::TestGenerator::new();
+    let mut cfg = ctest2::TestGenerator::new();
     cfg.header("chemfiles.h");
     cfg.include("../chemfiles-sys/chemfiles/include");
     cfg.include(".");
