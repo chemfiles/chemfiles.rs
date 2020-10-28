@@ -3,22 +3,19 @@
 
 //! String conversions between C and Rust
 use std::ffi::{CStr, CString};
-use std::str;
 
 use chemfiles_sys::chfl_status;
 use errors::{check, Error};
 
-/// Create a Rust string from a C string.
+/// Create a Rust string from a C string. Clones all characters in `buffer`.
 pub fn from_c(buffer: *const i8) -> String {
-    let mut res = String::new();
     unsafe {
-        let c_string = CStr::from_ptr(buffer);
-        let rust_str = str::from_utf8(c_string.to_bytes()).expect("invalid Rust string from C");
-        res.push_str(rust_str);
+        let rust_str = CStr::from_ptr(buffer)
+            .to_str()
+            .expect("Invalid Rust string from C");
+        return String::from(rust_str);
     }
-    return res;
 }
-
 
 /// Create a C string from a Rust string.
 pub fn to_c(string: &str) -> CString {
