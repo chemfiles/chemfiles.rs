@@ -79,6 +79,24 @@ pub enum chfl_cellshape {
     CHFL_CELL_INFINITE = 2,
 }
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct chfl_format_metadata {
+    pub name: *const c_char,
+    pub extension: *const c_char,
+    pub description: *const c_char,
+    pub reference: *const c_char,
+    pub read: bool,
+    pub write: bool,
+    pub memory: bool,
+    pub positions: bool,
+    pub velocities: bool,
+    pub unit_cell: bool,
+    pub atoms: bool,
+    pub bonds: bool,
+    pub residues: bool,
+}
+
 #[link(name="chemfiles", kind="static")]
 extern "C" {
     pub fn chfl_version() -> *const c_char;
@@ -216,4 +234,5 @@ extern "C" {
     pub fn chfl_selection_string(selection: *const CHFL_SELECTION, string: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_selection_evaluate(selection: *mut CHFL_SELECTION, frame: *const CHFL_FRAME, n_matches: *mut u64) -> chfl_status;
     pub fn chfl_selection_matches(selection: *const CHFL_SELECTION, matches: *mut chfl_match, n_matches: u64) -> chfl_status;
+    pub fn chfl_formats_list(metadata: *mut *mut chfl_format_metadata, count: *mut u64) -> chfl_status;
 }

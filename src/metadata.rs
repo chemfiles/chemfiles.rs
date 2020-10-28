@@ -1,0 +1,102 @@
+// Chemfiles, a modern library for chemistry file reading and writing
+// Copyright (C) 2015-2020 Guillaume Fraux -- BSD licensed
+
+use std::convert::TryInto;
+use std::ffi::CStr;
+
+use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free};
+use errors::check_success;
+
+/// `FormatMetadata` contains metdata associated with one format.
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FormatMetadata {
+    /// Name of the format.
+    pub name: &'static str,
+    /// Extension associated with the format.
+    pub extension: Option<&'static str>,
+    /// Extended, user-facing description of the format.
+    pub description: &'static str,
+    /// URL pointing to the format definition/reference.
+    pub reference: &'static str,
+    /// Is reading files in this format implemented?
+    pub read: bool,
+    /// Is writing files in this format implemented?
+    pub write: bool,
+    /// Does this format support in-memory IO?
+    pub memory: bool,
+    /// Does this format support storing atomic positions?
+    pub positions: bool,
+    /// Does this format support storing atomic velocities?
+    pub velocities: bool,
+    /// Does this format support storing unit cell information?
+    pub unit_cell: bool,
+    /// Does this format support storing atom names or types?
+    pub atoms: bool,
+    /// Does this format support storing bonds between atoms?
+    pub bonds: bool,
+    /// Does this format support storing residues?
+    pub residues: bool,
+}
+
+impl FormatMetadata {
+    pub(crate) fn from_raw(raw: &chfl_format_metadata) -> Self {
+        let str_from_ptr = |ptr| unsafe {
+            CStr::from_ptr(ptr)
+                .to_str()
+                .expect("Invalid Rust str from C")
+        };
+        let extension = if raw.extension.is_null() {
+            None
+        } else {
+            Some(str_from_ptr(raw.extension))
+        };
+        Self {
+            name: str_from_ptr(raw.name),
+            extension,
+            description: str_from_ptr(raw.description),
+            reference: str_from_ptr(raw.reference),
+            read: raw.read,
+            write: raw.write,
+            memory: raw.memory,
+            positions: raw.positions,
+            velocities: raw.velocities,
+            unit_cell: raw.unit_cell,
+            atoms: raw.atoms,
+            bonds: raw.bonds,
+            residues: raw.residues,
+        }
+    }
+}
+
+/// Get the list of formats known by chemfiles, as well as all associated metadata.
+///
+/// # Example
+/// ```
+/// let formats = chemfiles::formats_list();
+/// println!("chemfiles supports {} formats:", formats.len());
+/// for format in &formats {
+///     println!(
+///         "   {:<15} {}",
+///         format.name,
+///         format.extension.as_deref().unwrap_or("")
+///     );
+/// }
+/// ```
+#[must_use]
+pub fn formats_list() -> Vec<FormatMetadata> {
+    let mut formats = std::ptr::null_mut();
+    let mut count: u64 = 0;
+    let formats_slice = unsafe {
+        check_success(chfl_formats_list(&mut formats, &mut count));
+        std::slice::from_raw_parts(formats, count.try_into().unwrap())
+    };
+    let formats_vec = formats_slice
+        .iter()
+        .map(|fm| FormatMetadata::from_raw(fm))
+        .collect();
+    unsafe {
+        let _ = chfl_free(formats as *const _);
+    }
+    return formats_vec;
+}
