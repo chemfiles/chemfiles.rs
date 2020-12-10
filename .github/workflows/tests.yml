@@ -1,0 +1,90 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    # Check all PR
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    env:
+      KCOV_VERSION: c18c77531f3fc00440571a9a04dd33ee4fcd4c39
+    strategy:
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-18.04
+            rust-version: stable
+            rust-target: x86_64-unknown-linux-gnu
+          - name: Linux (beta rustc)
+            os: ubuntu-18.04
+            rust-version: beta
+            rust-target: x86_64-unknown-linux-gnu
+          - name: 32-bit MSVC Windows
+            os: windows-2019
+            rust-version: stable
+            rust-target: i686-pc-windows-msvc
+          - name: 64-bit MSVC Windows
+            os: windows-2019
+            rust-version: stable
+            rust-target: x86_64-pc-windows-msvc
+          # This is failing, it needs to be investigated
+          # - name: 64-bit MinGW Windows
+          #   os: windows-2019
+          #   rust-version: stable
+          #   rust-target: x86_64-pc-windows-gnu
+          - name: macOS
+            os: macos-10.15
+            rust-version: stable
+            rust-target: x86_64-apple-darwin
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: cache kcov
+        uses: actions/cache@v2
+        if: matrix.os == 'ubuntu-18.04'
+        with:
+          path: ~/kcov/
+          key: ${{ runner.os }}-kcov-${{ env.KCOV_VERSION }}
+      - name: build kcov
+        if: matrix.os == 'ubuntu-18.04'
+        run: |
+          sudo apt update
+          sudo apt install libcurl4-openssl-dev libelf-dev libdw-dev
+          if [ -f ~/kcov/bin/kcov ]; then
+              echo "Using cached kcov from ~/kcov/bin/kcov"
+          else
+              mkdir -p ~/kcov
+              cd
+              wget https://github.com/SimonKagstrom/kcov/archive/${KCOV_VERSION}.tar.gz
+              tar xzf ${KCOV_VERSION}.tar.gz && mkdir kcov-${KCOV_VERSION}/build && cd kcov-${KCOV_VERSION}/build
+              cmake -DCMAKE_INSTALL_PREFIX=$HOME/kcov ..
+              make install -j4
+          fi
+      - name: setup rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust-version }}
+          target: ${{ matrix.rust-target }}
+      - name: run tests in debug mode
+        run: cargo test --all --target ${{ matrix.rust-target }} -- --test-threads=2
+      - name: run tests in release mode
+        run: cargo test --all --release --target ${{ matrix.rust-target }} -- --test-threads=2
+      - name: run extra checks
+        run: |
+          ./scripts/check-used-functions.py
+      - name: collect coverage
+        if: matrix.os == 'ubuntu-18.04'
+        run: |
+          mkdir target/kcov
+          for test in $(find target/${{ matrix.rust-target }}/debug/deps/ -maxdepth 1 -executable -type f)
+          do
+              ~/kcov/bin/kcov --include-pattern=$(pwd)/src --exclude-pattern=target target/kcov $test
+          done
+      - name: upload coverage
+        if: matrix.os == 'ubuntu-18.04'
+        run: bash <(curl -s https://codecov.io/bash) -s target/kcov
