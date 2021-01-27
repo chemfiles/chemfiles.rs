@@ -919,7 +919,7 @@ mod test {
         assert_eq!(frame.size(), 1);
         assert_eq!(frame.atom(0).name(), "U");
 
-        let positions: &[[f64; 3]] = &[[1.0, 1.0, 2.0]];
+        let positions = &[[1.0, 1.0, 2.0]];
         assert_eq!(frame.positions(), positions);
 
         frame.add_velocities();
@@ -928,10 +928,10 @@ mod test {
         assert_eq!(frame.atom(0).name(), "U");
         assert_eq!(frame.atom(1).name(), "F");
 
-        let positions: &[[f64; 3]] = &[[1.0, 1.0, 2.0], [1.0, 1.0, 2.0]];
+        let positions = &[[1.0, 1.0, 2.0], [1.0, 1.0, 2.0]];
         assert_eq!(frame.positions(), positions);
 
-        let velocities: &[[f64; 3]] = &[[0.0, 0.0, 0.0], [4.0, 3.0, 2.0]];
+        let velocities = &[[0.0, 0.0, 0.0], [4.0, 3.0, 2.0]];
         assert_eq!(frame.velocities(), velocities);
     }
 

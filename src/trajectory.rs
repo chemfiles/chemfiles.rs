@@ -339,6 +339,7 @@ impl Trajectory {
     /// let result = trajectory_memory.memory_buffer();
     /// assert_eq!(result.unwrap(), "CC\n");
     /// ```
+    #[allow(clippy::cast_possible_truncation)]
     pub fn memory_buffer(&self) -> Result<&str, Error> {
             let mut raw_str: *const i8 = std::ptr::null();
             let mut strlen: u64 = 0;
@@ -469,11 +470,8 @@ mod test {
         let mut frame = Frame::new();
         frame.resize(4);
 
-        {
-            let positions = frame.positions_mut();
-            for i in 0..positions.len() {
-                positions[i] = [1.0, 2.0, 3.0];
-            }
+        for position in frame.positions_mut() {
+            *position = [1.0, 2.0, 3.0];
         }
 
         let mut topology = Topology::new();
@@ -515,16 +513,16 @@ X 1 2 3".lines().collect::<Vec<_>>();
             frame_write.add_atom(&Atom::new("H"), [-1.5, 10.0, 0.0], None);
             let cell = UnitCell::new([10.0, 11.0, 12.5]);
 
-            let mut traj_write = Trajectory::memory_writer(*format).unwrap();
-            traj_write.set_cell(&cell);
-            traj_write.write(&frame_write).unwrap();
+            let mut trajectory_write = Trajectory::memory_writer(*format).unwrap();
+            trajectory_write.set_cell(&cell);
+            trajectory_write.write(&frame_write).unwrap();
 
-            let traj_content = traj_write.memory_buffer().unwrap();
-            let mut traj_read = Trajectory::memory_reader(traj_content, *format).unwrap();
+            let buffer = trajectory_write.memory_buffer().unwrap();
+            let mut trajectory_read = Trajectory::memory_reader(buffer, *format).unwrap();
             let mut frame_read = Frame::new();
-            traj_read.read(&mut frame_read).unwrap();
+            trajectory_read.read(&mut frame_read).unwrap();
 
-            assert_eq!(traj_read.nsteps().unwrap(), 1);
+            assert_eq!(trajectory_read.nsteps().unwrap(), 1);
             assert_eq!(frame_read.cell().shape(), CellShape::Orthorhombic);
             assert_eq!(frame_read.size(), 3);
             assert_eq!(frame_read.atom(1).name(), "O");

@@ -353,10 +353,8 @@ mod tests {
             assert_eq!(match_.iter().cloned().collect::<Vec<usize>>(), vec![1, 2, 3, 4]);
 
             let v = vec![1, 2, 3, 4];
-            let mut i = 0;
-            for &m in &match_ {
+            for (i, &m) in match_.iter().enumerate() {
                 assert_eq!(v[i], m);
-                i += 1;
             }
         }
 
@@ -406,7 +404,7 @@ mod tests {
         let mut selection = Selection::new("angles: all").unwrap();
         let res = selection.evaluate(&frame).unwrap();
         for m in &[Match::new(&[0, 1, 2]), Match::new(&[1, 2, 3])] {
-            assert!(res.iter().find(|&r| r == m).is_some())
+            assert!(res.iter().any(|r| r == m))
         }
     }
 
