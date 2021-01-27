@@ -21,8 +21,9 @@ pub struct Error {
     pub message: String,
 }
 
-#[derive(Clone, Debug, PartialEq)]
 #[repr(C)]
+#[non_exhaustive]
+#[derive(Clone, Debug, PartialEq)]
 /// Possible causes of error in chemfiles
 pub enum Status {
     /// No error
@@ -47,8 +48,6 @@ pub enum Status {
     StdCppError = chfl_status::CHFL_CXX_ERROR as isize,
     /// The given path is not valid UTF8
     UTF8PathError,
-    #[doc(hidden)]
-    __Nonexhaustive,
 }
 
 impl From<chfl_status> for Error {
@@ -117,10 +116,10 @@ pub(crate) fn check_not_null<T>(ptr: *const T) {
     }
 }
 
-pub trait WarningCallback: RefUnwindSafe + Fn(&str) -> () {}
+pub trait WarningCallback: RefUnwindSafe + Fn(&str) {}
 impl<T> WarningCallback for T
 where
-    T: RefUnwindSafe + Fn(&str) -> (),
+    T: RefUnwindSafe + Fn(&str),
 {
 }
 
@@ -177,7 +176,6 @@ impl error::Error for Error {
             Status::ConfigurationError => "Error in configuration files",
             Status::OutOfBounds => "Out of bounds indexing",
             Status::PropertyError => "Error in property",
-            _ => "unsupported error code",
         }
     }
 }

@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         input.read(&mut frame)?;
 
         let mut to_remove = selection.list(&frame)?;
-        to_remove.sort();
+        to_remove.sort_unstable();
         to_remove.reverse();
         for i in to_remove {
             frame.remove(i);

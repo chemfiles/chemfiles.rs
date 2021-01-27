@@ -10,6 +10,7 @@ use super::{Residue, ResidueRef};
 
 /// Possible bond order associated with bonds
 #[repr(C)]
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum BondOrder {
     /// Unknown or unspecified bond order
@@ -28,8 +29,6 @@ pub enum BondOrder {
     Amide = chfl_bond_order::CHFL_BOND_AMIDE as isize,
     /// Aromatic bond (required by some file formats)
     Aromatic = chfl_bond_order::CHFL_BOND_AROMATIC as isize,
-    #[doc(hidden)]
-    __Nonexhaustive,
 }
 
 impl BondOrder {
@@ -43,7 +42,6 @@ impl BondOrder {
             BondOrder::Qintuplet => chfl_bond_order::CHFL_BOND_QINTUPLET,
             BondOrder::Amide => chfl_bond_order::CHFL_BOND_AMIDE,
             BondOrder::Aromatic => chfl_bond_order::CHFL_BOND_AROMATIC,
-            BondOrder::__Nonexhaustive => panic!("invalid BondOrder"),
         }
     }
 }
