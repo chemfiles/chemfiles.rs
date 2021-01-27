@@ -12,7 +12,7 @@
 //! please see its [documentation][cxx_doc]. Specifically, the following pages
 //! are worth reading:
 //!
-//! - The [overview][overview] of the classes organisation;
+//! - The [overview][overview] of the classes organization;
 //! - The list of [supported formats][formats];
 //! - The documentation for the [selection language][selections];
 //!
@@ -30,7 +30,6 @@
 #![allow(clippy::missing_docs_in_private_items, clippy::or_fun_call, clippy::indexing_slicing)]
 #![allow(clippy::module_name_repetitions, clippy::must_use_candidate)]
 #![allow(clippy::wildcard_imports, clippy::unreadable_literal, clippy::shadow_unrelated)]
-#![allow(clippy::missing_errors_doc)]
 
 #![cfg_attr(test, allow(clippy::float_cmp))]
 
@@ -100,13 +99,15 @@ pub fn version() -> String {
 
 /// Read configuration data from the file at `path`.
 ///
-/// By default, chemfiles reads configuration from any file named `.chemfiles.toml`
-/// in the current directory or any parent directory. This function can be used
-/// to add data from another configuration file.
+/// By default, chemfiles reads configuration from any file named
+/// `.chemfiles.toml` in the current directory or any parent directory. This
+/// function can be used to add data from another configuration file. Data from
+/// the new configuration file will overwrite any existing data.
+///
+/// # Errors
 ///
 /// This function will fail if there is no file at `path`, or if the file is
-/// incorrectly formatted. Data from the new configuration file will overwrite
-/// any existing data.
+/// incorrectly formatted.
 ///
 /// # Example
 /// ```no_run

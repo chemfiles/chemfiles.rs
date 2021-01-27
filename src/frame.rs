@@ -306,8 +306,10 @@ impl Frame {
 
     /// Add a copy of `residue` to this frame.
     ///
-    /// The residue id must not already be in this frame's topology, and the
-    /// residue must contain only atoms that are not already in another
+    /// # Errors
+    ///
+    /// This function fails is the residue id is already in this frame's
+    /// topology, or if the residue contain atoms that are already in another
     /// residue.
     ///
     /// # Example
@@ -676,8 +678,12 @@ impl Frame {
         }
     }
 
-    /// Set the `Topology` of this frame to `topology`. The topology must
-    /// contain the same number of atoms that this frame.
+    /// Set the `Topology` of this frame to `topology`.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the topology contains a different number of atoms
+    /// than this frame.
     ///
     /// # Example
     /// ```
@@ -738,8 +744,10 @@ impl Frame {
     /// The bonds are guessed using a distance-based algorithm, and then angles
     /// and dihedrals are guessed from the bonds.
     ///
-    /// This can fail if the covalent radius is unknown for some atoms in the
-    /// frame.
+    /// # Errors
+    ////
+    /// This function can fail if the covalent radius is unknown for some atoms
+    /// in the frame.
     ///
     /// # Example
     /// ```

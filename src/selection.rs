@@ -149,6 +149,10 @@ impl Selection {
 
     /// Create a new selection from the given selection string.
     ///
+    /// # Errors
+    ///
+    /// This function fails if the selection string is invalid.
+    ///
     /// # Example
     /// ```
     /// # use chemfiles::Selection;
@@ -217,7 +221,7 @@ impl Selection {
     /// frame.add_atom(&Atom::new("H"), [-1.0, 0.0, 0.0], None);
     ///
     /// let mut selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
-    /// let matches = selection.evaluate(&frame).unwrap();
+    /// let matches = selection.evaluate(&frame);
     ///
     /// assert_eq!(matches.len(), 2);
     ///
@@ -229,13 +233,13 @@ impl Selection {
     /// assert_eq!(matches[1][0], 2);
     /// assert_eq!(matches[1][1], 1);
     /// ```
-    pub fn evaluate(&mut self, frame: &Frame) -> Result<Vec<Match>, Error> {
+    pub fn evaluate(&mut self, frame: &Frame) -> Vec<Match> {
         #![allow(clippy::cast_possible_truncation)]
         let mut count = 0;
         unsafe {
             check(chfl_selection_evaluate(
                 self.as_mut_ptr(), frame.as_ptr(), &mut count
-            ))?;
+            )).expect("failed to evaluate selection");
         }
 
         let size = count as usize;
@@ -245,10 +249,10 @@ impl Selection {
                 self.handle,
                 chfl_matches.as_mut_ptr(),
                 count
-            ))?;
+            )).expect("failed to extract matches");
         }
-        let matches = chfl_matches
-            .into_iter()
+
+        return chfl_matches.into_iter()
             .map(|chfl_match| Match {
                 size: chfl_match.size as usize,
                 atoms: [
@@ -259,11 +263,14 @@ impl Selection {
                 ],
             })
             .collect();
-        return Ok(matches);
     }
 
     /// Evaluates a selection of size 1 on a given `frame`. This function
     /// returns the list of atomic indexes in the frame matching this selection.
+    ///
+    /// # Panics
+    ///
+    /// If the selection size is not 1
     ///
     /// # Example
     /// ```
@@ -274,26 +281,20 @@ impl Selection {
     /// frame.add_atom(&Atom::new("H"), [-1.0, 0.0, 0.0], None);
     ///
     /// let mut selection = Selection::new("name H").unwrap();
-    /// let matches = selection.list(&frame).unwrap();
+    /// let matches = selection.list(&frame);
     ///
     /// assert_eq!(matches.len(), 2);
     /// assert_eq!(matches[0], 0);
     /// assert_eq!(matches[1], 2);
     /// ```
-    pub fn list(&mut self, frame: &Frame) -> Result<Vec<usize>, Error> {
+    pub fn list(&mut self, frame: &Frame) -> Vec<usize> {
         if self.size() != 1 {
-            return Err(Error{
-                status: Status::SelectionError,
-                message: "can not call `Selection::list` on a multiple selection".into()
-            });
+            panic!("can not call `Selection::list` on a multiple selection")
         }
-        let matches = self.evaluate(frame)?;
-        let mut list = vec![0; matches.len()];
-        #[allow(clippy::cast_possible_truncation)]
-        for (i, m) in matches.iter().enumerate() {
-            list[i] = m[0] as usize;
-        }
-        Ok(list)
+        return self.evaluate(frame)
+            .into_iter()
+            .map(|m| m[0] as usize)
+            .collect();
     }
 }
 
@@ -398,11 +399,11 @@ mod tests {
         let frame = testing_frame();
 
         let mut selection = Selection::new("name H").unwrap();
-        let res = selection.evaluate(&frame).unwrap();
+        let res = selection.evaluate(&frame);
         assert_eq!(res, &[Match::new(&[0]), Match::new(&[3])]);
 
         let mut selection = Selection::new("angles: all").unwrap();
-        let res = selection.evaluate(&frame).unwrap();
+        let res = selection.evaluate(&frame);
         for m in &[Match::new(&[0, 1, 2]), Match::new(&[1, 2, 3])] {
             assert!(res.iter().any(|r| r == m))
         }
@@ -413,11 +414,15 @@ mod tests {
         let frame = testing_frame();
 
         let mut selection = Selection::new("name H").unwrap();
-        let res = selection.list(&frame).unwrap();
+        let res = selection.list(&frame);
         assert_eq!(res, vec![0, 3]);
+    }
 
-        // Using it with a multiple selection
+    #[test]
+    #[should_panic = "can not call `Selection::list` on a multiple selection"]
+    fn list_on_size_1_selection() {
+        let frame = testing_frame();
         let mut selection = Selection::new("pairs: name(#1) H").unwrap();
-        assert!(selection.list(&frame).is_err());
+        let _ = selection.list(&frame);
     }
 }

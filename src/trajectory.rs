@@ -51,6 +51,12 @@ impl Trajectory {
     ///
     /// Valid modes are `'r'` for read, `'w'` for write and `'a'` for append.
     ///
+    /// # Errors
+    ///
+    /// This function fails if the file is not accessible for the given mode, if
+    /// it is incorrectly formatted for the corresponding format, or in case of
+    /// I/O errors from the OS.
+    ///
     /// # Example
     /// ```no_run
     /// # use chemfiles::Trajectory;
@@ -70,8 +76,8 @@ impl Trajectory {
         }
     }
 
-    /// Open the file at the given `path` using a specific file `format` and
-    /// the given `mode`.
+    /// Open the file at the given `path` using a specific file `format` and the
+    /// given `mode`.
     ///
     /// Valid modes are `'r'` for read, `'w'` for write and `'a'` for append.
     ///
@@ -79,6 +85,12 @@ impl Trajectory {
     /// extension, or when there is not standard extension for this format. If
     /// `format` is an empty string, the format will be guessed from the
     /// extension.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the file is not accessible for the given mode, if
+    /// it is incorrectly formatted for the corresponding format, or in case of
+    /// I/O errors from the OS.
     ///
     /// # Example
     /// ```no_run
@@ -107,8 +119,13 @@ impl Trajectory {
     /// Read a memory buffer as though it was a formatted file.
     ///
     /// The memory buffer used to store the file is given using the `data`
-    /// argument. The `format` parameter is required and should follow the
-    /// same rules as in the main `Trajectory` constructor.
+    /// argument. The `format` parameter is required and should follow the same
+    /// rules as in the main `Trajectory` constructor.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the data is incorrectly formatted for the
+    /// corresponding format, or if the format do not support in-memory readers.
     ///
     /// # Example
     /// ```
@@ -141,6 +158,10 @@ impl Trajectory {
     /// The `memory_buffer` function can be used to retrieve the data written
     /// to memory of the `Trajectory`.
     ///
+    /// # Errors
+    ///
+    /// This function fails if the format do not support in-memory writers.
+    ///
     /// # Example
     /// ```
     /// # use chemfiles::Trajectory;
@@ -164,6 +185,11 @@ impl Trajectory {
     /// If the number of atoms in frame does not correspond to the number of atom
     /// in the next step, the frame is resized.
     ///
+    /// # Errors
+    ///
+    /// This function fails if the data is incorrectly formatted for the
+    /// corresponding format, or in case of I/O errors from the OS.
+    ///
     /// # Example
     /// ```no_run
     /// # use chemfiles::{Trajectory, Frame};
@@ -183,6 +209,11 @@ impl Trajectory {
     /// If the number of atoms in frame does not correspond to the number of
     /// atom at this step, the frame is resized.
     ///
+    /// # Errors
+    ///
+    /// This function fails if the data is incorrectly formatted for the
+    /// corresponding format.
+    ///
     /// # Example
     /// ```no_run
     /// # use chemfiles::{Trajectory, Frame};
@@ -198,6 +229,11 @@ impl Trajectory {
     }
 
     /// Write a `frame` to this trajectory.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the data is incorrectly formatted for the
+    /// corresponding format.
     ///
     /// # Example
     /// ```no_run
@@ -237,8 +273,13 @@ impl Trajectory {
     }
 
     /// Set the topology associated with this trajectory by reading the first
-    /// frame of the file at the given `path` using the file format in
-    /// `format`; and extracting the topology of this frame.
+    /// frame of the file at the given `path` using the file format in `format`;
+    /// and extracting the topology of this frame.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the topology file is incorrectly formatted for
+    /// the corresponding format, or in case of I/O errors from the OS.
     ///
     /// # Example
     /// ```no_run
@@ -264,6 +305,11 @@ impl Trajectory {
     ///
     /// If `format` is an empty string, the format will be guessed from the
     /// `path` extension.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the topology file is incorrectly formatted for
+    /// the corresponding format, or in case of I/O errors from the OS.
     ///
     /// # Example
     /// ```no_run
@@ -307,22 +353,28 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::Trajectory;
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
-    /// let steps = trajectory.nsteps().unwrap();
     ///
-    /// println!("This trajectory contains {} steps", steps);
+    /// println!("This trajectory contains {} steps", trajectory.nsteps());
     /// ```
     // FIXME should this take &self instead? The file can be modified by this
     // function, but the format should reset the state.
-    pub fn nsteps(&mut self) -> Result<usize, Error> {
+    pub fn nsteps(&mut self) -> usize {
         let mut res = 0;
         unsafe {
-            check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))?;
+            check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res)).expect(
+                "failed to get the number of steps in this trajectory"
+            );
         }
         #[allow(clippy::cast_possible_truncation)]
-        Ok(res as usize)
+        return res as usize;
     }
 
     /// Obtain the memory buffer written to by the trajectory.
+    ///
+    /// # Errors
+    ///
+    /// This fails if the trajectory was not opened with
+    /// `Trajectory::memory_writer`.
     ///
     /// # Example
     /// ```
@@ -401,7 +453,7 @@ mod test {
             panic!("please add test for this OS!");
         }
 
-        assert_eq!(file.nsteps(), Ok(100));
+        assert_eq!(file.nsteps(), 100);
 
         let mut frame = Frame::new();
         assert!(file.read(&mut frame).is_ok());
@@ -522,11 +574,11 @@ X 1 2 3".lines().collect::<Vec<_>>();
             let mut frame_read = Frame::new();
             trajectory_read.read(&mut frame_read).unwrap();
 
-            assert_eq!(trajectory_read.nsteps().unwrap(), 1);
+            assert_eq!(trajectory_read.nsteps(), 1);
             assert_eq!(frame_read.cell().shape(), CellShape::Orthorhombic);
             assert_eq!(frame_read.size(), 3);
             assert_eq!(frame_read.atom(1).name(), "O");
-            ::assert_vector3d_eq(&frame_read.positions()[2], &[-1.5, 10.0, 0.0], 1e-4);
+            crate::assert_vector3d_eq(&frame_read.positions()[2], &[-1.5, 10.0, 0.0], 1e-4);
         }
     }
 }
