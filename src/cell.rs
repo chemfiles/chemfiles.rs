@@ -247,7 +247,9 @@ impl UnitCell {
 
     /// Set the three lengths of the cell, in Angstroms.
     ///
-    /// This fails if the unit cell is infinite
+    /// # Errors
+    ///
+    /// This function fails if the unit cell is infinite
     ///
     /// # Example
     /// ```
@@ -287,8 +289,11 @@ impl UnitCell {
         return angles;
     }
 
-    /// Set the three angles of the cell, in degrees. This is only possible
-    /// with `Triclinic` cells.
+    /// Set the three angles of the cell, in degrees.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the unit cell is not `Triclinic`.
     ///
     /// # Example
     /// ```
@@ -358,6 +363,8 @@ impl UnitCell {
     }
 
     /// Set the shape of the unit cell to `shape`.
+    ///
+    /// # Errors
     ///
     /// This can fail if the cell length or angles are incompatible with the
     /// new shape.

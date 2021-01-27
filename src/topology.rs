@@ -731,8 +731,10 @@ impl Topology {
 
     /// Add a residue to this topology.
     ///
-    /// The residue `id` must not already be in the topology, and the residue
-    /// must contain only atoms that are not already in another residue.
+    /// # Errors
+    ///
+    /// This function fails is the residue `id` is not already in the topology,
+    /// or if the residue contains atoms that are already in another residue.
     ///
     /// # Example
     /// ```
