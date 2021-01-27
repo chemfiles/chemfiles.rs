@@ -19,7 +19,7 @@ chemfiles-sys = {path = "chemfiles-sys", version = "0.10.0"}
 libc = "0.2"
 
 [dev-dependencies]
-approx = "0.3"
+approx = "0.4"
 
 [workspace]
 members = [
