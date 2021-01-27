@@ -222,9 +222,9 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     /// assert_eq!(cell.shape(), CellShape::Orthorhombic);
     /// ```
-    pub fn from_matrix(matrix: [[f64; 3]; 3]) -> UnitCell {
+    pub fn from_matrix(mut matrix: [[f64; 3]; 3]) -> UnitCell {
         unsafe {
-            let handle = chfl_cell_from_matrix(matrix.as_ptr());
+            let handle = chfl_cell_from_matrix(matrix.as_mut_ptr());
             UnitCell::from_ptr(handle)
         }
     }

@@ -23,8 +23,8 @@ pub enum BondOrder {
     Triple = chfl_bond_order::CHFL_BOND_TRIPLE as isize,
     /// Quadruple bond (present in some metals)
     Quadruple = chfl_bond_order::CHFL_BOND_QUADRUPLE as isize,
-    /// Qintuplet bond (present in some metals)
-    Qintuplet = chfl_bond_order::CHFL_BOND_QINTUPLET as isize,
+    /// Quintuplet bond (present in some metals)
+    Quintuplet = chfl_bond_order::CHFL_BOND_QUINTUPLET as isize,
     /// Amide bond (required by some file formats)
     Amide = chfl_bond_order::CHFL_BOND_AMIDE as isize,
     /// Aromatic bond (required by some file formats)
@@ -39,7 +39,7 @@ impl BondOrder {
             BondOrder::Double => chfl_bond_order::CHFL_BOND_DOUBLE,
             BondOrder::Triple => chfl_bond_order::CHFL_BOND_TRIPLE,
             BondOrder::Quadruple => chfl_bond_order::CHFL_BOND_QUADRUPLE,
-            BondOrder::Qintuplet => chfl_bond_order::CHFL_BOND_QINTUPLET,
+            BondOrder::Quintuplet => chfl_bond_order::CHFL_BOND_QUINTUPLET,
             BondOrder::Amide => chfl_bond_order::CHFL_BOND_AMIDE,
             BondOrder::Aromatic => chfl_bond_order::CHFL_BOND_AROMATIC,
         }
@@ -54,7 +54,7 @@ impl From<chfl_bond_order> for BondOrder {
             chfl_bond_order::CHFL_BOND_DOUBLE => BondOrder::Double,
             chfl_bond_order::CHFL_BOND_TRIPLE => BondOrder::Triple,
             chfl_bond_order::CHFL_BOND_QUADRUPLE => BondOrder::Quadruple,
-            chfl_bond_order::CHFL_BOND_QINTUPLET => BondOrder::Qintuplet,
+            chfl_bond_order::CHFL_BOND_QUINTUPLET => BondOrder::Quintuplet,
             chfl_bond_order::CHFL_BOND_AMIDE => BondOrder::Amide,
             chfl_bond_order::CHFL_BOND_AROMATIC => BondOrder::Aromatic,
         }
