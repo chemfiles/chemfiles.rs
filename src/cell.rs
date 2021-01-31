@@ -211,6 +211,11 @@ impl UnitCell {
     /// matrix is non-zero, then the cell is `Orthorhombic`. Else a
     /// `Triclinic` cell is created. The matrix entries should be in Angstroms.
     ///
+    /// # Panics
+    ///
+    /// If the matrix has a negative determinant, or more generally is not
+    /// representing a unit cell.
+    ///
     /// # Example
     /// ```
     /// # use chemfiles::{UnitCell, CellShape};
@@ -249,7 +254,8 @@ impl UnitCell {
     ///
     /// # Errors
     ///
-    /// This function fails if the unit cell is infinite
+    /// This function fails if the unit cell is infinite, or if one of the
+    /// lengths is negative.
     ///
     /// # Example
     /// ```
