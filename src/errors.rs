@@ -64,9 +64,11 @@ impl From<chfl_status> for Error {
             chfl_status::CHFL_OUT_OF_BOUNDS => Status::OutOfBounds,
             chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
+
+        let message = Error::last_error();
         Error {
-            status: status,
-            message: Error::last_error(),
+            status,
+            message,
         }
     }
 }

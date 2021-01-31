@@ -66,7 +66,7 @@ impl Trajectory {
     where
         P: AsRef<Path>,
     {
-        let path = path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref()))?;
+        let path = path.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
 
         let path = strings::to_c(path);
         unsafe {
@@ -103,7 +103,7 @@ impl Trajectory {
         S: Into<&'a str>,
     {
         let filename =
-            filename.as_ref().to_str().ok_or(Error::utf8_path_error(filename.as_ref()))?;
+            filename.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(filename.as_ref()))?;
 
         let filename = strings::to_c(filename);
         let format = strings::to_c(format.into());
@@ -291,7 +291,7 @@ impl Trajectory {
     where
         P: AsRef<Path>,
     {
-        let path = path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref()))?;
+        let path = path.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
 
         let path = strings::to_c(path);
         unsafe {
@@ -322,7 +322,7 @@ impl Trajectory {
         P: AsRef<Path>,
         S: Into<&'a str>,
     {
-        let path = path.as_ref().to_str().ok_or(Error::utf8_path_error(path.as_ref()))?;
+        let path = path.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
 
         let format = strings::to_c(format.into());
         let path = strings::to_c(path);
