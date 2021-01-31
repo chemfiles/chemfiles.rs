@@ -26,12 +26,11 @@
 #![warn(unused_qualifications, unused_results)]
 // Configuration for clippy lints
 #![warn(clippy::all, clippy::pedantic)]
-#![allow(clippy::needless_return, clippy::redundant_field_names, clippy::use_self)]
-#![allow(clippy::missing_docs_in_private_items, clippy::or_fun_call, clippy::indexing_slicing)]
-#![allow(clippy::module_name_repetitions, clippy::must_use_candidate)]
-#![allow(clippy::wildcard_imports, clippy::unreadable_literal, clippy::shadow_unrelated)]
+#![allow(clippy::needless_return, clippy::module_name_repetitions)]
+#![allow(clippy::must_use_candidate, clippy::wildcard_imports)]
 
-#![cfg_attr(test, allow(clippy::float_cmp))]
+// Allow a few more clippy lints in test mode
+#![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
 
 // deny(warnings) in doc tests
 #![doc(test(attr(deny(warnings))))]
