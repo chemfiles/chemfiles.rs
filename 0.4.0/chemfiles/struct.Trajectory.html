@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Trajectory` struct in crate `chemfiles`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Trajectory">
+
+    <title>chemfiles::Trajectory - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>chemfiles</a></p><script>window.sidebarCurrent = {name: 'Trajectory', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>chemfiles</a>::<wbr><a class='struct' href=''>Trajectory</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-625' class='srclink' href='../src/chemfiles/src/trajectory.rs.html#21-23' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Trajectory {
+    // some fields omitted
+}</pre><div class='docblock'><p>A Trajectory is a chemistry file on the hard drive. It is the main entry
+point of chemfiles.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a></code></h3><div class='impl-items'><h4 id='method.open' class='method'><code>fn <a href='#method.open' class='fnname'>open</a>&lt;P&gt;(filename: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;</span></code></h4>
+<div class='docblock'><p>Open a trajectory file in read mode.</p>
+</div><h4 id='method.create' class='method'><code>fn <a href='#method.create' class='fnname'>create</a>&lt;P&gt;(filename: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;</span></code></h4>
+<div class='docblock'><p>Open a trajectory file in write mode.</p>
+</div><h4 id='method.open_with_format' class='method'><code>fn <a href='#method.open_with_format' class='fnname'>open_with_format</a>&lt;'a, P, S&gt;(filename: P, format: S) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;, S: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</span></code></h4>
+<div class='docblock'><p>Open a trajectory file in read mode using a specific <code>format</code>.</p>
+</div><h4 id='method.create_with_format' class='method'><code>fn <a href='#method.create_with_format' class='fnname'>create_with_format</a>&lt;'a, P, S&gt;(filename: P, format: S) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;, S: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</span></code></h4>
+<div class='docblock'><p>Open a trajectory file in write mode.</p>
+</div><h4 id='method.read' class='method'><code>fn <a href='#method.read' class='fnname'>read</a>(&amp;mut self, frame: &amp;mut <a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Read the next step of the trajectory into a frame</p>
+</div><h4 id='method.read_step' class='method'><code>fn <a href='#method.read_step' class='fnname'>read_step</a>(&amp;mut self, step: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, frame: &amp;mut <a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Read a specific step of the trajectory in a frame</p>
+</div><h4 id='method.write' class='method'><code>fn <a href='#method.write' class='fnname'>write</a>(&amp;mut self, frame: &amp;<a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Write a frame to the trajectory.</p>
+</div><h4 id='method.set_topology' class='method'><code>fn <a href='#method.set_topology' class='fnname'>set_topology</a>(&amp;mut self, topology: <a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the topology associated with a trajectory. This topology will be
+used when reading and writing the files, replacing any topology in the
+frames or files.</p>
+</div><h4 id='method.set_topology_file' class='method'><code>fn <a href='#method.set_topology_file' class='fnname'>set_topology_file</a>&lt;P&gt;(&amp;mut self, filename: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;</span></code></h4>
+<div class='docblock'><p>Set the topology associated with a trajectory by reading the first frame
+of <code>filename</code>; and extracting the topology of this frame.</p>
+</div><h4 id='method.set_cell' class='method'><code>fn <a href='#method.set_cell' class='fnname'>set_cell</a>(&amp;mut self, cell: <a class='struct' href='../chemfiles/struct.UnitCell.html' title='chemfiles::UnitCell'>UnitCell</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the unit cell associated with a trajectory. This cell will be used
+when reading and writing the files, replacing any unit cell in the
+frames or files.</p>
+</div><h4 id='method.nsteps' class='method'><code>fn <a href='#method.nsteps' class='fnname'>nsteps</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the number of steps (the number of frames) in a trajectory.</p>
+</div><h4 id='method.sync' class='method'><code>fn <a href='#method.sync' class='fnname'>sync</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Synchronize any buffered content to the hard drive.</p>
+</div><h4 id='method.from_ptr' class='method'><code>unsafe fn <a href='#method.from_ptr' class='fnname'>from_ptr</a>(ptr: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut </a><a class='enum' href='../chemfiles_sys/enum.CHFL_TRAJECTORY.html' title='chemfiles_sys::CHFL_TRAJECTORY'>CHFL_TRAJECTORY</a>) -&gt; <a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a></code></h4>
+<div class='docblock'><p>Create a <code>Trajectory</code> from a C pointer. This function is unsafe because
+no validity check is made on the pointer.</p>
+</div><h4 id='method.as_ptr' class='method'><code>unsafe fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_TRAJECTORY.html' title='chemfiles_sys::CHFL_TRAJECTORY'>CHFL_TRAJECTORY</a></code></h4>
+<div class='docblock'><p>Get the underlying C pointer. This function is unsafe because no
+lifetime guarantee is made on the pointer.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../chemfiles/struct.Trajectory.html' title='chemfiles::Trajectory'>Trajectory</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

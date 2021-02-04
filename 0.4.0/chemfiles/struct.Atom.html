@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Atom` struct in crate `chemfiles`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Atom">
+
+    <title>chemfiles::Atom - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>chemfiles</a></p><script>window.sidebarCurrent = {name: 'Atom', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>chemfiles</a>::<wbr><a class='struct' href=''>Atom</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-196' class='srclink' href='../src/chemfiles/src/atom.rs.html#45-47' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Atom {
+    // some fields omitted
+}</pre><div class='docblock'><p>An Atom is a particle in the current Frame. It can be used to store and
+retrieve informations about a particle, such as mass, name, atomic number,
+<em>etc.</em></p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>&lt;'a, S&gt;(name: S) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where S: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</span></code></h4>
+<div class='docblock'><p>Create a new <code>Atom</code> from a <code>name</code>.</p>
+</div><h4 id='method.mass' class='method'><code>fn <a href='#method.mass' class='fnname'>mass</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the <code>Atom</code> mass, in atomic mass units</p>
+</div><h4 id='method.set_mass' class='method'><code>fn <a href='#method.set_mass' class='fnname'>set_mass</a>(&amp;mut self, mass: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the <code>Atom</code> mass, in atomic mass units</p>
+</div><h4 id='method.charge' class='method'><code>fn <a href='#method.charge' class='fnname'>charge</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the <code>Atom</code> charge, in number of the electron charge <em>e</em></p>
+</div><h4 id='method.set_charge' class='method'><code>fn <a href='#method.set_charge' class='fnname'>set_charge</a>(&amp;mut self, charge: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the <code>Atom</code> charge, in number of the electron charge <em>e</em></p>
+</div><h4 id='method.name' class='method'><code>fn <a href='#method.name' class='fnname'>name</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the <code>Atom</code> name</p>
+</div><h4 id='method.set_name' class='method'><code>fn <a href='#method.set_name' class='fnname'>set_name</a>&lt;'a, S&gt;(&amp;mut self, name: S) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt; <span class='where'>where S: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</span></code></h4>
+<div class='docblock'><p>Set the <code>Atom</code> name</p>
+</div><h4 id='method.full_name' class='method'><code>fn <a href='#method.full_name' class='fnname'>full_name</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Try to get the full name of the <code>Atom</code>. The full name of &quot;He&quot; is
+&quot;Helium&quot;, and so on. If the name can not be found, returns the empty
+string.</p>
+</div><h4 id='method.vdw_radius' class='method'><code>fn <a href='#method.vdw_radius' class='fnname'>vdw_radius</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Try to get the Van der Waals radius of the <code>Atom</code>. If the radius can not
+be found, returns -1.</p>
+</div><h4 id='method.covalent_radius' class='method'><code>fn <a href='#method.covalent_radius' class='fnname'>covalent_radius</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Try to get the covalent radius of the <code>Atom</code>. If the radius can not be
+found, returns -1.</p>
+</div><h4 id='method.atomic_number' class='method'><code>fn <a href='#method.atomic_number' class='fnname'>atomic_number</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Try to get the atomic number of the <code>Atom</code>. If the number can not be
+found, returns -1.</p>
+</div><h4 id='method.atom_type' class='method'><code>fn <a href='#method.atom_type' class='fnname'>atom_type</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../chemfiles/enum.AtomType.html' title='chemfiles::AtomType'>AtomType</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the type of the atom</p>
+</div><h4 id='method.set_atom_type' class='method'><code>fn <a href='#method.set_atom_type' class='fnname'>set_atom_type</a>(&amp;mut self, atom_type: <a class='enum' href='../chemfiles/enum.AtomType.html' title='chemfiles::AtomType'>AtomType</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../chemfiles/enum.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the type of the atom</p>
+</div><h4 id='method.from_ptr' class='method'><code>unsafe fn <a href='#method.from_ptr' class='fnname'>from_ptr</a>(ptr: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_ATOM.html' title='chemfiles_sys::CHFL_ATOM'>CHFL_ATOM</a>) -&gt; <a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a></code></h4>
+<div class='docblock'><p>Create an <code>Atom</code> from a C pointer. This function is unsafe because no
+validity check is made on the pointer.</p>
+</div><h4 id='method.as_ptr' class='method'><code>unsafe fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_ATOM.html' title='chemfiles_sys::CHFL_ATOM'>CHFL_ATOM</a></code></h4>
+<div class='docblock'><p>Get the underlying C pointer. This function is unsafe because no
+lifetime guarantee is made on the pointer.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `chemfiles` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, chemfiles">
+
+    <title>chemfiles - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc mod">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Crate chemfiles</p><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'chemfiles', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Crate <a class="mod" href=''>chemfiles</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/chemfiles/lib.rs.html#8-127' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Chemfiles is a multi-language library written in modern C++ for reading and
+writing from and to molecular trajectory files. These files are created by
+your favorite theoretical chemistry program, and contains informations about
+atomic or residues names and positions. Some format also have additional
+informations, such as velocities, forces, energy, …</p>
+
+<p>This crate expose the C API of chemfiles to Rust, and make all the
+functionalities accessibles. For more informations on the C++ library,
+please see its <a href="https://chemfiles.org/chemfiles">documentation</a>. Specifically, the following pages
+are worth reading:</p>
+
+<ul>
+<li>The <a href="https://chemfiles.org/chemfiles/latest/overview.html">overview</a> of the classes organisation;</li>
+<li>The lisf of <a href="https://chemfiles.org/chemfiles/latest/formats.html">supported formats</a>;</li>
+<li>The documentation for the <a href="https://chemfiles.org/chemfiles/latest/selections.html">selection language</a>;</li>
+</ul>
+
+<p>As all the function call the underlying C library, they all can fail and
+thus all return a <code>Result&lt;_, Error&gt;</code> value.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Atom.html"
+                                  title='struct chemfiles::Atom'>Atom</a></td>
+                           <td class='docblock-short'>
+                                <p>An <code>Atom</code> is a particle in the current <code>Frame</code>. It stores the following
+atomic properties:</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Error.html"
+                                  title='struct chemfiles::Error'>Error</a></td>
+                           <td class='docblock-short'>
+                                <p>Error type for Chemfiles.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Frame.html"
+                                  title='struct chemfiles::Frame'>Frame</a></td>
+                           <td class='docblock-short'>
+                                <p>A <code>Frame</code> contains data from one simulation step: the current unit
+cell, the topology, the positions, and the velocities of the particles in
+the system. If some information is missing (topology or velocity or unit
+cell), the corresponding data is filled with a default value.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Match.html"
+                                  title='struct chemfiles::Match'>Match</a></td>
+                           <td class='docblock-short'>
+                                <p>A <code>Match</code> is a set of atomic indexes matching a given selection. It can
+mostly be used like a <code>&amp;[u64]</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Residue.html"
+                                  title='struct chemfiles::Residue'>Residue</a></td>
+                           <td class='docblock-short'>
+                                <p>A <code>Residue</code> is a group of atoms belonging to the same logical unit. They
+can be small molecules, amino-acids in a protein, monomers in polymers,
+<em>etc.</em></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Selection.html"
+                                  title='struct chemfiles::Selection'>Selection</a></td>
+                           <td class='docblock-short'>
+                                <p>A <code>Selection</code> allow to select atoms in a <code>Frame</code>, from a selection
+language. The selection language is built by combining basic operations.
+Each basic operation follows the <code>&lt;selector&gt;[(&lt;variable&gt;)] &lt;operator&gt; &lt;value&gt;</code> structure, where <code>&lt;operator&gt;</code> is a comparison operator in
+<code>== != &lt; &lt;= &gt; &gt;=</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Topology.html"
+                                  title='struct chemfiles::Topology'>Topology</a></td>
+                           <td class='docblock-short'>
+                                <p>A <code>Topology</code> contains the definition of all the atoms in the system, and
+the liaisons between the atoms (bonds, angles, dihedrals, ...). It will
+also contain all the residues information if it is available.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Trajectory.html"
+                                  title='struct chemfiles::Trajectory'>Trajectory</a></td>
+                           <td class='docblock-short'>
+                                <p>The <code>Trajectory</code> type is the main entry point when using chemfiles. A
+<code>Trajectory</code> behave a bit like a file, allowing to read and/or write
+<code>Frame</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.UnitCell.html"
+                                  title='struct chemfiles::UnitCell'>UnitCell</a></td>
+                           <td class='docblock-short'>
+                                <p>An <code>UnitCell</code> represent the box containing the atoms, and its periodicity.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.CellShape.html"
+                                  title='enum chemfiles::CellShape'>CellShape</a></td>
+                           <td class='docblock-short'>
+                                <p>Available unit cell shapes.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.Property.html"
+                                  title='enum chemfiles::Property'>Property</a></td>
+                           <td class='docblock-short'>
+                                <p>A <code>Property</code> is a piece of data that can be associated with an <code>Atom</code> or a
+<code>Frame</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.Status.html"
+                                  title='enum chemfiles::Status'>Status</a></td>
+                           <td class='docblock-short'>
+                                <p>Possible causes of error in chemfiles</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.add_configuration.html"
+                                  title='fn chemfiles::add_configuration'>add_configuration</a></td>
+                           <td class='docblock-short'>
+                                <p>Read configuration data from the file at <code>path</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.set_warning_callback.html"
+                                  title='fn chemfiles::set_warning_callback'>set_warning_callback</a></td>
+                           <td class='docblock-short'>
+                                <p>Use <code>callback</code> for every chemfiles warning. The callback will be passed
+the warning message.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.version.html"
+                                  title='fn chemfiles::version'>version</a></td>
+                           <td class='docblock-short'>
+                                <p>Get the version of the chemfiles library.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="type" href="type.Result.html"
+                                  title='type chemfiles::Result'>Result</a></td>
+                           <td class='docblock-short'>
+                                <p>Custom result type for working with errors in chemfiles</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+    </script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

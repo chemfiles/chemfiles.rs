@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `chemfiles` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, chemfiles">
+
+    <title>chemfiles - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'chemfiles', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>chemfiles</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/chemfiles/src/lib.rs.html#9-52' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Chemfiles is a multi-language library written in modern C++ for reading and
+writing from and to molecular trajectory files. These files are created by
+your favorite theoretical chemistry program, and contains informations about
+atomic or residues names and positions. Some format also have additional
+informations, such as velocities, forces, energy, …</p>
+
+<p>This crate expose the C API of chemfiles to Rust, and make all the
+functionalities accessibles. For more informations on the C++ library,
+please see its <a href="http://chemfiles.rtfd.org">documentation</a>. Specifically, the
+following pages are worth reading:</p>
+
+<ul>
+<li>The <a href="http://chemfiles.rtfd.org/en/latest/overview.html">overview</a> of the
+classes organisation;</li>
+<li>The <a href="http://chemfiles.rtfd.org/en/latest/formats.html">supported formats</a>;</li>
+</ul>
+
+<p>As all the function call the underlying C library, they all can fail and
+thus all return a <code>Result&lt;_, Error&gt;</code> value.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='logging/index.html'
+                                  title='chemfiles::logging'>logging</a></td>
+                           <td class='docblock short'>
+                                <p>Logging utilities</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Atom.html'
+                                  title='chemfiles::Atom'>Atom</a></td>
+                           <td class='docblock short'>
+                                <p>An Atom is a particle in the current Frame. It can be used to store and
+retrieve informations about a particle, such as mass, name, atomic number,
+<em>etc.</em></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Frame.html'
+                                  title='chemfiles::Frame'>Frame</a></td>
+                           <td class='docblock short'>
+                                <p>A <code>Frame</code> holds data from one step of a simulation: the current <code>Topology</code>,
+the positions, and maybe the velocities of the particles in the system.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Topology.html'
+                                  title='chemfiles::Topology'>Topology</a></td>
+                           <td class='docblock short'>
+                                <p>A <code>Topology</code> contains the definition of all the particles in the system, and
+the liaisons between the particles (bonds, angles, dihedrals, ...).</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Trajectory.html'
+                                  title='chemfiles::Trajectory'>Trajectory</a></td>
+                           <td class='docblock short'>
+                                <p>A Trajectory is a chemistry file on the hard drive. It is the main entry
+point of chemfiles.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.UnitCell.html'
+                                  title='chemfiles::UnitCell'>UnitCell</a></td>
+                           <td class='docblock short'>
+                                <p>An <code>UnitCell</code> represent the box containing the atoms in the system, and its
+periodicity.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.AtomType.html'
+                                  title='chemfiles::AtomType'>AtomType</a></td>
+                           <td class='docblock short'>
+                                <p>Available types of atoms</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CellType.html'
+                                  title='chemfiles::CellType'>CellType</a></td>
+                           <td class='docblock short'>
+                                <p>Available unit cell types</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Error.html'
+                                  title='chemfiles::Error'>Error</a></td>
+                           <td class='docblock short'>
+                                <p>Possible causes of error in chemfiles</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

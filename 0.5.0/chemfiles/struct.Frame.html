@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Frame` struct in crate `chemfiles`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Frame">
+
+    <title>chemfiles::Frame - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>chemfiles</a></p><script>window.sidebarCurrent = {name: 'Frame', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>chemfiles</a>::<wbr><a class='struct' href=''>Frame</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-575' class='srclink' href='../src/chemfiles/src/frame.rs.html#19-21' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Frame {
+    // some fields omitted
+}</pre><div class='docblock'><p>A <code>Frame</code> holds data from one step of a simulation: the current <code>Topology</code>,
+the positions, and maybe the velocities of the particles in the system.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(natoms: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Create an empty frame with initial capacity of <code>natoms</code>. It will be
+resized by the library as needed.</p>
+</div><h4 id='method.atom' class='method'><code>fn <a href='#method.atom' class='fnname'>atom</a>(&amp;self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get a specific <code>Atom</code> from a frame, given its <code>index</code> in the frame</p>
+</div><h4 id='method.natoms' class='method'><code>fn <a href='#method.natoms' class='fnname'>natoms</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the current number of atoms in the <code>Frame</code>.</p>
+</div><h4 id='method.resize' class='method'><code>fn <a href='#method.resize' class='fnname'>resize</a>(&amp;mut self, natoms: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Resize the positions and the velocities in frame, to make space for
+<code>natoms</code> atoms. Previous data is conserved, as well as the presence of
+absence of velocities.</p>
+</div><h4 id='method.positions' class='method'><code>fn <a href='#method.positions' class='fnname'>positions</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>; 3]</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the positions from the <code>Frame</code>.</p>
+</div><h4 id='method.velocities' class='method'><code>fn <a href='#method.velocities' class='fnname'>velocities</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>; 3]</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the velocities from the <code>Frame</code>.</p>
+</div><h4 id='method.has_velocities' class='method'><code>fn <a href='#method.has_velocities' class='fnname'>has_velocities</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Check if the <code>Frame</code> has velocity information.</p>
+</div><h4 id='method.add_velocities' class='method'><code>fn <a href='#method.add_velocities' class='fnname'>add_velocities</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Add velocity storage to this frame for <code>Frame::natoms</code> atoms. If the
+frame already have velocities, this does nothing.</p>
+</div><h4 id='method.cell' class='method'><code>fn <a href='#method.cell' class='fnname'>cell</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.UnitCell.html' title='chemfiles::UnitCell'>UnitCell</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the <code>UnitCell</code> from the <code>Frame</code></p>
+</div><h4 id='method.set_cell' class='method'><code>fn <a href='#method.set_cell' class='fnname'>set_cell</a>(&amp;mut self, cell: &amp;<a class='struct' href='../chemfiles/struct.UnitCell.html' title='chemfiles::UnitCell'>UnitCell</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the <code>UnitCell</code> of the <code>Frame</code></p>
+</div><h4 id='method.topology' class='method'><code>fn <a href='#method.topology' class='fnname'>topology</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the <code>Topology</code> from the <code>Frame</code></p>
+</div><h4 id='method.set_topology' class='method'><code>fn <a href='#method.set_topology' class='fnname'>set_topology</a>(&amp;mut self, topology: &amp;<a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the <code>Topology</code> of the <code>Frame</code></p>
+</div><h4 id='method.step' class='method'><code>fn <a href='#method.step' class='fnname'>step</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the <code>Frame</code> step, i.e. the frame number in the trajectory</p>
+</div><h4 id='method.set_step' class='method'><code>fn <a href='#method.set_step' class='fnname'>set_step</a>(&amp;mut self, step: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Set the <code>Frame</code> step</p>
+</div><h4 id='method.guess_topology' class='method'><code>fn <a href='#method.guess_topology' class='fnname'>guess_topology</a>(&amp;self, bonds: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Try to guess the bonds, angles and dihedrals in the system. If <code>bonds</code>
+is true, guess everything; else only guess the angles and dihedrals from
+the topology bond list.</p>
+</div><h4 id='method.select' class='method'><code>fn <a href='#method.select' class='fnname'>select</a>(&amp;self, selection: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>&gt;, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Select atoms in a frame, from a specific selection string.</p>
+
+<p>This function select atoms in a frame matching a selection string. For
+example, <code>&quot;name H and x &gt; 4&quot;</code> will select all the atoms with name <code>&quot;H&quot;</code>
+and <code>x</code> coordinate less than 4. See the C++ documentation for the full
+selection language.</p>
+
+<p>The result is a <code>Vec&lt;bool&gt;</code> containing <code>true</code> at position <code>i</code> if the
+atom at position <code>i</code> matches the selection string, and <code>false</code>
+otherwise.</p>
+</div><h4 id='method.from_ptr' class='method'><code>unsafe fn <a href='#method.from_ptr' class='fnname'>from_ptr</a>(ptr: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_FRAME.html' title='chemfiles_sys::CHFL_FRAME'>CHFL_FRAME</a>) -&gt; <a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a></code></h4>
+<div class='docblock'><p>Create a <code>Frame</code> from a C pointer. This function is unsafe because
+no validity check is made on the pointer.</p>
+</div><h4 id='method.as_ptr' class='method'><code>unsafe fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_FRAME.html' title='chemfiles_sys::CHFL_FRAME'>CHFL_FRAME</a></code></h4>
+<div class='docblock'><p>Get the underlying C pointer. This function is unsafe because no
+lifetime guarantee is made on the pointer.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../chemfiles/struct.Frame.html' title='chemfiles::Frame'>Frame</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

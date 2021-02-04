@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Logger` struct in crate `chemfiles`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Logger">
+
+    <title>chemfiles::Logger - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>chemfiles</a></p><script>window.sidebarCurrent = {name: 'Logger', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>chemfiles</a>::<wbr><a class='struct' href=''>Logger</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-163' class='srclink' href='../src/chemfiles/src/logging.rs.html#48-50' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Logger&lt;'a&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>This struct give access to the logging system.</p>
+
+<p>As it is a global system, it must be aquired before any operations.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='struct' href='../chemfiles/struct.Logger.html' title='chemfiles::Logger'>Logger</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.get' class='method'><code>fn <a href='#method.get' class='fnname'>get</a>() -&gt; <a class='struct' href='../chemfiles/struct.Logger.html' title='chemfiles::Logger'>Logger</a>&lt;'a&gt;</code></h4>
+<div class='docblock'><p>Get an handle to the logging system. This function blocks, waiting for a
+mutex to be available. You should probably call this function from one
+thread only.</p>
+</div><h4 id='method.level' class='method'><code>fn <a href='#method.level' class='fnname'>level</a>(&amp;self) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='enum' href='../chemfiles/enum.LogLevel.html' title='chemfiles::LogLevel'>LogLevel</a>&gt;</code></h4>
+<div class='docblock'><p>Get the current maximal logging level</p>
+</div><h4 id='method.set_level' class='method'><code>fn <a href='#method.set_level' class='fnname'>set_level</a>(&amp;self, level: <a class='enum' href='../chemfiles/enum.LogLevel.html' title='chemfiles::LogLevel'>LogLevel</a>) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Set the maximal logging level to <code>level</code></p>
+</div><h4 id='method.log_to_file' class='method'><code>fn <a href='#method.log_to_file' class='fnname'>log_to_file</a>&lt;P&gt;(&amp;self, filename: P) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;</span></code></h4>
+<div class='docblock'><p>Write logs to the file at <code>path</code>, creating it if needed.</p>
+</div><h4 id='method.log_to_stderr' class='method'><code>fn <a href='#method.log_to_stderr' class='fnname'>log_to_stderr</a>(&amp;self) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Redirect the logs to the standard error stream. This is the default.</p>
+</div><h4 id='method.log_to_stdout' class='method'><code>fn <a href='#method.log_to_stdout' class='fnname'>log_to_stdout</a>(&amp;self) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Redirect the logs to the standard output.</p>
+</div><h4 id='method.log_silent' class='method'><code>fn <a href='#method.log_silent' class='fnname'>log_silent</a>(&amp;self) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Remove all logging output.</p>
+</div><h4 id='method.log_callback' class='method'><code>fn <a href='#method.log_callback' class='fnname'>log_callback</a>&lt;F&gt;(&amp;self, callback: F) -&gt; <a class='type' href='../chemfiles/type.Result.html' title='chemfiles::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(<a class='enum' href='../chemfiles/enum.LogLevel.html' title='chemfiles::LogLevel'>LogLevel</a>, &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) + 'static</span></code></h4>
+<div class='docblock'><p>Redirect all logging to user-provided logging. The <code>callback</code> function will
+be called at each loggin operation with the level of the message, and the
+the message itself.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

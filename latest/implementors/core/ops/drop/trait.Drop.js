@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["chemfiles"] = [{"text":"impl Drop for Atom","synthetic":false,"types":[]},{"text":"impl Drop for UnitCell","synthetic":false,"types":[]},{"text":"impl Drop for Residue","synthetic":false,"types":[]},{"text":"impl Drop for Topology","synthetic":false,"types":[]},{"text":"impl Drop for Frame","synthetic":false,"types":[]},{"text":"impl Drop for Trajectory","synthetic":false,"types":[]},{"text":"impl Drop for Selection","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

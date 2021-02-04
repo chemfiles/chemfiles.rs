@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Match","A `Match` is a set of atomic indexes matching a given selection. It should be used like a `&[usize]`."],["Selection","Select atoms in a `Frame` with a selection language."]]});
