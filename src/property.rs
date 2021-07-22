@@ -100,7 +100,7 @@ impl RawProperty {
 impl Drop for RawProperty {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr() as *const _);
+            let _ = chfl_free(self.as_ptr().cast());
         }
     }
 }

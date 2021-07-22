@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check_not_null, check_success, Error};
+use errors::{check_not_null, check_success};
 use property::{Property, RawProperty, PropertiesIter};
 use strings;
 
@@ -149,9 +149,11 @@ impl Residue {
             return Some(resid);
         } else if status == chfl_status::CHFL_GENERIC_ERROR {
             return None;
-        } else {
-            panic!("unexpected failure: {}", Error::last_error());
         }
+
+        // call check_success to panic in case of error
+        check_success(status);
+        unreachable!();
     }
 
     /// Get the name of this residue.
@@ -332,7 +334,7 @@ impl Residue {
 impl Drop for Residue {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr() as *const _);
+            let _ = chfl_free(self.as_ptr().cast());
         }
     }
 }
@@ -383,8 +385,8 @@ mod tests {
         residue.add_atom(45);
         assert_eq!(residue.size(), 3);
 
-        assert_eq!(residue.contains(3), true);
-        assert_eq!(residue.contains(5), false);
+        assert!(residue.contains(3));
+        assert!(!residue.contains(5));
 
         assert_eq!(residue.atoms(), vec![0, 3, 45]);
     }

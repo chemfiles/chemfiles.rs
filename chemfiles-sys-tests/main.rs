@@ -6,6 +6,7 @@ extern crate libc;
 use libc::*;
 use chemfiles_sys::*;
 
+#[allow(warnings)]
 include!(concat!(env!("OUT_DIR"), "/ctest.rs"));
 
 #[cfg(test)]
