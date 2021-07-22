@@ -615,7 +615,7 @@ impl Topology {
                 self.as_ptr(),
                 // Casting BondOrder to chfl_bond_order is safe, as they are
                 // both `repr(C)` enums with the same values.
-                bonds.as_mut_ptr() as *mut _,
+                bonds.as_mut_ptr().cast(),
                 count
             ));
         }
@@ -784,7 +784,7 @@ impl Topology {
 impl Drop for Topology {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr() as *const _);
+            let _ = chfl_free(self.as_ptr().cast());
         }
     }
 }
@@ -995,7 +995,7 @@ mod test {
 
         let first = topology.residue(0).unwrap();
         let second = topology.residue(0).unwrap();
-        assert_eq!(topology.are_linked(&first, &second), true);
+        assert!(topology.are_linked(&first, &second));
 
         // missing residue
         assert!(topology.residue_for_atom(1).is_none());

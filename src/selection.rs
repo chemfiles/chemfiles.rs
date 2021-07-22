@@ -118,7 +118,7 @@ impl Clone for Selection {
 impl Drop for Selection {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr() as *const _);
+            let _ = chfl_free(self.as_ptr().cast());
         }
     }
 }
@@ -351,7 +351,7 @@ mod tests {
         #[test]
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
-            assert_eq!(match_.iter().cloned().collect::<Vec<usize>>(), vec![1, 2, 3, 4]);
+            assert_eq!(match_.iter().copied().collect::<Vec<usize>>(), vec![1, 2, 3, 4]);
 
             let v = vec![1, 2, 3, 4];
             for (i, &m) in match_.iter().enumerate() {
@@ -423,6 +423,6 @@ mod tests {
     fn list_on_size_1_selection() {
         let frame = testing_frame();
         let mut selection = Selection::new("pairs: name(#1) H").unwrap();
-        let _ = selection.list(&frame);
+        let _list = selection.list(&frame);
     }
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::needless_return)]
+
 extern crate cmake;
 
 use std::io::prelude::*;
@@ -12,7 +14,7 @@ fn main() {
 fn build_chemfiles() -> PathBuf {
     let path = Path::new("chemfiles").join("CMakeLists.txt");
     if !path.exists() {
-        panic!("uninitalized git submodule. Please run `git submodule update --init`.")
+        panic!("uninitialized git submodule. Please run `git submodule update --init`.")
     }
 
     let out_dir = cmake::Config::new(".").build();

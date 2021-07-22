@@ -1,6 +1,6 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
+use std::convert::TryInto;
 use std::path::Path;
 use std::ptr;
 
@@ -393,14 +393,17 @@ impl Trajectory {
     /// ```
     #[allow(clippy::cast_possible_truncation)]
     pub fn memory_buffer(&self) -> Result<&str, Error> {
-            let mut raw_str: *const i8 = std::ptr::null();
-            let mut strlen: u64 = 0;
-            unsafe {
-                check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut raw_str, &mut strlen))?;
-                let mem_buf = std::ffi::CStr::from_ptr(raw_str);
-                assert_eq!(mem_buf.to_bytes().len(), strlen as usize);
-                Ok(mem_buf.to_str().unwrap())
-            }
+            let mut ptr: *const i8 = std::ptr::null();
+            let mut count: u64 = 0;
+            let buffer = unsafe {
+                check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
+                 std::slice::from_raw_parts(
+                    ptr.cast(), count.try_into().expect("failed to convert u64 to usize")
+                )
+            };
+
+            let string = std::str::from_utf8(buffer)?;
+            Ok(string)
     }
 
     /// Get file path for this trajectory.

@@ -888,7 +888,7 @@ impl Frame {
 impl Drop for Frame {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr() as *const _);
+            let _ = chfl_free(self.as_ptr().cast());
         }
     }
 }
@@ -948,7 +948,7 @@ mod test {
     fn out_of_bounds_atom() {
         let mut frame = Frame::new();
         frame.resize(22);
-        let _ = frame.atom(23);
+        let _atom = frame.atom(23);
     }
 
     #[test]
@@ -993,9 +993,9 @@ mod test {
     fn velocities() {
         let mut frame = Frame::new();
         frame.resize(4);
-        assert_eq!(frame.has_velocities(), false);
+        assert!(!frame.has_velocities());
         frame.add_velocities();
-        assert_eq!(frame.has_velocities(), true);
+        assert!(frame.has_velocities());
 
         let expected = &[
             [1.0, 2.0, 3.0],

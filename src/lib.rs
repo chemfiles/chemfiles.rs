@@ -23,7 +23,7 @@
 
 #![deny(missing_docs)]
 #![warn(trivial_casts, unused_import_braces, variant_size_differences)]
-#![warn(unused_qualifications, unused_results)]
+#![warn(unused_results)]
 // Configuration for clippy lints
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]

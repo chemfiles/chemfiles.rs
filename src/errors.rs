@@ -47,6 +47,7 @@ pub enum Status {
     /// Exception in the C++ standard library
     StdCppError = chfl_status::CHFL_CXX_ERROR as isize,
     /// The given path is not valid UTF8
+    // TODO: rename this to UTF8Error in the next breaking release
     UTF8PathError,
 }
 
@@ -69,6 +70,15 @@ impl From<chfl_status> for Error {
         Error {
             status,
             message,
+        }
+    }
+}
+
+impl From<std::str::Utf8Error> for Error {
+    fn from(_: std::str::Utf8Error) -> Self {
+        Error {
+            status: Status::UTF8PathError,
+            message: "failed to convert data to UTF8 string".into(),
         }
     }
 }
@@ -131,7 +141,7 @@ extern "C" fn warning_callback(message: *const c_char) {
     unsafe {
         let callback = &*LOGGING_CALLBACK.expect("No callback provided, this is an internal bug");
         // ignore result. If a panic happened, everything is going badly anyway
-        let _ = panic::catch_unwind(|| {
+        let _result = panic::catch_unwind(|| {
             callback(&strings::from_c(message));
         });
     }
@@ -147,7 +157,8 @@ pub fn set_warning_callback<F>(callback: F) where F: WarningCallback + 'static {
             // set the LOGGING_CALLBACK to the new one
             LOGGING_CALLBACK = Some(callback);
             // drop the previous callback
-            let _ = Box::from_raw(previous);
+            let previous = Box::from_raw(previous);
+            std::mem::drop(previous);
         } else {
             // set the LOGGING_CALLBACK
             LOGGING_CALLBACK = Some(callback);
@@ -174,7 +185,7 @@ impl error::Error for Error {
             Status::FileError => "Error while reading or writing a file",
             Status::FormatError => "Error in file formatting, i.e. the file is invalid",
             Status::SelectionError => "Error in selection string syntax",
-            Status::UTF8PathError => "The given path is not valid UTF8",
+            Status::UTF8PathError => "A string is not valid UTF8",
             Status::ConfigurationError => "Error in configuration files",
             Status::OutOfBounds => "Out of bounds indexing",
             Status::PropertyError => "Error in property",
