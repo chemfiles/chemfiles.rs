@@ -82,8 +82,8 @@ mod property;
 pub use property::Property;
 pub use property::PropertiesIter;
 
-mod metadata;
-pub use metadata::{FormatMetadata, formats_list};
+mod misc;
+pub use misc::{FormatMetadata, formats_list, guess_format};
 
 /// Get the version of the chemfiles library.
 ///

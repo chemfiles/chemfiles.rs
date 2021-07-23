@@ -4,10 +4,10 @@
 use std::convert::TryInto;
 use std::ffi::CStr;
 
-use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free};
+use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_guess_format};
 use errors::check_success;
 
-/// `FormatMetadata` contains metdata associated with one format.
+/// `FormatMetadata` contains metadata associated with one format.
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FormatMetadata {
@@ -99,4 +99,38 @@ pub fn formats_list() -> Vec<FormatMetadata> {
         let _ = chfl_free(formats as *const _);
     }
     return formats_vec;
+}
+
+#[allow(clippy::doc_markdown)]
+/// Get the format that chemfiles would use to read a file at the given
+/// ``path``.
+///
+/// The format is mostly guessed from the path extension, chemfiles only tries
+/// to read the file to distinguish between CIF and mmCIF files. Opening the
+/// file using the returned format string might still fail. For example, it will
+/// fail if the file is not actually formatted according to the guessed format;
+/// or the format/compression combination is not supported (e.g. `XTC / GZ` will
+/// not work since the XTC reader does not support compressed files).
+///
+/// The returned format is represented in a way compatible with the various
+/// `Trajectory` constructors, i.e. `"<format name> [/ <compression>]"`, where
+/// compression is optional.
+///
+/// # Examples
+/// ```
+/// let format = chemfiles::guess_format("trajectory.xyz.xz");
+/// assert_eq!(format, "XYZ / XZ");
+///
+/// let format = chemfiles::guess_format("trajectory.nc");
+/// assert_eq!(format, "Amber NetCDF");
+/// ```
+pub fn guess_format(path: &str) -> String {
+    let path = crate::strings::to_c(path);
+    let mut buffer = vec![0; 128];
+    unsafe {
+        check_success(chfl_guess_format(
+            path.as_ptr(), buffer.as_mut_ptr(), buffer.len() as u64
+        ));
+    }
+    return crate::strings::from_c(buffer.as_ptr());
 }
