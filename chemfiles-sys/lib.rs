@@ -111,6 +111,7 @@ extern "C" {
     pub fn chfl_set_warning_callback(callback: chfl_warning_callback) -> chfl_status;
     pub fn chfl_add_configuration(path: *const c_char) -> chfl_status;
     pub fn chfl_formats_list(metadata: *mut *mut chfl_format_metadata, count: *mut u64) -> chfl_status;
+    pub fn chfl_guess_format(path: *const c_char, format: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_free(object: *const c_void) -> c_void;
     pub fn chfl_property_bool(value: c_bool) -> *mut CHFL_PROPERTY;
     pub fn chfl_property_double(value: c_double) -> *mut CHFL_PROPERTY;
