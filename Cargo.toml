@@ -21,6 +21,11 @@ libc = "0.2"
 [dev-dependencies]
 approx = "0.4"
 
+[features]
+# force a build from sources even if there is a matching pre-built version
+# available
+build-from-sources = ["chemfiles-sys/build-from-sources"]
+
 [workspace]
 members = [
     "chemfiles-sys",
