@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles"
-version = "0.10.1"
+version = "0.10.2"
 authors = ["Guillaume Fraux <guillaume.fraux@chimie-paristech.fr>"]
 documentation = "http://chemfiles.org/chemfiles.rs/"
 repository = "https://github.com/chemfiles/chemfiles.rs"
@@ -15,7 +15,7 @@ exclude = ["data/*"]
 name = "chemfiles"
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.10.1"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.10.2"}
 libc = "0.2"
 
 [dev-dependencies]
