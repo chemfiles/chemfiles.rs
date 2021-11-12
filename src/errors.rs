@@ -154,11 +154,11 @@ pub fn set_warning_callback<F>(callback: F) where F: WarningCallback + 'static {
     let callback = Box::into_raw(Box::new(callback));
     unsafe {
         if let Some(previous) = LOGGING_CALLBACK {
-            // set the LOGGING_CALLBACK to the new one
-            LOGGING_CALLBACK = Some(callback);
             // drop the previous callback
             let previous = Box::from_raw(previous);
             std::mem::drop(previous);
+            // set the LOGGING_CALLBACK to the new one
+            LOGGING_CALLBACK = Some(callback);
         } else {
             // set the LOGGING_CALLBACK
             LOGGING_CALLBACK = Some(callback);

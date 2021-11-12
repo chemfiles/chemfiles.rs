@@ -15,4 +15,4 @@ libc = "0.2"
 chemfiles-sys = {path = "../chemfiles-sys"}
 
 [build-dependencies]
-ctest2 = "0.3"
+ctest2 = "0.4"

@@ -289,7 +289,7 @@ impl Selection {
     /// ```
     pub fn list(&mut self, frame: &Frame) -> Vec<usize> {
         if self.size() != 1 {
-            panic!("can not call `Selection::list` on a multiple selection")
+            panic!("can not call `Selection::list` on a multiple selection");
         }
         return self.evaluate(frame)
             .into_iter()
@@ -405,7 +405,7 @@ mod tests {
         let mut selection = Selection::new("angles: all").unwrap();
         let res = selection.evaluate(&frame);
         for m in &[Match::new(&[0, 1, 2]), Match::new(&[1, 2, 3])] {
-            assert!(res.iter().any(|r| r == m))
+            assert!(res.iter().any(|r| r == m));
         }
     }
 

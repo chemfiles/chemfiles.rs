@@ -419,7 +419,7 @@ impl UnitCell {
     /// ```
     pub fn wrap(&self, vector: &mut [f64; 3]) {
         unsafe {
-            check_success(chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr()))
+            check_success(chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr()));
         }
     }
 }
