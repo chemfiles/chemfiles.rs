@@ -893,6 +893,83 @@ impl Drop for Frame {
     }
 }
 
+pub struct FrameAtomIterator<'a> {
+    frame: &'a Frame,
+    atom_index: usize,
+}
+
+impl<'a> Frame {
+    /// Gets an iterator over all (atom, position, Option<velocity>) for the frame
+    pub fn iter(&'a self) -> FrameAtomIterator<'a> {
+        FrameAtomIterator {
+            frame: &self,
+            atom_index: 0,
+        }
+    }
+}
+
+impl<'a> IntoIterator for &'a Frame {
+    type Item = (AtomRef<'a>, &'a [f64; 3],Option<&'a [f64; 3]>);
+    type IntoIter = FrameAtomIterator<'a>;
+
+    /// Gets an iterator over all (atom. position, Option<velocity>) for this frame
+    ///
+    /// # Examples
+    /// ```
+    /// # use chemfiles::{Atom, Frame};
+    /// let mut frame = Frame::new();
+    ///
+    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
+    ///
+    /// let mut iter = frame.into_iter();
+    ///
+    /// if let Some(first) = iter.next() {
+    ///     assert_eq!(first.0.name(), "O");
+    ///     assert_eq!(first.1[0], 0.0);
+    ///     assert_eq!(first.1[1], 0.0);
+    ///     assert_eq!(first.1[2], 0.0);
+    /// } else {
+    ///     assert!(false);
+    /// }
+    ///
+    /// if let Some(second) = iter.next() {
+    ///     assert_eq!(second.0.name(), "H");
+    ///     assert_eq!(second.1[0], 1.0);
+    ///     assert_eq!(second.1[1], 0.0);
+    ///     assert_eq!(second.1[2], 0.0);
+    /// } else {
+    ///     assert!(false);
+    /// }
+    ///
+    /// let end = iter.next();
+    /// assert!(end.is_none());
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a> Iterator for FrameAtomIterator<'a> {
+    type Item = (AtomRef<'a>, &'a [f64; 3], Option<&'a [f64; 3]>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.frame.size() == self.atom_index {
+            return None;
+        }
+        let atom_index = self.atom_index;
+        self.atom_index += 1;
+        let atom = self.frame.atom(atom_index);
+        let position = &self.frame.positions()[atom_index];
+        if self.frame.has_velocities() {
+            let velocity = &self.frame.velocities()[atom_index];
+            return Some((atom, position, Some(velocity)));
+        } else {
+            return Some((atom, position, None));
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -1143,5 +1220,65 @@ mod test {
         assert_eq!(frame.angle(0, 1, 2), PI / 2.0);
         assert_eq!(frame.dihedral(0, 1, 2, 3), PI / 2.0);
         assert_eq!(frame.out_of_plane(1, 4, 0, 2), 2.0);
+    }
+
+    #[test]
+    fn iterator_without_velocity() {
+        let mut frame = Frame::new();
+
+        frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], None);
+        frame.add_atom(&Atom::new("H2"), [0.0, 1.0, 0.0], None);
+        frame.add_atom(&Atom::new("H3"), [0.0, 0.0, 1.0], None);
+        frame.add_atom(&Atom::new("H4"), [1.0, 1.0, 1.0], None);
+
+        let mut atoms = Vec::new();
+        let mut positions = Vec::new();
+
+        for item in &frame {
+            atoms.push(item.0);
+            positions.push(item.1);
+            assert_eq!(item.2, None);
+        }
+
+        assert_eq!(atoms[0].name(), "H1");
+        assert_eq!(atoms[2].name(), "H3");
+
+        assert_eq!(positions[1][0], 0.0);
+        assert_eq!(positions[1][1], 1.0);
+        assert_eq!(positions[1][2], 0.0);
+
+        assert_eq!(positions[3][0], 1.0);
+        assert_eq!(positions[3][1], 1.0);
+        assert_eq!(positions[3][2], 1.0);
+    }
+
+    #[test]
+    fn iterator_with_velocity() {
+        let mut frame = Frame::new();
+
+        frame.add_velocities();
+        frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], [-1.0, 0.0, 0.0]);
+        frame.add_atom(&Atom::new("H2"), [0.0, 1.0, 0.0], [0.0, -1.0, 0.0]);
+        frame.add_atom(&Atom::new("H3"), [0.0, 0.0, 1.0], [0.0, 0.0, -1.0]);
+        frame.add_atom(&Atom::new("H4"), [1.0, 1.0, 1.0], [-1.0, -1.0, -1.0]);
+
+        let mut atoms = Vec::new();
+        let mut velocities = Vec::new();
+
+        for item in &frame {
+            atoms.push(item.0);
+            velocities.push(item.2);
+        }
+
+        assert_eq!(atoms[0].name(), "H1");
+        assert_eq!(atoms[2].name(), "H3");
+
+        if let Some(velocity) = velocities[1] {
+            assert_eq!(velocity[0], 0.0);
+            assert_eq!(velocity[1], -1.0);
+            assert_eq!(velocity[2], 0.0);
+        } else {
+            assert!(false);
+        }
     }
 }
