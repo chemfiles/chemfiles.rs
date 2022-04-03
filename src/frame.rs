@@ -4,13 +4,13 @@ use std::ops::Drop;
 use std::ptr;
 use std::slice;
 
+use super::{Atom, AtomMut, AtomRef};
+use super::{BondOrder, Residue, Topology, TopologyRef};
+use super::{UnitCell, UnitCellMut, UnitCellRef};
 use chemfiles_sys::*;
+use errors::{check, check_not_null, check_success, Error};
+use property::{PropertiesIter, Property, RawProperty};
 use strings;
-use errors::{check_not_null, check_success, check, Error};
-use super::{Atom, AtomRef, AtomMut};
-use super::{Topology, TopologyRef, Residue, BondOrder};
-use super::{UnitCell, UnitCellRef, UnitCellMut};
-use property::{Property, RawProperty, PropertiesIter};
 
 /// A `Frame` contains data from one simulation step: the current unit
 /// cell, the topology, the positions, and the velocities of the particles in
@@ -37,9 +37,7 @@ impl Frame {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_FRAME) -> Frame {
         check_not_null(ptr);
-        Frame {
-            handle: ptr
-        }
+        Frame { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -75,9 +73,7 @@ impl Frame {
     /// assert_eq!(frame.size(), 0);
     /// ```
     pub fn new() -> Frame {
-        unsafe {
-            Frame::from_ptr(chfl_frame())
-        }
+        unsafe { Frame::from_ptr(chfl_frame()) }
     }
 
     /// Get a reference to the atom at the given `index` in this frame.
@@ -97,10 +93,8 @@ impl Frame {
     /// ```
     pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
-            let handle = chfl_atom_from_frame(
-                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
-                index as u64
-            );
+            let handle =
+                chfl_atom_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
         }
     }
@@ -183,8 +177,7 @@ impl Frame {
         atom: &Atom,
         position: [f64; 3],
         velocity: impl Into<Option<[f64; 3]>>,
-    )
-    {
+    ) {
         let velocity = velocity.into();
         let velocity_ptr = match velocity {
             Some(ref data) => data.as_ptr(),
@@ -196,10 +189,9 @@ impl Frame {
                 self.as_mut_ptr(),
                 atom.as_ptr(),
                 position.as_ptr(),
-                velocity_ptr
+                velocity_ptr,
             ));
         }
-
     }
 
     /// Remove the atom at index `i` in this frame.
@@ -325,9 +317,7 @@ impl Frame {
     /// assert_eq!(topology.residue(0).unwrap().name(), "foo");
     /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<(), Error> {
-        unsafe {
-            check(chfl_frame_add_residue(self.as_mut_ptr(), residue.as_ptr()))
-        }
+        unsafe { check(chfl_frame_add_residue(self.as_mut_ptr(), residue.as_ptr())) }
     }
 
     /// Get the distance between the atoms at indexes `i` and `j` in this frame,
@@ -468,7 +458,7 @@ impl Frame {
             check_success(chfl_frame_positions(
                 self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
                 &mut ptr,
-                &mut natoms
+                &mut natoms,
             ));
         }
 
@@ -499,7 +489,11 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            check_success(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms));
+            check_success(chfl_frame_positions(
+                self.as_mut_ptr(),
+                &mut ptr,
+                &mut natoms,
+            ));
         }
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
@@ -528,7 +522,7 @@ impl Frame {
             check_success(chfl_frame_velocities(
                 self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
                 &mut ptr,
-                &mut natoms
+                &mut natoms,
             ));
         }
         #[allow(clippy::cast_possible_truncation)]
@@ -559,7 +553,11 @@ impl Frame {
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            check_success(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms));
+            check_success(chfl_frame_velocities(
+                self.as_mut_ptr(),
+                &mut ptr,
+                &mut natoms,
+            ));
         }
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
@@ -701,7 +699,10 @@ impl Frame {
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<(), Error> {
         unsafe {
-            check(chfl_frame_set_topology(self.as_mut_ptr(), topology.as_ptr()))
+            check(chfl_frame_set_topology(
+                self.as_mut_ptr(),
+                topology.as_ptr(),
+            ))
         }
     }
 
@@ -762,9 +763,7 @@ impl Frame {
     /// assert_eq!(frame.topology().bonds_count(), 1);
     /// ```
     pub fn guess_bonds(&mut self) -> Result<(), Error> {
-        unsafe {
-            check(chfl_frame_guess_bonds(self.as_mut_ptr()))
-        }
+        unsafe { check(chfl_frame_guess_bonds(self.as_mut_ptr())) }
     }
 
     /// Remove all existing bonds, angles, dihedral angles and improper
@@ -814,7 +813,9 @@ impl Frame {
         let property = property.into().as_raw();
         unsafe {
             check_success(chfl_frame_set_property(
-                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+                self.as_mut_ptr(),
+                buffer.as_ptr(),
+                property.as_ptr(),
             ));
         }
     }
@@ -870,7 +871,11 @@ impl Frame {
         let size = count as usize;
         let mut c_names = vec![ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_frame_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
+            check_success(chfl_frame_list_properties(
+                self.as_ptr(),
+                c_names.as_mut_ptr(),
+                count,
+            ));
         }
 
         let mut names = Vec::new();
@@ -880,7 +885,7 @@ impl Frame {
 
         PropertiesIter {
             names: names.into_iter(),
-            getter: Box::new(move |name| self.get(&*name).expect("failed to get property"))
+            getter: Box::new(move |name| self.get(&*name).expect("failed to get property")),
         }
     }
 }
@@ -895,26 +900,48 @@ impl Drop for Frame {
 
 pub struct FrameAtomIterator<'a> {
     frame: &'a Frame,
-    atom_index: usize,
+    index: usize,
+}
+
+pub struct FrameVelocityIterator<'a> {
+    frame: &'a Frame,
+    index: usize,
+}
+
+pub struct FramePositionIterator<'a> {
+    frame: &'a Frame,
+    index: usize,
 }
 
 impl<'a> Frame {
-    /// Gets an iterator over all (atom, position, Option<velocity>) for the frame
-    pub fn iter(&'a self) -> FrameAtomIterator<'a> {
+    /// Gets an iterator over atoms
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Atom, AtomRef, Frame};
+    /// let mut frame = Frame::new();
+    ///
+    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
+    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
+    ///
+    /// let mut atoms: Vec<AtomRef> = Vec::new();
+    ///
+    /// for atom in frame.iter_atoms() {
+    ///     atoms.push(atom);
+    /// }
+    ///
+    /// assert_eq!(atoms.len(), 2);
+    /// ```
+    pub fn iter_atoms(&'a self) -> FrameAtomIterator<'a> {
         FrameAtomIterator {
             frame: &self,
-            atom_index: 0,
+            index: 0,
         }
     }
-}
 
-impl<'a> IntoIterator for &'a Frame {
-    type Item = (AtomRef<'a>, &'a [f64; 3],Option<&'a [f64; 3]>);
-    type IntoIter = FrameAtomIterator<'a>;
-
-    /// Gets an iterator over all (atom. position, Option<velocity>) for this frame
+    /// Gets an iterator over atom positions
     ///
-    /// # Examples
+    /// # Example
     /// ```
     /// # use chemfiles::{Atom, Frame};
     /// let mut frame = Frame::new();
@@ -922,51 +949,89 @@ impl<'a> IntoIterator for &'a Frame {
     /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
     /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
     ///
-    /// let mut iter = frame.into_iter();
-    ///
-    /// if let Some(first) = iter.next() {
-    ///     assert_eq!(first.0.name(), "O");
-    ///     assert_eq!(first.1[0], 0.0);
-    ///     assert_eq!(first.1[1], 0.0);
-    ///     assert_eq!(first.1[2], 0.0);
-    /// } else {
-    ///     assert!(false);
+    /// for (i, position) in frame.iter_positions().enumerate() {
+    ///     if i == 0 {
+    ///         assert_eq!(position[0], 0.0);
+    ///     }
+    ///     if i == 1 {
+    ///         assert_eq!(position[0], 1.0);
+    ///     }
     /// }
-    ///
-    /// if let Some(second) = iter.next() {
-    ///     assert_eq!(second.0.name(), "H");
-    ///     assert_eq!(second.1[0], 1.0);
-    ///     assert_eq!(second.1[1], 0.0);
-    ///     assert_eq!(second.1[2], 0.0);
-    /// } else {
-    ///     assert!(false);
-    /// }
-    ///
-    /// let end = iter.next();
-    /// assert!(end.is_none());
     /// ```
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+    pub fn iter_positions(&'a self) -> FramePositionIterator<'a> {
+        FramePositionIterator {
+            frame: &self,
+            index: 0,
+        }
+    }
+
+    /// Gets an iterator over atom velocities
+    ///
+    /// Panics if has_velocities() is false
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{Atom, Frame};
+    /// let mut frame = Frame::new();
+    ///
+    /// frame.add_velocities();
+    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
+    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+    ///
+    /// assert!(frame.has_velocities());
+    /// for (i, velocity) in frame.iter_velocities().enumerate() {
+    ///     if i == 0 {
+    ///         assert_eq!(velocity[0], 1.0);
+    ///     }
+    ///     if i == 1 {
+    ///         assert_eq!(velocity[1], 1.0);
+    ///     }
+    /// }
+    /// ```
+    pub fn iter_velocities(&'a self) -> FrameVelocityIterator<'a> {
+        if !self.has_velocities() {
+            panic!("Frame has no velocity information");
+        }
+        FrameVelocityIterator {
+            frame: &self,
+            index: 0,
+        }
     }
 }
 
 impl<'a> Iterator for FrameAtomIterator<'a> {
-    type Item = (AtomRef<'a>, &'a [f64; 3], Option<&'a [f64; 3]>);
+    type Item = AtomRef<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.frame.size() == self.atom_index {
+        if self.frame.size() == self.index {
             return None;
         }
-        let atom_index = self.atom_index;
-        self.atom_index += 1;
-        let atom = self.frame.atom(atom_index);
-        let position = &self.frame.positions()[atom_index];
-        if self.frame.has_velocities() {
-            let velocity = &self.frame.velocities()[atom_index];
-            return Some((atom, position, Some(velocity)));
-        } else {
-            return Some((atom, position, None));
+        self.index += 1;
+        Some(self.frame.atom(self.index - 1))
+    }
+}
+
+impl<'a> Iterator for FramePositionIterator<'a> {
+    type Item = &'a [f64; 3];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.frame.size() == self.index {
+            return None;
         }
+        self.index += 1;
+        Some(&self.frame.positions()[self.index - 1])
+    }
+}
+
+impl<'a> Iterator for FrameVelocityIterator<'a> {
+    type Item = &'a [f64; 3];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.frame.size() == self.index {
+            return None;
+        }
+        self.index += 1;
+        Some(&self.frame.velocities()[self.index - 1])
     }
 }
 
@@ -1223,7 +1288,7 @@ mod test {
     }
 
     #[test]
-    fn iterator_without_velocity() {
+    fn atom_position_iterator() {
         let mut frame = Frame::new();
 
         frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], None);
@@ -1231,25 +1296,35 @@ mod test {
         frame.add_atom(&Atom::new("H3"), [0.0, 0.0, 1.0], None);
         frame.add_atom(&Atom::new("H4"), [1.0, 1.0, 1.0], None);
 
-        let mut atoms = Vec::new();
-        let mut positions = Vec::new();
+        let mut items: Vec<(AtomRef, &[f64; 3])> = Vec::new();
 
-        for item in &frame {
-            atoms.push(item.0);
-            positions.push(item.1);
-            assert_eq!(item.2, None);
+        for item in frame.iter_atoms().zip(frame.iter_positions()) {
+            items.push(item);
         }
 
-        assert_eq!(atoms[0].name(), "H1");
-        assert_eq!(atoms[2].name(), "H3");
+        assert_eq!(items[0].0.name(), "H1");
+        assert_eq!(items[2].0.name(), "H3");
 
-        assert_eq!(positions[1][0], 0.0);
-        assert_eq!(positions[1][1], 1.0);
-        assert_eq!(positions[1][2], 0.0);
+        assert_eq!(items[1].1[0], 0.0);
+        assert_eq!(items[1].1[1], 1.0);
+        assert_eq!(items[1].1[2], 0.0);
+        assert_eq!(items[3].1[0], 1.0);
+        assert_eq!(items[3].1[1], 1.0);
+        assert_eq!(items[3].1[2], 1.0);
+    }
 
-        assert_eq!(positions[3][0], 1.0);
-        assert_eq!(positions[3][1], 1.0);
-        assert_eq!(positions[3][2], 1.0);
+    #[test]
+    #[should_panic]
+    fn iterator_velocity_no_velocity_exists() {
+        let mut frame = Frame::new();
+
+        frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], None);
+        frame.add_atom(&Atom::new("H2"), [0.0, 1.0, 0.0], None);
+
+        let mut _total_velocity_0: f64 = 0.0;
+        for item in frame.iter_velocities() {
+            _total_velocity_0 += item[0];
+        }
     }
 
     #[test]
@@ -1262,23 +1337,14 @@ mod test {
         frame.add_atom(&Atom::new("H3"), [0.0, 0.0, 1.0], [0.0, 0.0, -1.0]);
         frame.add_atom(&Atom::new("H4"), [1.0, 1.0, 1.0], [-1.0, -1.0, -1.0]);
 
-        let mut atoms = Vec::new();
         let mut velocities = Vec::new();
 
-        for item in &frame {
-            atoms.push(item.0);
-            velocities.push(item.2);
+        for item in frame.iter_velocities() {
+            velocities.push(item);
         }
 
-        assert_eq!(atoms[0].name(), "H1");
-        assert_eq!(atoms[2].name(), "H3");
-
-        if let Some(velocity) = velocities[1] {
-            assert_eq!(velocity[0], 0.0);
-            assert_eq!(velocity[1], -1.0);
-            assert_eq!(velocity[2], 0.0);
-        } else {
-            assert!(false);
-        }
+        assert_eq!(velocities[1][0], 0.0);
+        assert_eq!(velocities[1][1], -1.0);
+        assert_eq!(velocities[1][2], 0.0);
     }
 }
