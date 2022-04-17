@@ -903,16 +903,6 @@ pub struct FrameAtomIterator<'a> {
     index: usize,
 }
 
-pub struct FrameVelocityIterator<'a> {
-    frame: &'a Frame,
-    index: usize,
-}
-
-pub struct FramePositionIterator<'a> {
-    frame: &'a Frame,
-    index: usize,
-}
-
 impl<'a> Frame {
     /// Gets an iterator over atoms
     ///
@@ -934,66 +924,7 @@ impl<'a> Frame {
     /// ```
     pub fn iter_atoms(&'a self) -> FrameAtomIterator<'a> {
         FrameAtomIterator {
-            frame: &self,
-            index: 0,
-        }
-    }
-
-    /// Gets an iterator over atom positions
-    ///
-    /// # Example
-    /// ```
-    /// # use chemfiles::{Atom, Frame};
-    /// let mut frame = Frame::new();
-    ///
-    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], None);
-    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], None);
-    ///
-    /// for (i, position) in frame.iter_positions().enumerate() {
-    ///     if i == 0 {
-    ///         assert_eq!(position[0], 0.0);
-    ///     }
-    ///     if i == 1 {
-    ///         assert_eq!(position[0], 1.0);
-    ///     }
-    /// }
-    /// ```
-    pub fn iter_positions(&'a self) -> FramePositionIterator<'a> {
-        FramePositionIterator {
-            frame: &self,
-            index: 0,
-        }
-    }
-
-    /// Gets an iterator over atom velocities
-    ///
-    /// Panics if has_velocities() is false
-    ///
-    /// # Example
-    /// ```
-    /// # use chemfiles::{Atom, Frame};
-    /// let mut frame = Frame::new();
-    ///
-    /// frame.add_velocities();
-    /// frame.add_atom(&Atom::new("O"), [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
-    /// frame.add_atom(&Atom::new("H"), [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
-    ///
-    /// assert!(frame.has_velocities());
-    /// for (i, velocity) in frame.iter_velocities().enumerate() {
-    ///     if i == 0 {
-    ///         assert_eq!(velocity[0], 1.0);
-    ///     }
-    ///     if i == 1 {
-    ///         assert_eq!(velocity[1], 1.0);
-    ///     }
-    /// }
-    /// ```
-    pub fn iter_velocities(&'a self) -> FrameVelocityIterator<'a> {
-        if !self.has_velocities() {
-            panic!("Frame has no velocity information");
-        }
-        FrameVelocityIterator {
-            frame: &self,
+            frame: self,
             index: 0,
         }
     }
@@ -1003,35 +934,11 @@ impl<'a> Iterator for FrameAtomIterator<'a> {
     type Item = AtomRef<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.frame.size() == self.index {
+        if self.frame.size() <= self.index {
             return None;
         }
         self.index += 1;
         Some(self.frame.atom(self.index - 1))
-    }
-}
-
-impl<'a> Iterator for FramePositionIterator<'a> {
-    type Item = &'a [f64; 3];
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.frame.size() == self.index {
-            return None;
-        }
-        self.index += 1;
-        Some(&self.frame.positions()[self.index - 1])
-    }
-}
-
-impl<'a> Iterator for FrameVelocityIterator<'a> {
-    type Item = &'a [f64; 3];
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.frame.size() == self.index {
-            return None;
-        }
-        self.index += 1;
-        Some(&self.frame.velocities()[self.index - 1])
     }
 }
 
@@ -1288,7 +1195,7 @@ mod test {
     }
 
     #[test]
-    fn atom_position_iterator() {
+    fn atom_iterator() {
         let mut frame = Frame::new();
 
         frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], None);
@@ -1298,7 +1205,7 @@ mod test {
 
         let mut items: Vec<(AtomRef, &[f64; 3])> = Vec::new();
 
-        for item in frame.iter_atoms().zip(frame.iter_positions()) {
+        for item in frame.iter_atoms().zip(frame.positions()) {
             items.push(item);
         }
 
@@ -1311,40 +1218,5 @@ mod test {
         assert_eq!(items[3].1[0], 1.0);
         assert_eq!(items[3].1[1], 1.0);
         assert_eq!(items[3].1[2], 1.0);
-    }
-
-    #[test]
-    #[should_panic]
-    fn iterator_velocity_no_velocity_exists() {
-        let mut frame = Frame::new();
-
-        frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], None);
-        frame.add_atom(&Atom::new("H2"), [0.0, 1.0, 0.0], None);
-
-        let mut _total_velocity_0: f64 = 0.0;
-        for item in frame.iter_velocities() {
-            _total_velocity_0 += item[0];
-        }
-    }
-
-    #[test]
-    fn iterator_with_velocity() {
-        let mut frame = Frame::new();
-
-        frame.add_velocities();
-        frame.add_atom(&Atom::new("H1"), [1.0, 0.0, 0.0], [-1.0, 0.0, 0.0]);
-        frame.add_atom(&Atom::new("H2"), [0.0, 1.0, 0.0], [0.0, -1.0, 0.0]);
-        frame.add_atom(&Atom::new("H3"), [0.0, 0.0, 1.0], [0.0, 0.0, -1.0]);
-        frame.add_atom(&Atom::new("H4"), [1.0, 1.0, 1.0], [-1.0, -1.0, -1.0]);
-
-        let mut velocities = Vec::new();
-
-        for item in frame.iter_velocities() {
-            velocities.push(item);
-        }
-
-        assert_eq!(velocities[1][0], 0.0);
-        assert_eq!(velocities[1][1], -1.0);
-        assert_eq!(velocities[1][2], 0.0);
     }
 }
