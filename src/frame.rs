@@ -29,6 +29,12 @@ impl Clone for Frame {
     }
 }
 
+pub struct AtomIter<'a> {
+    frame: &'a Frame,
+    index: usize,
+    size: usize,
+}
+
 impl Frame {
     /// Create a `Frame` from a C pointer.
     ///
@@ -888,22 +894,7 @@ impl Frame {
             getter: Box::new(move |name| self.get(&*name).expect("failed to get property")),
         }
     }
-}
 
-impl Drop for Frame {
-    fn drop(&mut self) {
-        unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
-        }
-    }
-}
-
-pub struct FrameAtomIterator<'a> {
-    frame: &'a Frame,
-    index: usize,
-}
-
-impl<'a> Frame {
     /// Gets an iterator over atoms
     ///
     /// # Example
@@ -922,19 +913,28 @@ impl<'a> Frame {
     ///
     /// assert_eq!(atoms.len(), 2);
     /// ```
-    pub fn iter_atoms(&'a self) -> FrameAtomIterator<'a> {
-        FrameAtomIterator {
+    pub fn iter_atoms(&self) -> AtomIter<'_> {
+        AtomIter {
             frame: self,
             index: 0,
+            size: self.size(),
         }
     }
 }
 
-impl<'a> Iterator for FrameAtomIterator<'a> {
+impl Drop for Frame {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = chfl_free(self.as_ptr().cast());
+        }
+    }
+}
+
+impl<'a> Iterator for AtomIter<'a> {
     type Item = AtomRef<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.frame.size() <= self.index {
+        if self.size <= self.index {
             return None;
         }
         let atom = self.frame.atom(self.index);
@@ -1213,7 +1213,7 @@ mod test {
         assert_eq!(items[0].0.name(), "H1");
         assert_eq!(items[2].0.name(), "H3");
 
-        assert_eq!(items[1].1, [0.0, 1.0, 0.0]);
-        assert_eq!(items[3].1, [1.0, 1.0, 1.0]);
+        assert_eq!(items[1].1, &[0.0_f64, 1.0_f64, 0.0_f64]);
+        assert_eq!(items[3].1, &[1.0_f64, 1.0_f64, 1.0_f64]);
     }
 }
