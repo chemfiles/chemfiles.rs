@@ -937,8 +937,9 @@ impl<'a> Iterator for FrameAtomIterator<'a> {
         if self.frame.size() <= self.index {
             return None;
         }
+        let atom = self.frame.atom(self.index);
         self.index += 1;
-        Some(self.frame.atom(self.index - 1))
+        Some(atom)
     }
 }
 
