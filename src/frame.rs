@@ -1213,11 +1213,7 @@ mod test {
         assert_eq!(items[0].0.name(), "H1");
         assert_eq!(items[2].0.name(), "H3");
 
-        assert_eq!(items[1].1[0], 0.0);
-        assert_eq!(items[1].1[1], 1.0);
-        assert_eq!(items[1].1[2], 0.0);
-        assert_eq!(items[3].1[0], 1.0);
-        assert_eq!(items[3].1[1], 1.0);
-        assert_eq!(items[3].1[2], 1.0);
+        assert_eq!(items[1].1, [0.0, 1.0, 0.0]);
+        assert_eq!(items[3].1, [1.0, 1.0, 1.0]);
     }
 }
