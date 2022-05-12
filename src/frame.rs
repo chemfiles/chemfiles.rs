@@ -517,11 +517,15 @@ impl Frame {
     /// frame.resize(67);
     /// frame.add_velocities();
     ///
-    /// let velocities = frame.velocities();
+    /// let velocities = frame.velocities().expect("missing velocities");
     /// assert_eq!(velocities.len(), 67);
     /// assert_eq!(velocities[0], [0.0, 0.0, 0.0]);
     /// ```
-    pub fn velocities(&self) -> &[[f64; 3]] {
+    pub fn velocities(&self) -> Option<&[[f64; 3]]> {
+        if !self.has_velocities() {
+            return None;
+        }
+
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -534,7 +538,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return slice::from_raw_parts(ptr, size);
+            return Some(slice::from_raw_parts(ptr, size));
         }
     }
 
@@ -547,15 +551,19 @@ impl Frame {
     /// frame.resize(67);
     /// frame.add_velocities();
     /// {
-    ///     let velocities = frame.velocities_mut();
+    ///     let velocities = frame.velocities_mut().expect("missing velocities");
     ///     assert_eq!(velocities[0], [0.0, 0.0, 0.0]);
     ///     velocities[0] = [1.0, 2.0, 3.0];
     /// }
     ///
-    /// let velocities = frame.velocities();
+    /// let velocities = frame.velocities().expect("missing velocities");
     /// assert_eq!(velocities[0], [1.0, 2.0, 3.0]);
     /// ```
-    pub fn velocities_mut(&mut self) -> &mut [[f64; 3]] {
+    pub fn velocities_mut(&mut self) -> Option<&mut [[f64; 3]]> {
+        if !self.has_velocities() {
+            return None;
+        }
+
         let mut ptr = ptr::null_mut();
         let mut natoms = 0;
         unsafe {
@@ -568,7 +576,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return slice::from_raw_parts_mut(ptr, size);
+            return Some(slice::from_raw_parts_mut(ptr, size));
         }
     }
 
@@ -990,7 +998,7 @@ mod test {
         assert_eq!(frame.positions(), positions);
 
         let velocities = &[[0.0, 0.0, 0.0], [4.0, 3.0, 2.0]];
-        assert_eq!(frame.velocities(), velocities);
+        assert_eq!(frame.velocities().unwrap(), velocities);
     }
 
     #[test]
@@ -1054,8 +1062,8 @@ mod test {
             [10.0, 11.0, 12.0],
         ];
 
-        frame.velocities_mut().clone_from_slice(expected);
-        assert_eq!(frame.velocities(), expected);
+        frame.velocities_mut().unwrap().clone_from_slice(expected);
+        assert_eq!(frame.velocities().unwrap(), expected);
     }
 
     #[test]
