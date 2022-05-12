@@ -3,12 +3,13 @@
 
 //! String conversions between C and Rust
 use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
 
 use chemfiles_sys::chfl_status;
 use errors::{check, Error};
 
 /// Create a Rust string from a C string. Clones all characters in `buffer`.
-pub fn from_c(buffer: *const i8) -> String {
+pub fn from_c(buffer: *const c_char) -> String {
     unsafe {
         let rust_str = CStr::from_ptr(buffer)
             .to_str()
@@ -23,7 +24,7 @@ pub fn to_c(string: &str) -> CString {
 }
 
 /// Check if a string buffer was big enough when passed to a C function
-fn buffer_was_big_enough(buffer: &[i8]) -> bool {
+fn buffer_was_big_enough(buffer: &[c_char]) -> bool {
     let len = buffer.len();
     if len < 2 {
         false
@@ -38,9 +39,9 @@ fn buffer_was_big_enough(buffer: &[i8]) -> bool {
 /// `initial` as the buffer initial size. If the buffer was filled and the
 /// result truncated by the C library, grow the buffer and try again until we
 /// get all the data. Then return the filled buffer to the caller.
-pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<i8>, Error>
+pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<c_char>, Error>
 where
-    F: Fn(*mut i8, u64) -> chfl_status,
+    F: Fn(*mut c_char, u64) -> chfl_status,
 {
     let mut size = initial;
     let mut buffer = vec![0; size];
