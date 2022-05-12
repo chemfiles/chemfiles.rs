@@ -93,7 +93,7 @@ pub fn formats_list() -> Vec<FormatMetadata> {
     };
     let formats_vec = formats_slice
         .iter()
-        .map(|fm| FormatMetadata::from_raw(fm))
+        .map(FormatMetadata::from_raw)
         .collect();
     unsafe {
         let _ = chfl_free(formats as *const _);

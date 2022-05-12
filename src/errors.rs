@@ -116,16 +116,12 @@ pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
 
 /// Check return value of a C function, panic if it failed.
 pub(crate) fn check_success(status: chfl_status) {
-    if status != chfl_status::CHFL_SUCCESS {
-        panic!("unexpected failure: {}", Error::last_error());
-    }
+    assert!(status == chfl_status::CHFL_SUCCESS, "unexpected failure: {}", Error::last_error());
 }
 
 /// Check a pointer for null.
 pub(crate) fn check_not_null<T>(ptr: *const T) {
-    if ptr.is_null() {
-        panic!("unexpected null pointer: {}", Error::last_error());
-    }
+    assert!(!ptr.is_null(), "unexpected null pointer: {}", Error::last_error());
 }
 
 pub trait WarningCallback: RefUnwindSafe + Fn(&str) {}
