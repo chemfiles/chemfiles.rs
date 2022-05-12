@@ -3,6 +3,7 @@
 use std::convert::TryInto;
 use std::path::Path;
 use std::ptr;
+use std::os::raw::c_char;
 
 use chemfiles_sys::*;
 use errors::{check, check_success, Error, Status};
@@ -71,7 +72,7 @@ impl Trajectory {
         let path = strings::to_c(path);
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
-            let handle = chfl_trajectory_open(path.as_ptr(), mode as i8);
+            let handle = chfl_trajectory_open(path.as_ptr(), mode as c_char);
             Trajectory::from_ptr(handle)
         }
     }
@@ -110,7 +111,7 @@ impl Trajectory {
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(
-                filename.as_ptr(), mode as i8, format.as_ptr()
+                filename.as_ptr(), mode as c_char, format.as_ptr()
             );
             Trajectory::from_ptr(handle)
         }
@@ -393,7 +394,7 @@ impl Trajectory {
     /// ```
     #[allow(clippy::cast_possible_truncation)]
     pub fn memory_buffer(&self) -> Result<&str, Error> {
-            let mut ptr: *const i8 = std::ptr::null();
+            let mut ptr: *const c_char = std::ptr::null();
             let mut count: u64 = 0;
             let buffer = unsafe {
                 check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
