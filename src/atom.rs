@@ -412,7 +412,7 @@ impl Atom {
 
         PropertiesIter {
             names: names.into_iter(),
-            getter: Box::new(move |name| self.get(&*name).expect("failed to get property"))
+            getter: Box::new(move |name| self.get(name).expect("failed to get property"))
         }
     }
 }
