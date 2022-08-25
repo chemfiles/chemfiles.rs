@@ -12,7 +12,7 @@ use self::libc::c_char;
 use chemfiles_sys::*;
 use strings;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// Error type for Chemfiles.
 pub struct Error {
     /// The error status code
@@ -23,7 +23,7 @@ pub struct Error {
 
 #[repr(C)]
 #[non_exhaustive]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// Possible causes of error in chemfiles
 pub enum Status {
     /// No error
