@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles-sys"
-version = "0.10.4"
+version = "0.10.3"
 authors = ["Guillaume Fraux <guillaume.fraux@epfl.ch>"]
 links = "chemfiles"
 repository = "https://github.com/chemfiles/chemfiles.rs"
