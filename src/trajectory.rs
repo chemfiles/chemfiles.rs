@@ -12,6 +12,7 @@ use UnitCell;
 /// The `Trajectory` type is the main entry point when using chemfiles. A
 /// `Trajectory` behave a bit like a file, allowing to read and/or write
 /// `Frame`.
+#[derive(Debug)]
 pub struct Trajectory {
     handle: *mut CHFL_TRAJECTORY,
 }
