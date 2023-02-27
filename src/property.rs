@@ -7,6 +7,7 @@ use errors::{check, check_not_null, check_success, Error};
 use strings;
 
 /// A thin wrapper around `CHFL_PROPERTY`
+#[derive(Debug)]
 pub struct RawProperty {
     handle: *mut CHFL_PROPERTY,
 }

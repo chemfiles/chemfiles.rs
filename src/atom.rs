@@ -22,11 +22,13 @@ use strings;
 /// The atom name is usually an unique identifier (`H1`, `C_a`) while the
 /// atom type will be shared between all particles of the same type: `H`,
 /// `Ow`, `CH3`.
+#[derive(Debug)]
 pub struct Atom {
     handle: *mut CHFL_ATOM,
 }
 
 /// An analog to a reference to an atom (`&Atom`)
+#[derive(Debug)]
 pub struct AtomRef<'a> {
     inner: Atom,
     marker: PhantomData<&'a Atom>,
@@ -40,6 +42,7 @@ impl<'a> Deref for AtomRef<'a> {
 }
 
 /// An analog to a mutable reference to an atom (`&mut Atom`)
+#[derive(Debug)]
 pub struct AtomMut<'a> {
     inner: Atom,
     marker: PhantomData<&'a mut Atom>,

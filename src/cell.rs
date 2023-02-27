@@ -55,11 +55,13 @@ impl From<CellShape> for chfl_cellshape {
 /// |  0    b_y   c_y |
 /// |  0     0    c_z |
 /// ```
+#[derive(Debug)]
 pub struct UnitCell {
     handle: *mut CHFL_CELL,
 }
 
 /// An analog to a reference to an unit cell (`&UnitCell`)
+#[derive(Debug)]
 pub struct UnitCellRef<'a> {
     inner: UnitCell,
     marker: PhantomData<&'a UnitCell>,
@@ -73,6 +75,7 @@ impl<'a> Deref for UnitCellRef<'a> {
 }
 
 /// An analog to a mutable reference to an unit cell (`&mut UnitCell`)
+#[derive(Debug)]
 pub struct UnitCellMut<'a> {
     inner: UnitCell,
     marker: PhantomData<&'a mut UnitCell>,

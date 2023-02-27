@@ -66,11 +66,13 @@ impl From<chfl_bond_order> for BondOrder {
 /// A `Topology` contains the definition of all the atoms in the system, and
 /// the liaisons between the atoms (bonds, angles, dihedrals, ...). It will
 /// also contain all the residues information if it is available.
+#[derive(Debug)]
 pub struct Topology {
     handle: *mut CHFL_TOPOLOGY,
 }
 
 /// An analog to a reference to a topology (`&Topology`)
+#[derive(Debug)]
 pub struct TopologyRef<'a> {
     inner: Topology,
     marker: PhantomData<&'a Topology>,

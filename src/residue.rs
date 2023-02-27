@@ -14,11 +14,13 @@ use strings;
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
 /// can be small molecules, amino-acids in a protein, monomers in polymers,
 /// *etc.*
+#[derive(Debug)]
 pub struct Residue {
     handle: *mut CHFL_RESIDUE,
 }
 
 /// An analog to a reference to a residue (`&Residue`)
+#[derive(Debug)]
 pub struct ResidueRef<'a> {
     inner: Residue,
     marker: PhantomData<&'a Residue>,

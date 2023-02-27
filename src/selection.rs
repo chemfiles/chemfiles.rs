@@ -104,6 +104,7 @@ impl<'a> IntoIterator for &'a Match {
 /// Each basic operation follows the `<selector>[(<variable>)] <operator>
 /// <value>` structure, where `<operator>` is a comparison operator in
 /// `== != < <= > >=`.
+#[derive(Debug)]
 pub struct Selection {
     handle: *mut CHFL_SELECTION,
 }
