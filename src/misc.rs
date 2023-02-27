@@ -7,6 +7,8 @@ use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_gue
 
 use crate::errors::check_success;
 
+use crate::{errors::check, Error};
+
 /// `FormatMetadata` contains metadata associated with one format.
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -109,23 +111,30 @@ pub fn formats_list() -> Vec<FormatMetadata> {
 /// `Trajectory` constructors, i.e. `"<format name> [/ <compression>]"`, where
 /// compression is optional.
 ///
+/// # Errors
+///
+/// This function returns an error if the file format couldn't be guessed.
+///
 /// # Examples
 /// ```
-/// let format = chemfiles::guess_format("trajectory.xyz.xz");
+/// let format = chemfiles::guess_format("trajectory.xyz.xz").unwrap();
 /// assert_eq!(format, "XYZ / XZ");
 ///
-/// let format = chemfiles::guess_format("trajectory.nc");
+/// let format = chemfiles::guess_format("trajectory.nc").unwrap();
 /// assert_eq!(format, "Amber NetCDF");
+///
+/// let format = chemfiles::guess_format("trajectory.unknown.format");
+/// assert!(format.is_err());
 /// ```
-pub fn guess_format(path: &str) -> String {
+pub fn guess_format(path: &str) -> Result<String, Error> {
     let path = crate::strings::to_c(path);
     let mut buffer = vec![0; 128];
     unsafe {
-        check_success(chfl_guess_format(
+        check(chfl_guess_format(
             path.as_ptr(),
             buffer.as_mut_ptr(),
             buffer.len() as u64,
-        ));
+        ))?;
     }
-    return crate::strings::from_c(buffer.as_ptr());
+    Ok(crate::strings::from_c(buffer.as_ptr()))
 }
