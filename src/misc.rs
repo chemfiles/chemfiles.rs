@@ -1,8 +1,7 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2020 Guillaume Fraux -- BSD licensed
 
-use std::convert::TryInto;
-use std::ffi::CStr;
+use std::{convert::TryInto, ffi::CStr};
 
 use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_guess_format};
 use errors::check_success;
@@ -89,12 +88,12 @@ pub fn formats_list() -> Vec<FormatMetadata> {
     let mut count: u64 = 0;
     let formats_slice = unsafe {
         check_success(chfl_formats_list(&mut formats, &mut count));
-        std::slice::from_raw_parts(formats, count.try_into().expect("failed to convert u64 to usize"))
+        std::slice::from_raw_parts(
+            formats,
+            count.try_into().expect("failed to convert u64 to usize"),
+        )
     };
-    let formats_vec = formats_slice
-        .iter()
-        .map(FormatMetadata::from_raw)
-        .collect();
+    let formats_vec = formats_slice.iter().map(FormatMetadata::from_raw).collect();
     unsafe {
         let _ = chfl_free(formats as *const _);
     }
@@ -129,7 +128,9 @@ pub fn guess_format(path: &str) -> String {
     let mut buffer = vec![0; 128];
     unsafe {
         check_success(chfl_guess_format(
-            path.as_ptr(), buffer.as_mut_ptr(), buffer.len() as u64
+            path.as_ptr(),
+            buffer.as_mut_ptr(),
+            buffer.len() as u64,
         ));
     }
     return crate::strings::from_c(buffer.as_ptr());

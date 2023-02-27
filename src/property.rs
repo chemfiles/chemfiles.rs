@@ -1,7 +1,6 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
-use std::vec::IntoIter;
+use std::{ops::Drop, vec::IntoIter};
 
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error};
@@ -18,9 +17,7 @@ impl RawProperty {
     /// This function is unsafe because no validity check is made on the pointer.
     pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> RawProperty {
         check_not_null(ptr);
-        RawProperty {
-            handle: ptr
-        }
+        RawProperty { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -91,7 +88,10 @@ impl RawProperty {
     fn get_vector3d(&self) -> Result<[f64; 3], Error> {
         let mut value = [0.0; 3];
         unsafe {
-            check(chfl_property_get_vector3d(self.as_ptr(), value.as_mut_ptr()))?;
+            check(chfl_property_get_vector3d(
+                self.as_ptr(),
+                value.as_mut_ptr(),
+            ))?;
         }
         return Ok(value);
     }
@@ -159,7 +159,7 @@ impl Property {
         }
     }
 
-    #[allow(clippy::needless_pass_by_value)]  // raw property
+    #[allow(clippy::needless_pass_by_value)] // raw property
     pub(crate) fn from_raw(raw: RawProperty) -> Property {
         match raw.get_kind() {
             chfl_property_kind::CHFL_PROPERTY_BOOL => {
@@ -179,7 +179,7 @@ impl Property {
 }
 
 /// An iterator over the properties in an atom/frame/residue
-pub struct PropertiesIter<'a> where  {
+pub struct PropertiesIter<'a> {
     pub(crate) names: IntoIter<String>,
     pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }
@@ -217,21 +217,30 @@ mod tests {
         #[test]
         fn double() {
             let property = RawProperty::double(45.0);
-            assert_eq!(property.get_kind(), chfl_property_kind::CHFL_PROPERTY_DOUBLE);
+            assert_eq!(
+                property.get_kind(),
+                chfl_property_kind::CHFL_PROPERTY_DOUBLE
+            );
             assert_eq!(property.get_double(), Ok(45.0));
         }
 
         #[test]
         fn string() {
             let property = RawProperty::string("test");
-            assert_eq!(property.get_kind(), chfl_property_kind::CHFL_PROPERTY_STRING);
+            assert_eq!(
+                property.get_kind(),
+                chfl_property_kind::CHFL_PROPERTY_STRING
+            );
             assert_eq!(property.get_string(), Ok("test".into()));
         }
 
         #[test]
         fn vector3d() {
             let property = RawProperty::vector3d([1.2, 3.4, 5.6]);
-            assert_eq!(property.get_kind(), chfl_property_kind::CHFL_PROPERTY_VECTOR3D);
+            assert_eq!(
+                property.get_kind(),
+                chfl_property_kind::CHFL_PROPERTY_VECTOR3D
+            );
             assert_eq!(property.get_vector3d(), Ok([1.2, 3.4, 5.6]));
         }
     }

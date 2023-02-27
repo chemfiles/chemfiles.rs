@@ -1,14 +1,15 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Deref, DerefMut};
-use std::marker::PhantomData;
-use std::ptr;
+use std::{
+    marker::PhantomData,
+    ops::{Deref, DerefMut, Drop},
+    ptr,
+};
 
 use chemfiles_sys::*;
-use errors::{check_success, check_not_null};
+use errors::{check_not_null, check_success};
+use property::{PropertiesIter, Property, RawProperty};
 use strings;
-
-use property::{Property, RawProperty, PropertiesIter};
 
 /// An `Atom` is a particle in the current `Frame`. It stores the following
 /// atomic properties:
@@ -28,7 +29,7 @@ pub struct Atom {
 /// An analog to a reference to an atom (`&Atom`)
 pub struct AtomRef<'a> {
     inner: Atom,
-    marker: PhantomData<&'a Atom>
+    marker: PhantomData<&'a Atom>,
 }
 
 impl<'a> Deref for AtomRef<'a> {
@@ -41,7 +42,7 @@ impl<'a> Deref for AtomRef<'a> {
 /// An analog to a mutable reference to an atom (`&mut Atom`)
 pub struct AtomMut<'a> {
     inner: Atom,
-    marker: PhantomData<&'a mut Atom>
+    marker: PhantomData<&'a mut Atom>,
 }
 
 impl<'a> Deref for AtomMut<'a> {
@@ -74,9 +75,7 @@ impl Atom {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Atom {
         check_not_null(ptr);
-        Atom {
-            handle: ptr
-        }
+        Atom { handle: ptr }
     }
 
     /// Create a borrowed `Atom` from a C pointer.
@@ -269,7 +268,8 @@ impl Atom {
     /// ```
     pub fn full_name(&self) -> String {
         let get_full_name = |ptr, len| unsafe { chfl_atom_full_name(self.as_ptr(), ptr, len) };
-        let name = strings::call_autogrow_buffer(10, get_full_name).expect("getting full name failed");
+        let name =
+            strings::call_autogrow_buffer(10, get_full_name).expect("getting full name failed");
         return strings::from_c(name.as_ptr());
     }
 
@@ -344,11 +344,12 @@ impl Atom {
         let property = property.into().as_raw();
         unsafe {
             check_success(chfl_atom_set_property(
-                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+                self.as_mut_ptr(),
+                buffer.as_ptr(),
+                property.as_ptr(),
             ));
         }
     }
-
 
     /// Get a property with the given `name` in this atom, if it exist.
     ///
@@ -402,7 +403,11 @@ impl Atom {
         let size = count as usize;
         let mut c_names = vec![ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_atom_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
+            check_success(chfl_atom_list_properties(
+                self.as_ptr(),
+                c_names.as_mut_ptr(),
+                count,
+            ));
         }
 
         let mut names = Vec::new();
@@ -412,7 +417,7 @@ impl Atom {
 
         PropertiesIter {
             names: names.into_iter(),
-            getter: Box::new(move |name| self.get(name).expect("failed to get property"))
+            getter: Box::new(move |name| self.get(name).expect("failed to get property")),
         }
     }
 }

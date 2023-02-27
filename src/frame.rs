@@ -1,16 +1,16 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
-use std::ptr;
-use std::slice;
+use std::{ops::Drop, ptr, slice};
 
-use super::{Atom, AtomMut, AtomRef};
-use super::{BondOrder, Residue, Topology, TopologyRef};
-use super::{UnitCell, UnitCellMut, UnitCellRef};
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error};
 use property::{PropertiesIter, Property, RawProperty};
 use strings;
+
+use super::{
+    Atom, AtomMut, AtomRef, BondOrder, Residue, Topology, TopologyRef, UnitCell, UnitCellMut,
+    UnitCellRef,
+};
 
 /// A `Frame` contains data from one simulation step: the current unit
 /// cell, the topology, the positions, and the velocities of the particles in
@@ -953,8 +953,11 @@ impl<'a> Iterator for AtomIter<'a> {
 
 #[cfg(test)]
 mod test {
+    use Atom;
+    use Topology;
+    use UnitCell;
+
     use super::*;
-    use {Atom, Topology, UnitCell};
 
     #[test]
     fn clone() {

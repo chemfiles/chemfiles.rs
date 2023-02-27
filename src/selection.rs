@@ -1,13 +1,15 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Index};
-use std::iter::IntoIterator;
-use std::slice::Iter;
+use std::{
+    iter::IntoIterator,
+    ops::{Drop, Index},
+    slice::Iter,
+};
 
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error, Status};
-use strings;
 use frame::Frame;
+use strings;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It can
@@ -130,9 +132,7 @@ impl Selection {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Selection {
         check_not_null(ptr);
-        Selection {
-            handle: ptr
-        }
+        Selection { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -165,7 +165,7 @@ impl Selection {
             if handle.is_null() {
                 Err(Error {
                     status: Status::SelectionError,
-                    message: Error::last_error()
+                    message: Error::last_error(),
                 })
             } else {
                 Ok(Selection::from_ptr(handle))
@@ -205,7 +205,8 @@ impl Selection {
     /// ```
     pub fn string(&self) -> String {
         let get_string = |ptr, len| unsafe { chfl_selection_string(self.as_ptr(), ptr, len) };
-        let selection = strings::call_autogrow_buffer(1024, get_string).expect("failed to get selection string");
+        let selection = strings::call_autogrow_buffer(1024, get_string)
+            .expect("failed to get selection string");
         return strings::from_c(selection.as_ptr());
     }
 
@@ -238,21 +239,32 @@ impl Selection {
         let mut count = 0;
         unsafe {
             check(chfl_selection_evaluate(
-                self.as_mut_ptr(), frame.as_ptr(), &mut count
-            )).expect("failed to evaluate selection");
+                self.as_mut_ptr(),
+                frame.as_ptr(),
+                &mut count,
+            ))
+            .expect("failed to evaluate selection");
         }
 
         let size = count as usize;
-        let mut chfl_matches = vec![chfl_match { size: 0, atoms: [0; 4] }; size];
+        let mut chfl_matches = vec![
+            chfl_match {
+                size: 0,
+                atoms: [0; 4]
+            };
+            size
+        ];
         unsafe {
             check(chfl_selection_matches(
                 self.handle,
                 chfl_matches.as_mut_ptr(),
-                count
-            )).expect("failed to extract matches");
+                count,
+            ))
+            .expect("failed to extract matches");
         }
 
-        return chfl_matches.into_iter()
+        return chfl_matches
+            .into_iter()
             .map(|chfl_match| Match {
                 size: chfl_match.size as usize,
                 atoms: [
@@ -291,7 +303,8 @@ impl Selection {
         if self.size() != 1 {
             panic!("can not call `Selection::list` on a multiple selection");
         }
-        return self.evaluate(frame)
+        return self
+            .evaluate(frame)
             .into_iter()
             .map(|m| m[0] as usize)
             .collect();
@@ -300,10 +313,11 @@ impl Selection {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use Atom;
     use Frame;
     use Topology;
-    use Atom;
+
+    use super::*;
 
     #[test]
     fn clone() {
@@ -351,7 +365,10 @@ mod tests {
         #[test]
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
-            assert_eq!(match_.iter().copied().collect::<Vec<usize>>(), vec![1, 2, 3, 4]);
+            assert_eq!(
+                match_.iter().copied().collect::<Vec<usize>>(),
+                vec![1, 2, 3, 4]
+            );
 
             let v = vec![1, 2, 3, 4];
             for (i, &m) in match_.iter().enumerate() {

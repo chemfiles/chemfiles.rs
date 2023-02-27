@@ -1,11 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Deref, DerefMut};
-use std::marker::PhantomData;
-use std::ptr;
+use std::{
+    marker::PhantomData,
+    ops::{Deref, DerefMut, Drop},
+    ptr,
+};
 
 use chemfiles_sys::*;
-use errors::{check_success, check_not_null, check, Error};
+use errors::{check, check_not_null, check_success, Error};
 
 /// Available unit cell shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -60,7 +62,7 @@ pub struct UnitCell {
 /// An analog to a reference to an unit cell (`&UnitCell`)
 pub struct UnitCellRef<'a> {
     inner: UnitCell,
-    marker: PhantomData<&'a UnitCell>
+    marker: PhantomData<&'a UnitCell>,
 }
 
 impl<'a> Deref for UnitCellRef<'a> {
@@ -73,7 +75,7 @@ impl<'a> Deref for UnitCellRef<'a> {
 /// An analog to a mutable reference to an unit cell (`&mut UnitCell`)
 pub struct UnitCellMut<'a> {
     inner: UnitCell,
-    marker: PhantomData<&'a mut UnitCell>
+    marker: PhantomData<&'a mut UnitCell>,
 }
 
 impl<'a> Deref for UnitCellMut<'a> {
@@ -105,9 +107,7 @@ impl UnitCell {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> UnitCell {
         check_not_null(ptr);
-        UnitCell {
-            handle: ptr
-        }
+        UnitCell { handle: ptr }
     }
 
     /// Create a borrowed `UnitCell` from a C pointer.
@@ -178,7 +178,8 @@ impl UnitCell {
     /// ```
     pub fn infinite() -> UnitCell {
         let mut cell = UnitCell::new([0.0, 0.0, 0.0]);
-        cell.set_shape(CellShape::Infinite).expect("could not set cell shape");
+        cell.set_shape(CellShape::Infinite)
+            .expect("could not set cell shape");
         return cell;
     }
 
@@ -268,9 +269,7 @@ impl UnitCell {
     /// assert!(UnitCell::infinite().set_lengths([1.0, 1.0, 1.0]).is_err());
     /// ```
     pub fn set_lengths(&mut self, lengths: [f64; 3]) -> Result<(), Error> {
-        unsafe {
-            check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr()))
-        }
+        unsafe { check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())) }
     }
 
     /// Get the three angles of the cell, in degrees.
@@ -314,9 +313,7 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     /// ```
     pub fn set_angles(&mut self, angles: [f64; 3]) -> Result<(), Error> {
-        unsafe {
-            check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr()))
-        }
+        unsafe { check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())) }
     }
 
     /// Get the unit cell matricial representation.
@@ -385,9 +382,7 @@ impl UnitCell {
     /// assert_eq!(cell.shape(), CellShape::Triclinic);
     /// ```
     pub fn set_shape(&mut self, shape: CellShape) -> Result<(), Error> {
-        unsafe {
-            check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into()))
-        }
+        unsafe { check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into())) }
     }
 
     /// Get the volume of the unit cell.
@@ -431,7 +426,6 @@ impl Drop for UnitCell {
         }
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -515,11 +509,7 @@ mod test {
 
         assert_eq!(cell.shape(), CellShape::Triclinic);
         for i in 0..3 {
-            assert_ulps_eq!(
-                cell.lengths()[i],
-                [123.0, 234.0, 345.0][i],
-                epsilon = 1e-3
-            );
+            assert_ulps_eq!(cell.lengths()[i], [123.0, 234.0, 345.0][i], epsilon = 1e-3);
             assert_ulps_eq!(cell.angles()[i], [67.0, 78.0, 89.0][i], epsilon = 1e-3);
         }
 

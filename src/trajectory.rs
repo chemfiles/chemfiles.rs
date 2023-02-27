@@ -1,15 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::convert::TryInto;
-use std::path::Path;
-use std::ptr;
-use std::os::raw::c_char;
+use std::{convert::TryInto, os::raw::c_char, path::Path, ptr};
 
 use chemfiles_sys::*;
 use errors::{check, check_success, Error, Status};
 use strings;
-
-use {Frame, Topology, UnitCell};
+use Frame;
+use Topology;
+use UnitCell;
 
 /// The `Trajectory` type is the main entry point when using chemfiles. A
 /// `Trajectory` behave a bit like a file, allowing to read and/or write
@@ -27,12 +25,10 @@ impl Trajectory {
         if ptr.is_null() {
             Err(Error {
                 status: Status::FileError,
-                message: Error::last_error()
+                message: Error::last_error(),
             })
         } else {
-            Ok(Trajectory {
-                handle: ptr
-            })
+            Ok(Trajectory { handle: ptr })
         }
     }
 
@@ -67,7 +63,10 @@ impl Trajectory {
     where
         P: AsRef<Path>,
     {
-        let path = path.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
+        let path = path
+            .as_ref()
+            .to_str()
+            .ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
 
         let path = strings::to_c(path);
         unsafe {
@@ -98,21 +97,26 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open_with_format("water.zeo", 'r', "XYZ").unwrap();
     /// ```
-    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Trajectory, Error>
+    pub fn open_with_format<'a, P, S>(
+        filename: P,
+        mode: char,
+        format: S,
+    ) -> Result<Trajectory, Error>
     where
         P: AsRef<Path>,
         S: Into<&'a str>,
     {
-        let filename =
-            filename.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(filename.as_ref()))?;
+        let filename = filename
+            .as_ref()
+            .to_str()
+            .ok_or_else(|| Error::utf8_path_error(filename.as_ref()))?;
 
         let filename = strings::to_c(filename);
         let format = strings::to_c(format.into());
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
-            let handle = chfl_trajectory_with_format(
-                filename.as_ptr(), mode as c_char, format.as_ptr()
-            );
+            let handle =
+                chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
             Trajectory::from_ptr(handle)
         }
     }
@@ -138,13 +142,16 @@ impl Trajectory {
     /// assert_eq!(frame.size(), 6);
     /// ```
     pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Trajectory, Error>
-    where S: Into<&'a str>,
+    where
+        S: Into<&'a str>,
     {
         let data = strings::to_c(data.into());
         let format = strings::to_c(format.into());
         unsafe {
             let handle = chfl_trajectory_memory_reader(
-                data.as_ptr(), data.as_bytes().len() as u64, format.as_ptr()
+                data.as_ptr(),
+                data.as_bytes().len() as u64,
+                format.as_ptr(),
             );
             Trajectory::from_ptr(handle)
         }
@@ -172,7 +179,8 @@ impl Trajectory {
     /// assert!(Trajectory::memory_writer("XTC").is_err());
     /// ```
     pub fn memory_writer<'a, S>(format: S) -> Result<Trajectory, Error>
-    where S: Into<&'a str>,
+    where
+        S: Into<&'a str>,
     {
         let format = strings::to_c(format.into());
         unsafe {
@@ -200,9 +208,7 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// ```
     pub fn read(&mut self, frame: &mut Frame) -> Result<(), Error> {
-        unsafe {
-            check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr()))
-        }
+        unsafe { check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr())) }
     }
 
     /// Read a specific `step` of this trajectory into a `frame`.
@@ -225,7 +231,11 @@ impl Trajectory {
     /// ```
     pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
-            check(chfl_trajectory_read_step(self.as_mut_ptr(), step as u64, frame.as_mut_ptr()))
+            check(chfl_trajectory_read_step(
+                self.as_mut_ptr(),
+                step as u64,
+                frame.as_mut_ptr(),
+            ))
         }
     }
 
@@ -245,9 +255,7 @@ impl Trajectory {
     /// trajectory.write(&mut frame).unwrap();
     /// ```
     pub fn write(&mut self, frame: &Frame) -> Result<(), Error> {
-        unsafe {
-            check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr()))
-        }
+        unsafe { check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())) }
     }
 
     /// Set the `topology` associated with this trajectory. This topology will
@@ -269,7 +277,10 @@ impl Trajectory {
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) {
         unsafe {
-            check_success(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()));
+            check_success(chfl_trajectory_set_topology(
+                self.as_mut_ptr(),
+                topology.as_ptr(),
+            ));
         }
     }
 
@@ -292,11 +303,18 @@ impl Trajectory {
     where
         P: AsRef<Path>,
     {
-        let path = path.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
+        let path = path
+            .as_ref()
+            .to_str()
+            .ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
 
         let path = strings::to_c(path);
         unsafe {
-            check(chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), ptr::null()))
+            check(chfl_trajectory_topology_file(
+                self.as_mut_ptr(),
+                path.as_ptr(),
+                ptr::null(),
+            ))
         }
     }
 
@@ -323,12 +341,19 @@ impl Trajectory {
         P: AsRef<Path>,
         S: Into<&'a str>,
     {
-        let path = path.as_ref().to_str().ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
+        let path = path
+            .as_ref()
+            .to_str()
+            .ok_or_else(|| Error::utf8_path_error(path.as_ref()))?;
 
         let format = strings::to_c(format.into());
         let path = strings::to_c(path);
         unsafe {
-            check(chfl_trajectory_topology_file(self.as_mut_ptr(), path.as_ptr(), format.as_ptr()))
+            check(chfl_trajectory_topology_file(
+                self.as_mut_ptr(),
+                path.as_ptr(),
+                format.as_ptr(),
+            ))
         }
     }
 
@@ -362,9 +387,8 @@ impl Trajectory {
     pub fn nsteps(&mut self) -> usize {
         let mut res = 0;
         unsafe {
-            check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res)).expect(
-                "failed to get the number of steps in this trajectory"
-            );
+            check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))
+                .expect("failed to get the number of steps in this trajectory");
         }
         #[allow(clippy::cast_possible_truncation)]
         return res as usize;
@@ -394,17 +418,22 @@ impl Trajectory {
     /// ```
     #[allow(clippy::cast_possible_truncation)]
     pub fn memory_buffer(&self) -> Result<&str, Error> {
-            let mut ptr: *const c_char = std::ptr::null();
-            let mut count: u64 = 0;
-            let buffer = unsafe {
-                check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
-                 std::slice::from_raw_parts(
-                    ptr.cast(), count.try_into().expect("failed to convert u64 to usize")
-                )
-            };
+        let mut ptr: *const c_char = std::ptr::null();
+        let mut count: u64 = 0;
+        let buffer = unsafe {
+            check(chfl_trajectory_memory_buffer(
+                self.as_ptr(),
+                &mut ptr,
+                &mut count,
+            ))?;
+            std::slice::from_raw_parts(
+                ptr.cast(),
+                count.try_into().expect("failed to convert u64 to usize"),
+            )
+        };
 
-            let string = std::str::from_utf8(buffer)?;
-            Ok(string)
+        let string = std::str::from_utf8(buffer)?;
+        Ok(string)
     }
 
     /// Get file path for this trajectory.
@@ -418,7 +447,8 @@ impl Trajectory {
     /// ```
     pub fn path(&self) -> String {
         let get_string = |ptr, len| unsafe { chfl_trajectory_path(self.as_ptr(), ptr, len) };
-        let path = strings::call_autogrow_buffer(1024, get_string).expect("failed to get path string");
+        let path =
+            strings::call_autogrow_buffer(1024, get_string).expect("failed to get path string");
         return strings::from_c(path.as_ptr());
     }
 }
@@ -433,15 +463,16 @@ impl Drop for Trajectory {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
-    use std::fs;
-    use std::path::Path;
-    use std::io::Read;
+    use std::{fs, io::Read, path::Path};
 
     use approx::assert_ulps_eq;
+    use Atom;
+    use CellShape;
+    use Frame;
+    use Topology;
+    use UnitCell;
 
-    use {Atom, CellShape, Frame, Topology, UnitCell};
+    use super::*;
 
     #[test]
     fn read() {
@@ -476,7 +507,6 @@ mod test {
         assert!(file.read_step(41, &mut frame).is_ok());
         let cell = frame.cell().clone();
         assert_eq!(cell.lengths(), [30.0, 30.0, 30.0]);
-
 
         assert_ulps_eq!(frame.positions()[0][0], 0.761277);
         assert_ulps_eq!(frame.positions()[0][1], 8.106125);
@@ -549,7 +579,9 @@ Properties=species:S:1:pos:R:3
 X 1 2 3
 X 1 2 3
 X 1 2 3
-X 1 2 3".lines().collect::<Vec<_>>();
+X 1 2 3"
+            .lines()
+            .collect::<Vec<_>>();
 
         let mut file = fs::File::open(filename).unwrap();
         let mut content = String::new();

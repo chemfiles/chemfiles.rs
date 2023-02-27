@@ -1,12 +1,14 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Deref};
-use std::marker::PhantomData;
-use std::ptr;
+use std::{
+    marker::PhantomData,
+    ops::{Deref, Drop},
+    ptr,
+};
 
 use chemfiles_sys::*;
 use errors::{check_not_null, check_success};
-use property::{Property, RawProperty, PropertiesIter};
+use property::{PropertiesIter, Property, RawProperty};
 use strings;
 
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
@@ -19,7 +21,7 @@ pub struct Residue {
 /// An analog to a reference to a residue (`&Residue`)
 pub struct ResidueRef<'a> {
     inner: Residue,
-    marker: PhantomData<&'a Residue>
+    marker: PhantomData<&'a Residue>,
 }
 
 impl<'a> Deref for ResidueRef<'a> {
@@ -45,9 +47,7 @@ impl Residue {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Residue {
         check_not_null(ptr);
-        Residue {
-            handle: ptr
-        }
+        Residue { handle: ptr }
     }
 
     /// Create a borrowed `Residue` from a C pointer.
@@ -141,9 +141,7 @@ impl Residue {
     /// ```
     pub fn id(&self) -> Option<i64> {
         let mut resid = 0;
-        let status = unsafe {
-            chfl_residue_id(self.as_ptr(), &mut resid)
-        };
+        let status = unsafe { chfl_residue_id(self.as_ptr(), &mut resid) };
 
         if status == chfl_status::CHFL_SUCCESS {
             return Some(resid);
@@ -166,7 +164,8 @@ impl Residue {
     /// ```
     pub fn name(&self) -> String {
         let get_name = |ptr, len| unsafe { chfl_residue_name(self.as_ptr(), ptr, len) };
-        let name = strings::call_autogrow_buffer(64, get_name).expect("getting residue name failed");
+        let name =
+            strings::call_autogrow_buffer(64, get_name).expect("getting residue name failed");
         return strings::from_c(name.as_ptr());
     }
 
@@ -209,7 +208,11 @@ impl Residue {
     pub fn contains(&self, atom: usize) -> bool {
         let mut inside = 0;
         unsafe {
-            check_success(chfl_residue_contains(self.as_ptr(), atom as u64, &mut inside));
+            check_success(chfl_residue_contains(
+                self.as_ptr(),
+                atom as u64,
+                &mut inside,
+            ));
         }
         return inside != 0;
     }
@@ -260,7 +263,9 @@ impl Residue {
         let property = property.into().as_raw();
         unsafe {
             check_success(chfl_residue_set_property(
-                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+                self.as_mut_ptr(),
+                buffer.as_ptr(),
+                property.as_ptr(),
             ));
         }
     }
@@ -316,7 +321,11 @@ impl Residue {
         let size = count as usize;
         let mut c_names = vec![ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_residue_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
+            check_success(chfl_residue_list_properties(
+                self.as_ptr(),
+                c_names.as_mut_ptr(),
+                count,
+            ));
         }
 
         let mut names = Vec::new();
@@ -326,7 +335,7 @@ impl Residue {
 
         PropertiesIter {
             names: names.into_iter(),
-            getter: Box::new(move |name| self.get(name).expect("failed to get property"))
+            getter: Box::new(move |name| self.get(name).expect("failed to get property")),
         }
     }
 }

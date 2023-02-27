@@ -2,8 +2,10 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 
 //! String conversions between C and Rust
-use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
+use std::{
+    ffi::{CStr, CString},
+    os::raw::c_char,
+};
 
 use chemfiles_sys::chfl_status;
 use errors::{check, Error};
