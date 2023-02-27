@@ -21,7 +21,10 @@ pub fn from_c(buffer: *const c_char) -> String {
 }
 
 /// Create a C string from a Rust string.
-pub fn to_c(string: &str) -> CString {
+pub fn to_c<S>(string: S) -> CString
+where
+    S: Into<Vec<u8>>,
+{
     CString::new(string).expect("Invalid C string from Rust")
 }
 
