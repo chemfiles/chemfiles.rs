@@ -67,6 +67,7 @@ mod frame;
 pub use self::frame::Frame;
 
 mod trajectory;
+pub use self::trajectory::MemoryTrajectoryReader;
 pub use self::trajectory::Trajectory;
 
 mod selection;
