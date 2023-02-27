@@ -185,10 +185,9 @@ impl Frame {
         velocity: impl Into<Option<[f64; 3]>>,
     ) {
         let velocity = velocity.into();
-        let velocity_ptr = match velocity {
-            Some(ref data) => data.as_ptr(),
-            None => ptr::null(),
-        };
+        let velocity_ptr = velocity
+            .as_ref()
+            .map_or_else(ptr::null, |data| data.as_ptr());
 
         unsafe {
             check_success(chfl_frame_add_atom(
