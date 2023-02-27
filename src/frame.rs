@@ -48,7 +48,7 @@ impl Frame {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_FRAME {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_FRAME {
         self.handle
     }
 
@@ -65,7 +65,7 @@ impl Frame {
     /// mutable borrows
     #[inline]
     #[allow(non_snake_case)]
-    pub(crate) fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_FRAME {
+    pub(crate) const fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_FRAME {
         self.handle
     }
 

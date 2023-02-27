@@ -30,7 +30,7 @@ impl Match {
     /// let atomic_match = Match::new(&[3, 4, 5]);
     /// assert_eq!(atomic_match.len(), 3);
     /// ```
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.size
     }
 
@@ -137,7 +137,7 @@ impl Selection {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_SELECTION {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_SELECTION {
         self.handle
     }
 

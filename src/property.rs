@@ -21,7 +21,7 @@ impl RawProperty {
     }
 
     /// Get the underlying C pointer as a const pointer.
-    pub fn as_ptr(&self) -> *const CHFL_PROPERTY {
+    pub const fn as_ptr(&self) -> *const CHFL_PROPERTY {
         self.handle
     }
 

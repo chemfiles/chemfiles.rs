@@ -34,7 +34,7 @@ impl Trajectory {
 
     /// Get the underlying C pointer as a pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
         self.handle
     }
 

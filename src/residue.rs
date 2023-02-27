@@ -65,7 +65,7 @@ impl Residue {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_RESIDUE {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_RESIDUE {
         self.handle
     }
 

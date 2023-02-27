@@ -104,7 +104,7 @@ impl Atom {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_ATOM {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_ATOM {
         self.handle
     }
 

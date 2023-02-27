@@ -34,7 +34,7 @@ pub enum BondOrder {
 }
 
 impl BondOrder {
-    pub(crate) fn as_raw(self) -> chfl_bond_order {
+    pub(crate) const fn as_raw(self) -> chfl_bond_order {
         match self {
             Self::Unknown => chfl_bond_order::CHFL_BOND_UNKNOWN,
             Self::Single => chfl_bond_order::CHFL_BOND_SINGLE,
@@ -118,7 +118,7 @@ impl Topology {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
         self.handle
     }
 
@@ -135,7 +135,7 @@ impl Topology {
     /// mutable borrows
     #[inline]
     #[allow(non_snake_case)]
-    pub(crate) fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_TOPOLOGY {
+    pub(crate) const fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_TOPOLOGY {
         self.handle
     }
 

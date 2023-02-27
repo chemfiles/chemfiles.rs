@@ -137,7 +137,7 @@ impl UnitCell {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_CELL {
+    pub(crate) const fn as_ptr(&self) -> *const CHFL_CELL {
         self.handle
     }
 
