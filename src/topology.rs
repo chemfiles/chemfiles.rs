@@ -36,29 +36,29 @@ pub enum BondOrder {
 impl BondOrder {
     pub(crate) fn as_raw(self) -> chfl_bond_order {
         match self {
-            BondOrder::Unknown => chfl_bond_order::CHFL_BOND_UNKNOWN,
-            BondOrder::Single => chfl_bond_order::CHFL_BOND_SINGLE,
-            BondOrder::Double => chfl_bond_order::CHFL_BOND_DOUBLE,
-            BondOrder::Triple => chfl_bond_order::CHFL_BOND_TRIPLE,
-            BondOrder::Quadruple => chfl_bond_order::CHFL_BOND_QUADRUPLE,
-            BondOrder::Quintuplet => chfl_bond_order::CHFL_BOND_QUINTUPLET,
-            BondOrder::Amide => chfl_bond_order::CHFL_BOND_AMIDE,
-            BondOrder::Aromatic => chfl_bond_order::CHFL_BOND_AROMATIC,
+            Self::Unknown => chfl_bond_order::CHFL_BOND_UNKNOWN,
+            Self::Single => chfl_bond_order::CHFL_BOND_SINGLE,
+            Self::Double => chfl_bond_order::CHFL_BOND_DOUBLE,
+            Self::Triple => chfl_bond_order::CHFL_BOND_TRIPLE,
+            Self::Quadruple => chfl_bond_order::CHFL_BOND_QUADRUPLE,
+            Self::Quintuplet => chfl_bond_order::CHFL_BOND_QUINTUPLET,
+            Self::Amide => chfl_bond_order::CHFL_BOND_AMIDE,
+            Self::Aromatic => chfl_bond_order::CHFL_BOND_AROMATIC,
         }
     }
 }
 
 impl From<chfl_bond_order> for BondOrder {
-    fn from(order: chfl_bond_order) -> BondOrder {
+    fn from(order: chfl_bond_order) -> Self {
         match order {
-            chfl_bond_order::CHFL_BOND_UNKNOWN => BondOrder::Unknown,
-            chfl_bond_order::CHFL_BOND_SINGLE => BondOrder::Single,
-            chfl_bond_order::CHFL_BOND_DOUBLE => BondOrder::Double,
-            chfl_bond_order::CHFL_BOND_TRIPLE => BondOrder::Triple,
-            chfl_bond_order::CHFL_BOND_QUADRUPLE => BondOrder::Quadruple,
-            chfl_bond_order::CHFL_BOND_QUINTUPLET => BondOrder::Quintuplet,
-            chfl_bond_order::CHFL_BOND_AMIDE => BondOrder::Amide,
-            chfl_bond_order::CHFL_BOND_AROMATIC => BondOrder::Aromatic,
+            chfl_bond_order::CHFL_BOND_UNKNOWN => Self::Unknown,
+            chfl_bond_order::CHFL_BOND_SINGLE => Self::Single,
+            chfl_bond_order::CHFL_BOND_DOUBLE => Self::Double,
+            chfl_bond_order::CHFL_BOND_TRIPLE => Self::Triple,
+            chfl_bond_order::CHFL_BOND_QUADRUPLE => Self::Quadruple,
+            chfl_bond_order::CHFL_BOND_QUINTUPLET => Self::Quintuplet,
+            chfl_bond_order::CHFL_BOND_AMIDE => Self::Amide,
+            chfl_bond_order::CHFL_BOND_AROMATIC => Self::Aromatic,
         }
     }
 }
@@ -84,10 +84,10 @@ impl<'a> Deref for TopologyRef<'a> {
 }
 
 impl Clone for Topology {
-    fn clone(&self) -> Topology {
+    fn clone(&self) -> Self {
         unsafe {
             let new_handle = chfl_topology_copy(self.as_ptr());
-            Topology::from_ptr(new_handle)
+            Self::from_ptr(new_handle)
         }
     }
 }
@@ -98,9 +98,9 @@ impl Topology {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Topology {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Self {
         check_not_null(ptr);
-        Topology { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `Topology` from a C pointer.
@@ -111,7 +111,7 @@ impl Topology {
     #[inline]
     pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_TOPOLOGY) -> TopologyRef<'a> {
         TopologyRef {
-            inner: Topology::from_ptr(ptr as *mut CHFL_TOPOLOGY),
+            inner: Self::from_ptr(ptr as *mut CHFL_TOPOLOGY),
             marker: PhantomData,
         }
     }
@@ -147,8 +147,8 @@ impl Topology {
     /// let topology = Topology::new();
     /// assert_eq!(topology.size(), 0);
     /// ```
-    pub fn new() -> Topology {
-        unsafe { Topology::from_ptr(chfl_topology()) }
+    pub fn new() -> Self {
+        unsafe { Self::from_ptr(chfl_topology()) }
     }
 
     /// Get a reference of the atom at the given `index` in this topology.
@@ -688,7 +688,7 @@ impl Topology {
     /// ```
     pub fn residue(&self, index: u64) -> Option<ResidueRef> {
         unsafe {
-            let handle = chfl_residue_from_topology(self.as_ptr(), index as u64);
+            let handle = chfl_residue_from_topology(self.as_ptr(), index);
             if handle.is_null() {
                 None
             } else {

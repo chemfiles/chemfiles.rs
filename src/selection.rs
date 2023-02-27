@@ -51,14 +51,14 @@ impl Match {
     /// assert_eq!(atomic_match[1], 4);
     /// assert_eq!(atomic_match[2], 5);
     /// ```
-    pub fn new(atoms: &[usize]) -> Match {
+    pub fn new(atoms: &[usize]) -> Self {
         assert!(atoms.len() <= 4);
         let size = atoms.len();
         let mut matches = [usize::max_value(); 4];
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Match {
+        Self {
             size,
             atoms: matches,
         }
@@ -109,10 +109,10 @@ pub struct Selection {
 }
 
 impl Clone for Selection {
-    fn clone(&self) -> Selection {
+    fn clone(&self) -> Self {
         unsafe {
             let new_handle = chfl_selection_copy(self.as_ptr());
-            Selection::from_ptr(new_handle)
+            Self::from_ptr(new_handle)
         }
     }
 }
@@ -130,9 +130,9 @@ impl Selection {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Selection {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Self {
         check_not_null(ptr);
-        Selection { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -158,7 +158,7 @@ impl Selection {
     /// # use chemfiles::Selection;
     /// let selection = Selection::new("pairs: name(#1) H and name(#2) O").unwrap();
     /// ```
-    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Selection, Error> {
+    pub fn new<'a, S: Into<&'a str>>(selection: S) -> Result<Self, Error> {
         let buffer = strings::to_c(selection.into());
         unsafe {
             let handle = chfl_selection(buffer.as_ptr());
@@ -168,7 +168,7 @@ impl Selection {
                     message: Error::last_error(),
                 })
             } else {
-                Ok(Selection::from_ptr(handle))
+                Ok(Self::from_ptr(handle))
             }
         }
     }
@@ -303,11 +303,7 @@ impl Selection {
         if self.size() != 1 {
             panic!("can not call `Selection::list` on a multiple selection");
         }
-        return self
-            .evaluate(frame)
-            .into_iter()
-            .map(|m| m[0] as usize)
-            .collect();
+        return self.evaluate(frame).into_iter().map(|m| m[0]).collect();
     }
 }
 

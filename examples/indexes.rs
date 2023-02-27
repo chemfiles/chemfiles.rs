@@ -18,6 +18,6 @@ fn main() {
 
     println!("Atoms with x < 5: ");
     for i in less_than_five {
-        println!("  - {}", i);
+        println!("  - {i}");
     }
 }

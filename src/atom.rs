@@ -59,10 +59,10 @@ impl<'a> DerefMut for AtomMut<'a> {
 }
 
 impl Clone for Atom {
-    fn clone(&self) -> Atom {
+    fn clone(&self) -> Self {
         unsafe {
             let new_handle = chfl_atom_copy(self.as_ptr());
-            Atom::from_ptr(new_handle)
+            Self::from_ptr(new_handle)
         }
     }
 }
@@ -73,9 +73,9 @@ impl Atom {
     /// This function is unsafe because no validity check is made on the
     /// pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Atom {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Self {
         check_not_null(ptr);
-        Atom { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `Atom` from a C pointer.
@@ -85,7 +85,7 @@ impl Atom {
     #[inline]
     pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_ATOM) -> AtomRef<'a> {
         AtomRef {
-            inner: Atom::from_ptr(ptr as *mut CHFL_ATOM),
+            inner: Self::from_ptr(ptr as *mut CHFL_ATOM),
             marker: PhantomData,
         }
     }
@@ -97,7 +97,7 @@ impl Atom {
     #[inline]
     pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_ATOM) -> AtomMut<'a> {
         AtomMut {
-            inner: Atom::from_ptr(ptr),
+            inner: Self::from_ptr(ptr),
             marker: PhantomData,
         }
     }
@@ -122,11 +122,11 @@ impl Atom {
     /// let atom = Atom::new("He");
     /// assert_eq!(atom.name(), "He");
     /// ```
-    pub fn new<'a>(name: impl Into<&'a str>) -> Atom {
+    pub fn new<'a>(name: impl Into<&'a str>) -> Self {
         let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_atom(buffer.as_ptr());
-            Atom::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 

@@ -21,14 +21,14 @@ impl Trajectory {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory, Error> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Self, Error> {
         if ptr.is_null() {
             Err(Error {
                 status: Status::FileError,
                 message: Error::last_error(),
             })
         } else {
-            Ok(Trajectory { handle: ptr })
+            Ok(Self { handle: ptr })
         }
     }
 
@@ -59,7 +59,7 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open("water.xyz", 'r').unwrap();
     /// ```
-    pub fn open<P>(path: P, mode: char) -> Result<Trajectory, Error>
+    pub fn open<P>(path: P, mode: char) -> Result<Self, Error>
     where
         P: AsRef<Path>,
     {
@@ -72,7 +72,7 @@ impl Trajectory {
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
             let handle = chfl_trajectory_open(path.as_ptr(), mode as c_char);
-            Trajectory::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -97,11 +97,7 @@ impl Trajectory {
     /// # use chemfiles::Trajectory;
     /// let trajectory = Trajectory::open_with_format("water.zeo", 'r', "XYZ").unwrap();
     /// ```
-    pub fn open_with_format<'a, P, S>(
-        filename: P,
-        mode: char,
-        format: S,
-    ) -> Result<Trajectory, Error>
+    pub fn open_with_format<'a, P, S>(filename: P, mode: char, format: S) -> Result<Self, Error>
     where
         P: AsRef<Path>,
         S: Into<&'a str>,
@@ -117,7 +113,7 @@ impl Trajectory {
             #[allow(clippy::cast_possible_wrap)]
             let handle =
                 chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
-            Trajectory::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -141,7 +137,7 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// assert_eq!(frame.size(), 6);
     /// ```
-    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Trajectory, Error>
+    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Self, Error>
     where
         S: Into<&'a str>,
     {
@@ -153,7 +149,7 @@ impl Trajectory {
                 data.as_bytes().len() as u64,
                 format.as_ptr(),
             );
-            Trajectory::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -178,14 +174,14 @@ impl Trajectory {
     /// // Binary formats typically do not support this feature
     /// assert!(Trajectory::memory_writer("XTC").is_err());
     /// ```
-    pub fn memory_writer<'a, S>(format: S) -> Result<Trajectory, Error>
+    pub fn memory_writer<'a, S>(format: S) -> Result<Self, Error>
     where
         S: Into<&'a str>,
     {
         let format = strings::to_c(format.into());
         unsafe {
             let handle = chfl_trajectory_memory_writer(format.as_ptr());
-            Trajectory::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 

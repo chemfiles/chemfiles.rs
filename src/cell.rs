@@ -21,21 +21,21 @@ pub enum CellShape {
 }
 
 impl From<chfl_cellshape> for CellShape {
-    fn from(celltype: chfl_cellshape) -> CellShape {
+    fn from(celltype: chfl_cellshape) -> Self {
         match celltype {
-            chfl_cellshape::CHFL_CELL_ORTHORHOMBIC => CellShape::Orthorhombic,
-            chfl_cellshape::CHFL_CELL_TRICLINIC => CellShape::Triclinic,
-            chfl_cellshape::CHFL_CELL_INFINITE => CellShape::Infinite,
+            chfl_cellshape::CHFL_CELL_ORTHORHOMBIC => Self::Orthorhombic,
+            chfl_cellshape::CHFL_CELL_TRICLINIC => Self::Triclinic,
+            chfl_cellshape::CHFL_CELL_INFINITE => Self::Infinite,
         }
     }
 }
 
 impl From<CellShape> for chfl_cellshape {
-    fn from(celltype: CellShape) -> chfl_cellshape {
+    fn from(celltype: CellShape) -> Self {
         match celltype {
-            CellShape::Orthorhombic => chfl_cellshape::CHFL_CELL_ORTHORHOMBIC,
-            CellShape::Triclinic => chfl_cellshape::CHFL_CELL_TRICLINIC,
-            CellShape::Infinite => chfl_cellshape::CHFL_CELL_INFINITE,
+            CellShape::Orthorhombic => Self::CHFL_CELL_ORTHORHOMBIC,
+            CellShape::Triclinic => Self::CHFL_CELL_TRICLINIC,
+            CellShape::Infinite => Self::CHFL_CELL_INFINITE,
         }
     }
 }
@@ -92,10 +92,10 @@ impl<'a> DerefMut for UnitCellMut<'a> {
 }
 
 impl Clone for UnitCell {
-    fn clone(&self) -> UnitCell {
+    fn clone(&self) -> Self {
         unsafe {
             let new_handle = chfl_cell_copy(self.as_ptr());
-            UnitCell::from_ptr(new_handle)
+            Self::from_ptr(new_handle)
         }
     }
 }
@@ -105,9 +105,9 @@ impl UnitCell {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> UnitCell {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Self {
         check_not_null(ptr);
-        UnitCell { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `UnitCell` from a C pointer.
@@ -117,7 +117,7 @@ impl UnitCell {
     #[inline]
     pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_CELL) -> UnitCellRef<'a> {
         UnitCellRef {
-            inner: UnitCell::from_ptr(ptr as *mut CHFL_CELL),
+            inner: Self::from_ptr(ptr as *mut CHFL_CELL),
             marker: PhantomData,
         }
     }
@@ -130,7 +130,7 @@ impl UnitCell {
     #[inline]
     pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_CELL) -> UnitCellMut<'a> {
         UnitCellMut {
-            inner: UnitCell::from_ptr(ptr),
+            inner: Self::from_ptr(ptr),
             marker: PhantomData,
         }
     }
@@ -158,10 +158,10 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     /// assert_eq!(cell.shape(), CellShape::Orthorhombic);
     /// ```
-    pub fn new(lengths: [f64; 3]) -> UnitCell {
+    pub fn new(lengths: [f64; 3]) -> Self {
         unsafe {
             let handle = chfl_cell(lengths.as_ptr(), ptr::null());
-            UnitCell::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -176,8 +176,8 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     /// assert_eq!(cell.shape(), CellShape::Infinite);
     /// ```
-    pub fn infinite() -> UnitCell {
-        let mut cell = UnitCell::new([0.0, 0.0, 0.0]);
+    pub fn infinite() -> Self {
+        let mut cell = Self::new([0.0, 0.0, 0.0]);
         cell.set_shape(CellShape::Infinite)
             .expect("could not set cell shape");
         return cell;
@@ -200,10 +200,10 @@ impl UnitCell {
     /// assert_eq!(cell.angles()[2], 90.0);
     /// assert_eq!(cell.shape(), CellShape::Triclinic);
     /// ```
-    pub fn triclinic(lengths: [f64; 3], angles: [f64; 3]) -> UnitCell {
+    pub fn triclinic(lengths: [f64; 3], angles: [f64; 3]) -> Self {
         unsafe {
             let handle = chfl_cell(lengths.as_ptr(), angles.as_ptr());
-            UnitCell::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -228,10 +228,10 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     /// assert_eq!(cell.shape(), CellShape::Orthorhombic);
     /// ```
-    pub fn from_matrix(mut matrix: [[f64; 3]; 3]) -> UnitCell {
+    pub fn from_matrix(mut matrix: [[f64; 3]; 3]) -> Self {
         unsafe {
             let handle = chfl_cell_from_matrix(matrix.as_mut_ptr());
-            UnitCell::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 

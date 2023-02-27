@@ -32,10 +32,10 @@ impl<'a> Deref for ResidueRef<'a> {
 }
 
 impl Clone for Residue {
-    fn clone(&self) -> Residue {
+    fn clone(&self) -> Self {
         unsafe {
             let new_handle = chfl_residue_copy(self.as_ptr());
-            Residue::from_ptr(new_handle)
+            Self::from_ptr(new_handle)
         }
     }
 }
@@ -45,9 +45,9 @@ impl Residue {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Residue {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Self {
         check_not_null(ptr);
-        Residue { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `Residue` from a C pointer.
@@ -58,7 +58,7 @@ impl Residue {
     #[inline]
     pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_RESIDUE) -> ResidueRef<'a> {
         ResidueRef {
-            inner: Residue::from_ptr(ptr as *mut CHFL_RESIDUE),
+            inner: Self::from_ptr(ptr as *mut CHFL_RESIDUE),
             marker: PhantomData,
         }
     }
@@ -84,11 +84,11 @@ impl Residue {
     /// assert_eq!(residue.name(), "ALA");
     /// assert_eq!(residue.id(), None);
     /// ```
-    pub fn new<'a>(name: impl Into<&'a str>) -> Residue {
+    pub fn new<'a>(name: impl Into<&'a str>) -> Self {
         let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_residue(buffer.as_ptr());
-            Residue::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -101,11 +101,11 @@ impl Residue {
     /// assert_eq!(residue.name(), "ALA");
     /// assert_eq!(residue.id(), Some(67));
     /// ```
-    pub fn with_id<'a>(name: impl Into<&'a str>, id: i64) -> Residue {
+    pub fn with_id<'a>(name: impl Into<&'a str>, id: i64) -> Self {
         let buffer = strings::to_c(name.into());
         unsafe {
             let handle = chfl_residue_with_id(buffer.as_ptr(), id);
-            Residue::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 

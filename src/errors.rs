@@ -53,7 +53,7 @@ pub enum Status {
 }
 
 impl From<chfl_status> for Error {
-    fn from(status: chfl_status) -> Error {
+    fn from(status: chfl_status) -> Self {
         let status = match status {
             chfl_status::CHFL_SUCCESS => Status::Success,
             chfl_status::CHFL_CXX_ERROR => Status::StdCppError,
@@ -67,14 +67,14 @@ impl From<chfl_status> for Error {
             chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
 
-        let message = Error::last_error();
-        Error { status, message }
+        let message = Self::last_error();
+        Self { status, message }
     }
 }
 
 impl From<std::str::Utf8Error> for Error {
     fn from(_: std::str::Utf8Error) -> Self {
-        Error {
+        Self {
             status: Status::UTF8PathError,
             message: "failed to convert data to UTF8 string".into(),
         }
@@ -83,8 +83,8 @@ impl From<std::str::Utf8Error> for Error {
 
 impl Error {
     /// Create a new error because the given `path` is invalid UTF-8 data
-    pub(crate) fn utf8_path_error(path: &Path) -> Error {
-        Error {
+    pub(crate) fn utf8_path_error(path: &Path) -> Self {
+        Self {
             status: Status::UTF8PathError,
             message: format!("Could not convert '{}' to UTF8", path.display()),
         }
@@ -104,7 +104,7 @@ impl Error {
 }
 
 /// Check return value of a C function, and get the error if needed.
-pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
+pub fn check(status: chfl_status) -> Result<(), Error> {
     if status == chfl_status::CHFL_SUCCESS {
         Ok(())
     } else {
@@ -113,7 +113,7 @@ pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
 }
 
 /// Check return value of a C function, panic if it failed.
-pub(crate) fn check_success(status: chfl_status) {
+pub fn check_success(status: chfl_status) {
     assert!(
         status == chfl_status::CHFL_SUCCESS,
         "unexpected failure: {}",
@@ -122,7 +122,7 @@ pub(crate) fn check_success(status: chfl_status) {
 }
 
 /// Check a pointer for null.
-pub(crate) fn check_not_null<T>(ptr: *const T) {
+pub fn check_not_null<T>(ptr: *const T) {
     assert!(
         !ptr.is_null(),
         "unexpected null pointer: {}",

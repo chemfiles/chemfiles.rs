@@ -7,7 +7,7 @@ use errors::{check, check_not_null, check_success, Error};
 use strings;
 
 /// A thin wrapper around `CHFL_PROPERTY`
-pub(crate) struct RawProperty {
+pub struct RawProperty {
     handle: *mut CHFL_PROPERTY,
 }
 
@@ -15,9 +15,9 @@ impl RawProperty {
     /// Create a `RawProperty` from a C pointer.
     ///
     /// This function is unsafe because no validity check is made on the pointer.
-    pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> RawProperty {
+    pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> Self {
         check_not_null(ptr);
-        RawProperty { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -25,33 +25,33 @@ impl RawProperty {
         self.handle
     }
 
-    fn double(value: f64) -> RawProperty {
+    fn double(value: f64) -> Self {
         unsafe {
             let handle = chfl_property_double(value);
-            RawProperty::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
-    fn bool(value: bool) -> RawProperty {
-        let value = if value { 1 } else { 0 };
+    fn bool(value: bool) -> Self {
+        let value = u8::from(value);
         unsafe {
             let handle = chfl_property_bool(value);
-            RawProperty::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
-    fn vector3d(value: [f64; 3]) -> RawProperty {
+    fn vector3d(value: [f64; 3]) -> Self {
         unsafe {
             let handle = chfl_property_vector3d(value.as_ptr());
-            RawProperty::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
-    fn string(value: &str) -> RawProperty {
+    fn string(value: &str) -> Self {
         let buffer = strings::to_c(value);
         unsafe {
             let handle = chfl_property_string(buffer.as_ptr());
-            RawProperty::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -121,58 +121,58 @@ pub enum Property {
 
 impl From<bool> for Property {
     fn from(value: bool) -> Self {
-        Property::Bool(value)
+        Self::Bool(value)
     }
 }
 
 impl From<f64> for Property {
     fn from(value: f64) -> Self {
-        Property::Double(value)
+        Self::Double(value)
     }
 }
 
 impl From<String> for Property {
     fn from(value: String) -> Self {
-        Property::String(value)
+        Self::String(value)
     }
 }
 
 impl<'a> From<&'a str> for Property {
     fn from(value: &'a str) -> Self {
-        Property::String(value.into())
+        Self::String(value.into())
     }
 }
 
 impl From<[f64; 3]> for Property {
     fn from(value: [f64; 3]) -> Self {
-        Property::Vector3D(value)
+        Self::Vector3D(value)
     }
 }
 
 impl Property {
     pub(crate) fn as_raw(&self) -> RawProperty {
         match *self {
-            Property::Bool(value) => RawProperty::bool(value),
-            Property::Double(value) => RawProperty::double(value),
-            Property::String(ref value) => RawProperty::string(value),
-            Property::Vector3D(value) => RawProperty::vector3d(value),
+            Self::Bool(value) => RawProperty::bool(value),
+            Self::Double(value) => RawProperty::double(value),
+            Self::String(ref value) => RawProperty::string(value),
+            Self::Vector3D(value) => RawProperty::vector3d(value),
         }
     }
 
     #[allow(clippy::needless_pass_by_value)] // raw property
-    pub(crate) fn from_raw(raw: RawProperty) -> Property {
+    pub(crate) fn from_raw(raw: RawProperty) -> Self {
         match raw.get_kind() {
             chfl_property_kind::CHFL_PROPERTY_BOOL => {
-                Property::Bool(raw.get_bool().expect("shoudl be a bool"))
+                Self::Bool(raw.get_bool().expect("shoudl be a bool"))
             }
             chfl_property_kind::CHFL_PROPERTY_DOUBLE => {
-                Property::Double(raw.get_double().expect("should be a double"))
+                Self::Double(raw.get_double().expect("should be a double"))
             }
             chfl_property_kind::CHFL_PROPERTY_STRING => {
-                Property::String(raw.get_string().expect("should be a string"))
+                Self::String(raw.get_string().expect("should be a string"))
             }
             chfl_property_kind::CHFL_PROPERTY_VECTOR3D => {
-                Property::Vector3D(raw.get_vector3d().expect("should be a vector3d"))
+                Self::Vector3D(raw.get_vector3d().expect("should be a vector3d"))
             }
         }
     }
@@ -188,7 +188,7 @@ impl<'a> Iterator for PropertiesIter<'a> {
     type Item = (String, Property);
     fn next(&mut self) -> Option<Self::Item> {
         self.names.next().map(|name| {
-            let property = (self.getter)(&*name);
+            let property = (self.getter)(&name);
             (name, property)
         })
     }

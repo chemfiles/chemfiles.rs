@@ -21,10 +21,10 @@ pub struct Frame {
 }
 
 impl Clone for Frame {
-    fn clone(&self) -> Frame {
+    fn clone(&self) -> Self {
         unsafe {
             let new_handle = chfl_frame_copy(self.as_ptr());
-            Frame::from_ptr(new_handle)
+            Self::from_ptr(new_handle)
         }
     }
 }
@@ -41,9 +41,9 @@ impl Frame {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_FRAME) -> Frame {
+    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_FRAME) -> Self {
         check_not_null(ptr);
-        Frame { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -78,8 +78,8 @@ impl Frame {
     ///
     /// assert_eq!(frame.size(), 0);
     /// ```
-    pub fn new() -> Frame {
-        unsafe { Frame::from_ptr(chfl_frame()) }
+    pub fn new() -> Self {
+        unsafe { Self::from_ptr(chfl_frame()) }
     }
 
     /// Get a reference to the atom at the given `index` in this frame.
