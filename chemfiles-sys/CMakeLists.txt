@@ -22,28 +22,28 @@ if (NOT ${CHFL_RUST_PREBUILT_TARGET} STREQUAL "")
     set(PREBUILT_NAME "chemfiles-static.v${CHEMFILES_VERSION}.${CHFL_RUST_PREBUILT_TARGET}.tar.gz")
     set(PREBUILT_URL "https://github.com/chemfiles/chemfiles-prebuilt/releases/download/v${CHEMFILES_VERSION}/${PREBUILT_NAME}")
 
-    set(PREBUILT_DESINATION ${CMAKE_CURRENT_BINARY_DIR}/${PREBUILT_NAME})
+    set(PREBUILT_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PREBUILT_NAME})
 
     message(STATUS "trying to download ${PREBUILT_URL}")
     file(DOWNLOAD
-        ${PREBUILT_URL} ${PREBUILT_DESINATION}
+        ${PREBUILT_URL} ${PREBUILT_DESTINATION}
         STATUS DOWNLOAD_STATUS
     )
 
     list(GET DOWNLOAD_STATUS 0 DOWNLOAD_ERROR_CODE)
     if (DOWNLOAD_ERROR_CODE)
-        file(REMOVE ${PREBUILT_DESINATION})
+        file(REMOVE ${PREBUILT_DESTINATION})
         message(STATUS "failed to download prebuilt chemfiles, building from sources")
     else()
         set(PREBUILT_DOWNLOAD_SUCCESS TRUE)
     endif()
 
     if (PREBUILT_DOWNLOAD_SUCCESS)
-        file(SHA256 ${PREBUILT_DESINATION} PREBUILT_SHA256)
+        file(SHA256 ${PREBUILT_DESTINATION} PREBUILT_SHA256)
         if (NOT ${PREBUILT_SHA256} STREQUAL ${CHFL_RUST_PREBUILT_SHA256})
             message(
                 FATAL_ERROR
-                "corrupted download of prebuilt chemfiles at '${PREBUILT_DESINATION}':\n"
+                "corrupted download of prebuilt chemfiles at '${PREBUILT_DESTINATION}':\n"
                 "Expected SHA256: ${CHFL_RUST_PREBUILT_SHA256}\n"
                 "Actual SHA256: ${PREBUILT_SHA256}"
             )
@@ -52,7 +52,7 @@ if (NOT ${CHFL_RUST_PREBUILT_TARGET} STREQUAL "")
         # this could use file(ARCHIVE_EXTRACT ...), but that's only available
         # for cmake >= 3.18
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xf ${PREBUILT_DESINATION}
+            COMMAND ${CMAKE_COMMAND} -E tar xf ${PREBUILT_DESTINATION}
             WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}
         )
 
