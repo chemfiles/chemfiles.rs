@@ -14,6 +14,7 @@ use crate::strings;
 /// cell, the topology, the positions, and the velocities of the particles in
 /// the system. If some information is missing (topology or velocity or unit
 /// cell), the corresponding data is filled with a default value.
+#[derive(Debug)]
 pub struct Frame {
     handle: *mut CHFL_FRAME,
 }
@@ -27,6 +28,7 @@ impl Clone for Frame {
     }
 }
 
+#[derive(Debug)]
 pub struct AtomIter<'a> {
     frame: &'a Frame,
     index: usize,

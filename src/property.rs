@@ -6,6 +6,7 @@ use crate::errors::{check, check_not_null, check_success, Error};
 use crate::strings;
 
 /// A thin wrapper around `CHFL_PROPERTY`
+#[derive(Debug)]
 pub(crate) struct RawProperty {
     handle: *mut CHFL_PROPERTY,
 }
