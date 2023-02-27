@@ -154,18 +154,21 @@ where
     // box callback to ensure it stays accessible
     let callback = Box::into_raw(Box::new(callback));
     unsafe {
-        if let Some(previous) = LOGGING_CALLBACK {
-            // drop the previous callback
-            let previous = Box::from_raw(previous);
-            std::mem::drop(previous);
-            // set the LOGGING_CALLBACK to the new one
-            LOGGING_CALLBACK = Some(callback);
-        } else {
-            // set the LOGGING_CALLBACK
-            LOGGING_CALLBACK = Some(callback);
-            // Tell C code to use Rust-provided callback
-            check_success(chfl_set_warning_callback(warning_callback));
-        }
+        LOGGING_CALLBACK.map_or_else(
+            || {
+                // set the LOGGING_CALLBACK
+                LOGGING_CALLBACK = Some(callback);
+                // Tell C code to use Rust-provided callback
+                check_success(chfl_set_warning_callback(warning_callback));
+            },
+            |previous| {
+                // drop the previous callback
+                let previous = Box::from_raw(previous);
+                std::mem::drop(previous);
+                // set the LOGGING_CALLBACK to the new one
+                LOGGING_CALLBACK = Some(callback);
+            },
+        );
     }
 }
 
