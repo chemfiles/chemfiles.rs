@@ -18,6 +18,14 @@ pub struct Trajectory {
     handle: *mut CHFL_TRAJECTORY,
 }
 
+impl Drop for Trajectory {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = chfl_trajectory_close(self.as_ptr());
+        }
+    }
+}
+
 impl Trajectory {
     /// Create a `Trajectory` from a C pointer.
     ///
@@ -114,38 +122,6 @@ impl Trajectory {
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
-            Trajectory::from_ptr(handle)
-        }
-    }
-
-    /// Read a memory buffer as though it was a formatted file.
-    ///
-    /// The memory buffer used to store the file is given using the `data`
-    /// argument. The `format` parameter is required and should follow the same
-    /// rules as in the main `Trajectory` constructor.
-    ///
-    /// # Errors
-    ///
-    /// This function fails if the data is incorrectly formatted for the
-    /// corresponding format, or if the format do not support in-memory readers.
-    ///
-    /// # Example
-    /// ```
-    /// # use chemfiles::{Trajectory, Frame};
-    /// let aromatics = "c1ccccc1\nc1ccco1\nc1ccccn1\n";
-    /// let mut trajectory = Trajectory::memory_reader(aromatics, "SMI").unwrap();
-    /// let mut frame = Frame::new();
-    /// trajectory.read(&mut frame).unwrap();
-    /// assert_eq!(frame.size(), 6);
-    /// ```
-    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Trajectory, Error>
-    where
-        S: Into<&'a str>,
-    {
-        let data = strings::to_c(data.into());
-        let format = strings::to_c(format.into());
-        unsafe {
-            let handle = chfl_trajectory_memory_reader(data.as_ptr(), data.as_bytes().len() as u64, format.as_ptr());
             Trajectory::from_ptr(handle)
         }
     }
@@ -435,11 +411,64 @@ impl Trajectory {
     }
 }
 
-impl Drop for Trajectory {
-    fn drop(&mut self) {
-        unsafe {
-            let _ = chfl_trajectory_close(self.as_ptr());
-        }
+/// `MemoryTrajectoryReader` is a handle for a `Trajectory` in memory.
+pub struct MemoryTrajectoryReader<'data> {
+    inner: Trajectory,
+    phantom: std::marker::PhantomData<&'data [u8]>,
+}
+
+impl<'data> MemoryTrajectoryReader<'data> {
+    /// Read a memory buffer as though it was a formatted file.
+    ///
+    /// The memory buffer used to store the file is given using the `data`
+    /// argument. The `format` parameter is required and should follow the same
+    /// rules as in the main `Trajectory` constructor.
+    ///
+    /// # Errors
+    ///
+    /// This function fails if the data is incorrectly formatted for the
+    /// corresponding format, or if the format do not support in-memory readers.
+    ///
+    /// # Example
+    /// ```
+    /// # use chemfiles::{MemoryTrajectoryReader, Frame};
+    /// let aromatics = "c1ccccc1\nc1ccco1\nc1ccccn1\n";
+    /// let mut trajectory = MemoryTrajectoryReader::new(aromatics.as_bytes(), "SMI").unwrap();
+    /// let mut frame = Frame::new();
+    /// trajectory.read(&mut frame).unwrap();
+    /// assert_eq!(frame.size(), 6);
+    /// ```
+    pub fn new<Data, Format>(data: Data, format: Format) -> Result<MemoryTrajectoryReader<'data>, Error>
+    where
+        Data: Into<&'data [u8]>,
+        Format: AsRef<str>,
+    {
+        let data = data.into();
+        let format = strings::to_c(format.as_ref());
+        let trajectory = unsafe {
+            let handle = chfl_trajectory_memory_reader(data.as_ptr().cast(), data.len() as u64, format.as_ptr());
+            Trajectory::from_ptr(handle)
+        };
+        Ok(MemoryTrajectoryReader {
+            inner: trajectory?,
+            phantom: std::marker::PhantomData,
+        })
+    }
+}
+
+impl<'a> std::ops::Deref for MemoryTrajectoryReader<'a> {
+    type Target = Trajectory;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<'a> std::ops::DerefMut for MemoryTrajectoryReader<'a> {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
     }
 }
 
@@ -589,7 +618,7 @@ X 1 2 3"
             trajectory_write.write(&frame_write).unwrap();
 
             let buffer = trajectory_write.memory_buffer().unwrap();
-            let mut trajectory_read = Trajectory::memory_reader(buffer, *format).unwrap();
+            let mut trajectory_read = MemoryTrajectoryReader::new(buffer.as_bytes(), *format).unwrap();
             let mut frame_read = Frame::new();
             trajectory_read.read(&mut frame_read).unwrap();
 
