@@ -2,6 +2,7 @@
 // Copyright (C) 2015-2020 Guillaume Fraux -- BSD licensed
 use std::convert::TryInto;
 use std::ffi::CStr;
+use std::path::Path;
 
 use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_guess_format};
 
@@ -115,6 +116,10 @@ pub fn formats_list() -> Vec<FormatMetadata> {
 ///
 /// This function returns an error if the file format couldn't be guessed.
 ///
+/// # Panics
+///
+/// This function panics if the path can't be converted to a Unicode string.
+///
 /// # Examples
 /// ```
 /// let format = chemfiles::guess_format("trajectory.xyz.xz").unwrap();
@@ -126,7 +131,11 @@ pub fn formats_list() -> Vec<FormatMetadata> {
 /// let format = chemfiles::guess_format("trajectory.unknown.format");
 /// assert!(format.is_err());
 /// ```
-pub fn guess_format(path: &str) -> Result<String, Error> {
+pub fn guess_format<P>(path: P) -> Result<String, Error>
+where
+    P: AsRef<Path>,
+{
+    let path = path.as_ref().to_str().expect("couldn't convert path to Unicode");
     let path = crate::strings::to_c(path);
     let mut buffer = vec![0; 128];
     unsafe {
