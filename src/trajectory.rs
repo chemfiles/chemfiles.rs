@@ -530,7 +530,10 @@ mod test {
         assert_eq!(frame.size(), 125);
     }
 
-    fn write_file(path: &str) {
+    fn write_file<P>(path: P)
+    where
+        P: AsRef<Path>,
+    {
         let mut file = Trajectory::open(path, 'w').unwrap();
         let mut frame = Frame::new();
         frame.resize(4);
