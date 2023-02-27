@@ -470,6 +470,7 @@ mod test {
 
     use super::*;
 
+    #[allow(clippy::cognitive_complexity)]
     #[test]
     fn read() {
         let root = Path::new(file!()).parent().unwrap().join("..");
