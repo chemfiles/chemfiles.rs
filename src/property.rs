@@ -163,7 +163,7 @@ impl Property {
     pub(crate) fn from_raw(raw: RawProperty) -> Self {
         match raw.get_kind() {
             chfl_property_kind::CHFL_PROPERTY_BOOL => {
-                Self::Bool(raw.get_bool().expect("shoudl be a bool"))
+                Self::Bool(raw.get_bool().expect("should be a bool"))
             }
             chfl_property_kind::CHFL_PROPERTY_DOUBLE => {
                 Self::Double(raw.get_double().expect("should be a double"))
