@@ -3,13 +3,12 @@
 use std::convert::TryInto;
 use std::os::raw::c_char;
 use std::path::Path;
-use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check, check_success, Error, Status};
-use strings;
 
-use {Frame, Topology, UnitCell};
+use crate::errors::{check, check_success, Error, Status};
+use crate::strings;
+use crate::{Frame, Topology, UnitCell};
 
 /// The `Trajectory` type is the main entry point when using chemfiles. A
 /// `Trajectory` behave a bit like a file, allowing to read and/or write
@@ -303,7 +302,7 @@ impl Trajectory {
             check(chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
                 path.as_ptr(),
-                ptr::null(),
+                std::ptr::null(),
             ))
         }
     }
@@ -447,13 +446,12 @@ impl Drop for Trajectory {
 mod test {
     use super::*;
 
-    use std::fs;
     use std::io::Read;
     use std::path::Path;
 
     use approx::assert_ulps_eq;
 
-    use {Atom, CellShape, Frame, Topology, UnitCell};
+    use crate::{Atom, CellShape, Frame, Topology, UnitCell};
 
     #[test]
     fn read() {
@@ -564,12 +562,12 @@ X 1 2 3"
             .lines()
             .collect::<Vec<_>>();
 
-        let mut file = fs::File::open(filename).unwrap();
+        let mut file = std::fs::File::open(filename).unwrap();
         let mut content = String::new();
         let _ = file.read_to_string(&mut content).unwrap();
 
         assert_eq!(expected_content, content.lines().collect::<Vec<_>>());
-        fs::remove_file(filename).unwrap();
+        std::fs::remove_file(filename).unwrap();
     }
 
     #[test]

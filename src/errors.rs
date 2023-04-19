@@ -1,16 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-extern crate libc;
-
-use std::error;
-use std::fmt;
+use std::os::raw::c_char;
 use std::panic::{self, RefUnwindSafe};
 use std::path::Path;
 
-use self::libc::c_char;
-
 use chemfiles_sys::*;
-use strings;
+
+use crate::strings;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 /// Error type for Chemfiles.
@@ -164,13 +160,13 @@ where
     }
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl std::fmt::Display for Error {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(fmt, "{}", self.message)
     }
 }
 
-impl error::Error for Error {
+impl std::error::Error for Error {
     fn description(&self) -> &str {
         match self.status {
             Status::Success => "Success",
@@ -191,7 +187,7 @@ impl error::Error for Error {
 #[cfg(test)]
 mod test {
     use super::*;
-    use Trajectory;
+    use crate::Trajectory;
 
     #[test]
     fn errors() {

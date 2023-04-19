@@ -1,8 +1,4 @@
 #![allow(bad_style, unused)]
-
-extern crate chemfiles_sys;
-extern crate libc;
-
 use chemfiles_sys::*;
 use libc::*;
 
