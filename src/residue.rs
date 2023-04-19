@@ -1,13 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
-use std::ops::{Deref, Drop};
-use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check_not_null, check_success};
-use property::{PropertiesIter, Property, RawProperty};
-use strings;
+
+use crate::errors::{check_not_null, check_success};
+use crate::property::{PropertiesIter, Property, RawProperty};
+use crate::strings;
 
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
 /// can be small molecules, amino-acids in a protein, monomers in polymers,
@@ -22,7 +21,7 @@ pub struct ResidueRef<'a> {
     marker: PhantomData<&'a Residue>,
 }
 
-impl<'a> Deref for ResidueRef<'a> {
+impl<'a> std::ops::Deref for ResidueRef<'a> {
     type Target = Residue;
     fn deref(&self) -> &Residue {
         &self.inner
@@ -308,7 +307,7 @@ impl Residue {
 
         #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut c_names = vec![ptr::null_mut(); size];
+        let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
             check_success(chfl_residue_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }

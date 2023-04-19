@@ -18,17 +18,10 @@ Add this to your `Cargo.toml` file:
 chemfiles = "0.9"
 ```
 
-And then use `chemfiles` in your project:
-
-```rust
-extern crate chemfiles;
-```
-
 Here is a simple usage example. See the `examples` folder for additional
 examples.
 
 ```rust
-extern crate chemfiles;
 use chemfiles::{Trajectory, Frame};
 
 fn main() {

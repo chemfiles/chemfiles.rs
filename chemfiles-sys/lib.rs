@@ -10,8 +10,7 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 #![allow(non_camel_case_types)]
-extern crate libc;
-use libc::{c_double, c_char, c_void};
+use std::os::raw::{c_char, c_double, c_void};
 
 // Manual definitions. Edit the bindgen code to make sure this matches the
 // chemfiles.h header

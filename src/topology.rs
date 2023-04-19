@@ -3,10 +3,11 @@
 use std::marker::PhantomData;
 use std::ops::{Deref, Drop};
 
-use super::{Atom, AtomMut, AtomRef};
-use super::{Residue, ResidueRef};
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
+
+use crate::errors::{check, check_not_null, check_success, Error};
+use crate::{Atom, AtomMut, AtomRef};
+use crate::{Residue, ResidueRef};
 
 /// Possible bond order associated with bonds
 #[repr(C)]

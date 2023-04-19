@@ -1,16 +1,14 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
-use std::ptr;
-use std::slice;
-
-use super::{Atom, AtomMut, AtomRef};
-use super::{BondOrder, Residue, Topology, TopologyRef};
-use super::{UnitCell, UnitCellMut, UnitCellRef};
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
-use property::{PropertiesIter, Property, RawProperty};
-use strings;
+
+use crate::{Atom, AtomMut, AtomRef};
+use crate::{BondOrder, Residue, Topology, TopologyRef};
+use crate::{UnitCell, UnitCellMut, UnitCellRef};
+
+use crate::errors::{check, check_not_null, check_success, Error};
+use crate::property::{PropertiesIter, Property, RawProperty};
+use crate::strings;
 
 /// A `Frame` contains data from one simulation step: the current unit
 /// cell, the topology, the positions, and the velocities of the particles in
@@ -181,7 +179,7 @@ impl Frame {
         let velocity = velocity.into();
         let velocity_ptr = match velocity {
             Some(ref data) => data.as_ptr(),
-            None => ptr::null(),
+            None => std::ptr::null(),
         };
 
         unsafe {
@@ -443,7 +441,7 @@ impl Frame {
     /// assert_eq!(positions[0], [0.0, 0.0, 0.0]);
     /// ```
     pub fn positions(&self) -> &[[f64; 3]] {
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             check_success(chfl_frame_positions(
@@ -456,7 +454,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return slice::from_raw_parts(ptr, size);
+            return std::slice::from_raw_parts(ptr, size);
         }
     }
 
@@ -477,7 +475,7 @@ impl Frame {
     /// assert_eq!(positions[0], [1.0, 2.0, 3.0]);
     /// ```
     pub fn positions_mut(&mut self) -> &mut [[f64; 3]] {
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             check_success(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms));
@@ -485,7 +483,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return slice::from_raw_parts_mut(ptr, size);
+            return std::slice::from_raw_parts_mut(ptr, size);
         }
     }
 
@@ -507,7 +505,7 @@ impl Frame {
             return None;
         }
 
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             check_success(chfl_frame_velocities(
@@ -519,7 +517,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return Some(slice::from_raw_parts(ptr, size));
+            return Some(std::slice::from_raw_parts(ptr, size));
         }
     }
 
@@ -545,7 +543,7 @@ impl Frame {
             return None;
         }
 
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             check_success(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms));
@@ -553,7 +551,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return Some(slice::from_raw_parts_mut(ptr, size));
+            return Some(std::slice::from_raw_parts_mut(ptr, size));
         }
     }
 
@@ -855,7 +853,7 @@ impl Frame {
 
         #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut c_names = vec![ptr::null_mut(); size];
+        let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
             check_success(chfl_frame_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
@@ -922,7 +920,6 @@ impl<'a> Iterator for AtomIter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use {Atom, Topology, UnitCell};
 
     #[test]
     fn clone() {

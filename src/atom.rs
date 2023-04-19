@@ -1,14 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
-use std::ops::{Deref, DerefMut, Drop};
-use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check_not_null, check_success};
-use strings;
 
-use property::{PropertiesIter, Property, RawProperty};
+use crate::errors::{check_not_null, check_success};
+use crate::property::{PropertiesIter, Property, RawProperty};
+use crate::strings;
 
 /// An `Atom` is a particle in the current `Frame`. It stores the following
 /// atomic properties:
@@ -31,7 +29,7 @@ pub struct AtomRef<'a> {
     marker: PhantomData<&'a Atom>,
 }
 
-impl<'a> Deref for AtomRef<'a> {
+impl<'a> std::ops::Deref for AtomRef<'a> {
     type Target = Atom;
     fn deref(&self) -> &Atom {
         &self.inner
@@ -44,14 +42,14 @@ pub struct AtomMut<'a> {
     marker: PhantomData<&'a mut Atom>,
 }
 
-impl<'a> Deref for AtomMut<'a> {
+impl<'a> std::ops::Deref for AtomMut<'a> {
     type Target = Atom;
     fn deref(&self) -> &Atom {
         &self.inner
     }
 }
 
-impl<'a> DerefMut for AtomMut<'a> {
+impl<'a> std::ops::DerefMut for AtomMut<'a> {
     fn deref_mut(&mut self) -> &mut Atom {
         &mut self.inner
     }
@@ -399,7 +397,7 @@ impl Atom {
 
         #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut c_names = vec![ptr::null_mut(); size];
+        let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
             check_success(chfl_atom_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
@@ -444,7 +442,7 @@ mod test {
     #[test]
     fn mass() {
         let mut atom = Atom::new("He");
-        assert_ulps_eq!(atom.mass(), 4.002602);
+        approx::assert_ulps_eq!(atom.mass(), 4.002602);
         atom.set_mass(15.0);
         assert_eq!(atom.mass(), 15.0);
     }
@@ -488,8 +486,8 @@ mod test {
     #[test]
     fn radii() {
         let atom = Atom::new("He");
-        assert_ulps_eq!(atom.vdw_radius(), 1.4);
-        assert_ulps_eq!(atom.covalent_radius(), 0.32);
+        approx::assert_ulps_eq!(atom.vdw_radius(), 1.4);
+        approx::assert_ulps_eq!(atom.covalent_radius(), 0.32);
 
         let atom = Atom::new("Unknown");
         assert_eq!(atom.vdw_radius(), 0.0);

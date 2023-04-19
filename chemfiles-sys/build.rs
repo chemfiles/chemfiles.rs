@@ -1,7 +1,5 @@
 #![allow(clippy::needless_return)]
 
-extern crate cmake;
-
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};

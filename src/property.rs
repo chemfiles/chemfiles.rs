@@ -1,11 +1,9 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
-use std::vec::IntoIter;
-
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
-use strings;
+
+use crate::errors::{check, check_not_null, check_success, Error};
+use crate::strings;
 
 /// A thin wrapper around `CHFL_PROPERTY`
 pub(crate) struct RawProperty {
@@ -172,7 +170,7 @@ impl Property {
 
 /// An iterator over the properties in an atom/frame/residue
 pub struct PropertiesIter<'a> {
-    pub(crate) names: IntoIter<String>,
+    pub(crate) names: std::vec::IntoIter<String>,
     pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }
 

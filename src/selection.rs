@@ -1,13 +1,10 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::iter::IntoIterator;
-use std::ops::{Drop, Index};
-use std::slice::Iter;
-
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error, Status};
-use frame::Frame;
-use strings;
+
+use crate::errors::{check, check_not_null, check_success, Error, Status};
+use crate::frame::Frame;
+use crate::strings;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It can
@@ -73,12 +70,12 @@ impl Match {
     /// assert_eq!(iter.next(), Some(&5));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter(&self) -> Iter<usize> {
+    pub fn iter(&self) -> std::slice::Iter<usize> {
         self.atoms[..self.len()].iter()
     }
 }
 
-impl Index<usize> for Match {
+impl std::ops::Index<usize> for Match {
     type Output = usize;
     fn index(&self, i: usize) -> &Self::Output {
         assert!(i < self.len());
@@ -88,8 +85,9 @@ impl Index<usize> for Match {
 
 impl<'a> IntoIterator for &'a Match {
     type Item = &'a usize;
-    type IntoIter = Iter<'a, usize>;
-    fn into_iter(self) -> Iter<'a, usize> {
+    type IntoIter = std::slice::Iter<'a, usize>;
+
+    fn into_iter(self) -> Self::IntoIter {
         self.atoms[..self.len()].iter()
     }
 }
@@ -290,9 +288,7 @@ impl Selection {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use Atom;
-    use Frame;
-    use Topology;
+    use crate::{Atom, Topology};
 
     #[test]
     fn clone() {

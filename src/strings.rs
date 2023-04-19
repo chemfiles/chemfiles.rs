@@ -5,8 +5,9 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
+use crate::errors::{check, Error};
+
 use chemfiles_sys::chfl_status;
-use errors::{check, Error};
 
 /// Create a Rust string from a C string. Clones all characters in `buffer`.
 pub fn from_c(buffer: *const c_char) -> String {

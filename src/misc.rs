@@ -1,11 +1,11 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2020 Guillaume Fraux -- BSD licensed
-
 use std::convert::TryInto;
 use std::ffi::CStr;
 
 use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_guess_format};
-use errors::check_success;
+
+use crate::errors::check_success;
 
 /// `FormatMetadata` contains metadata associated with one format.
 #[allow(clippy::struct_excessive_bools)]
