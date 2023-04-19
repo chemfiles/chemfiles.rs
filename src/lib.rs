@@ -28,10 +28,8 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]
 #![allow(clippy::must_use_candidate, clippy::wildcard_imports)]
-
 // Allow a few more clippy lints in test mode
 #![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
-
 // deny(warnings) in doc tests
 #![doc(test(attr(deny(warnings))))]
 #![doc(test(attr(allow(unused_variables))))]
@@ -46,28 +44,28 @@ use chemfiles_sys::{chfl_add_configuration, chfl_version};
 mod strings;
 
 mod errors;
-pub use errors::{Error, Status};
 pub use errors::set_warning_callback;
+pub use errors::{Error, Status};
 
 mod atom;
 pub use atom::Atom;
-pub use atom::AtomRef;
 pub use atom::AtomMut;
+pub use atom::AtomRef;
 
 mod cell;
-pub use cell::UnitCell;
-pub use cell::UnitCellRef;
-pub use cell::UnitCellMut;
 pub use cell::CellShape;
+pub use cell::UnitCell;
+pub use cell::UnitCellMut;
+pub use cell::UnitCellRef;
 
 mod residue;
 pub use residue::Residue;
 pub use residue::ResidueRef;
 
 mod topology;
+pub use topology::BondOrder;
 pub use topology::Topology;
 pub use topology::TopologyRef;
-pub use topology::BondOrder;
 
 mod frame;
 pub use frame::Frame;
@@ -79,11 +77,11 @@ mod selection;
 pub use selection::{Match, Selection};
 
 mod property;
-pub use property::Property;
 pub use property::PropertiesIter;
+pub use property::Property;
 
 mod misc;
-pub use misc::{FormatMetadata, formats_list, guess_format};
+pub use misc::{formats_list, guess_format, FormatMetadata};
 
 /// Get the version of the chemfiles library.
 ///
@@ -118,9 +116,7 @@ where
     S: AsRef<str>,
 {
     let buffer = strings::to_c(path.as_ref());
-    unsafe {
-        errors::check(chfl_add_configuration(buffer.as_ptr()))
-    }
+    unsafe { errors::check(chfl_add_configuration(buffer.as_ptr())) }
 }
 
 #[cfg(test)]

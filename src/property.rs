@@ -18,9 +18,7 @@ impl RawProperty {
     /// This function is unsafe because no validity check is made on the pointer.
     pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> RawProperty {
         check_not_null(ptr);
-        RawProperty {
-            handle: ptr
-        }
+        RawProperty { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -159,18 +157,12 @@ impl Property {
         }
     }
 
-    #[allow(clippy::needless_pass_by_value)]  // raw property
+    #[allow(clippy::needless_pass_by_value)] // raw property
     pub(crate) fn from_raw(raw: RawProperty) -> Property {
         match raw.get_kind() {
-            chfl_property_kind::CHFL_PROPERTY_BOOL => {
-                Property::Bool(raw.get_bool().expect("shoudl be a bool"))
-            }
-            chfl_property_kind::CHFL_PROPERTY_DOUBLE => {
-                Property::Double(raw.get_double().expect("should be a double"))
-            }
-            chfl_property_kind::CHFL_PROPERTY_STRING => {
-                Property::String(raw.get_string().expect("should be a string"))
-            }
+            chfl_property_kind::CHFL_PROPERTY_BOOL => Property::Bool(raw.get_bool().expect("shoudl be a bool")),
+            chfl_property_kind::CHFL_PROPERTY_DOUBLE => Property::Double(raw.get_double().expect("should be a double")),
+            chfl_property_kind::CHFL_PROPERTY_STRING => Property::String(raw.get_string().expect("should be a string")),
             chfl_property_kind::CHFL_PROPERTY_VECTOR3D => {
                 Property::Vector3D(raw.get_vector3d().expect("should be a vector3d"))
             }
@@ -179,7 +171,7 @@ impl Property {
 }
 
 /// An iterator over the properties in an atom/frame/residue
-pub struct PropertiesIter<'a> where  {
+pub struct PropertiesIter<'a> {
     pub(crate) names: IntoIter<String>,
     pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }

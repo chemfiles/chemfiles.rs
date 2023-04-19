@@ -41,11 +41,7 @@ pub struct FormatMetadata {
 
 impl FormatMetadata {
     pub(crate) fn from_raw(raw: &chfl_format_metadata) -> Self {
-        let str_from_ptr = |ptr| unsafe {
-            CStr::from_ptr(ptr)
-                .to_str()
-                .expect("Invalid Rust str from C")
-        };
+        let str_from_ptr = |ptr| unsafe { CStr::from_ptr(ptr).to_str().expect("Invalid Rust str from C") };
         let extension = if raw.extension.is_null() {
             None
         } else {
@@ -91,10 +87,7 @@ pub fn formats_list() -> Vec<FormatMetadata> {
         check_success(chfl_formats_list(&mut formats, &mut count));
         std::slice::from_raw_parts(formats, count.try_into().expect("failed to convert u64 to usize"))
     };
-    let formats_vec = formats_slice
-        .iter()
-        .map(FormatMetadata::from_raw)
-        .collect();
+    let formats_vec = formats_slice.iter().map(FormatMetadata::from_raw).collect();
     unsafe {
         let _ = chfl_free(formats as *const _);
     }
@@ -129,7 +122,9 @@ pub fn guess_format(path: &str) -> String {
     let mut buffer = vec![0; 128];
     unsafe {
         check_success(chfl_guess_format(
-            path.as_ptr(), buffer.as_mut_ptr(), buffer.len() as u64
+            path.as_ptr(),
+            buffer.as_mut_ptr(),
+            buffer.len() as u64,
         ));
     }
     return crate::strings::from_c(buffer.as_ptr());

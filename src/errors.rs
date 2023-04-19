@@ -67,10 +67,7 @@ impl From<chfl_status> for Error {
         };
 
         let message = Error::last_error();
-        Error {
-            status,
-            message,
-        }
+        Error { status, message }
     }
 }
 
@@ -116,7 +113,11 @@ pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
 
 /// Check return value of a C function, panic if it failed.
 pub(crate) fn check_success(status: chfl_status) {
-    assert!(status == chfl_status::CHFL_SUCCESS, "unexpected failure: {}", Error::last_error());
+    assert!(
+        status == chfl_status::CHFL_SUCCESS,
+        "unexpected failure: {}",
+        Error::last_error()
+    );
 }
 
 /// Check a pointer for null.
@@ -125,11 +126,7 @@ pub(crate) fn check_not_null<T>(ptr: *const T) {
 }
 
 pub trait WarningCallback: RefUnwindSafe + Fn(&str) {}
-impl<T> WarningCallback for T
-where
-    T: RefUnwindSafe + Fn(&str),
-{
-}
+impl<T> WarningCallback for T where T: RefUnwindSafe + Fn(&str) {}
 
 static mut LOGGING_CALLBACK: Option<*mut dyn WarningCallback<Output = ()>> = None;
 
@@ -145,7 +142,10 @@ extern "C" fn warning_callback(message: *const c_char) {
 
 /// Use `callback` for every chemfiles warning. The callback will be passed
 /// the warning message. This will drop any previous warning callback.
-pub fn set_warning_callback<F>(callback: F) where F: WarningCallback + 'static {
+pub fn set_warning_callback<F>(callback: F)
+where
+    F: WarningCallback + 'static,
+{
     // box callback to ensure it stays accessible
     let callback = Box::into_raw(Box::new(callback));
     unsafe {
@@ -163,7 +163,6 @@ pub fn set_warning_callback<F>(callback: F) where F: WarningCallback + 'static {
         }
     }
 }
-
 
 impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
@@ -189,7 +188,6 @@ impl error::Error for Error {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -212,12 +210,21 @@ mod test {
     fn codes() {
         assert_eq!(Error::from(chfl_status::CHFL_SUCCESS).status, Status::Success);
         assert_eq!(Error::from(chfl_status::CHFL_CXX_ERROR).status, Status::StdCppError);
-        assert_eq!(Error::from(chfl_status::CHFL_GENERIC_ERROR).status, Status::ChemfilesError);
+        assert_eq!(
+            Error::from(chfl_status::CHFL_GENERIC_ERROR).status,
+            Status::ChemfilesError
+        );
         assert_eq!(Error::from(chfl_status::CHFL_MEMORY_ERROR).status, Status::MemoryError);
         assert_eq!(Error::from(chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
         assert_eq!(Error::from(chfl_status::CHFL_FORMAT_ERROR).status, Status::FormatError);
-        assert_eq!(Error::from(chfl_status::CHFL_SELECTION_ERROR).status, Status::SelectionError);
+        assert_eq!(
+            Error::from(chfl_status::CHFL_SELECTION_ERROR).status,
+            Status::SelectionError
+        );
         assert_eq!(Error::from(chfl_status::CHFL_OUT_OF_BOUNDS).status, Status::OutOfBounds);
-        assert_eq!(Error::from(chfl_status::CHFL_PROPERTY_ERROR).status, Status::PropertyError);
+        assert_eq!(
+            Error::from(chfl_status::CHFL_PROPERTY_ERROR).status,
+            Status::PropertyError
+        );
     }
 }

@@ -1,12 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Deref};
 use std::marker::PhantomData;
+use std::ops::{Deref, Drop};
 
+use super::{Atom, AtomMut, AtomRef};
+use super::{Residue, ResidueRef};
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error};
-use super::{Atom, AtomRef, AtomMut};
-use super::{Residue, ResidueRef};
 
 /// Possible bond order associated with bonds
 #[repr(C)]
@@ -71,7 +71,7 @@ pub struct Topology {
 /// An analog to a reference to a topology (`&Topology`)
 pub struct TopologyRef<'a> {
     inner: Topology,
-    marker: PhantomData<&'a Topology>
+    marker: PhantomData<&'a Topology>,
 }
 
 impl<'a> Deref for TopologyRef<'a> {
@@ -98,9 +98,7 @@ impl Topology {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Topology {
         check_not_null(ptr);
-        Topology {
-            handle: ptr
-        }
+        Topology { handle: ptr }
     }
 
     /// Create a borrowed `Topology` from a C pointer.
@@ -148,9 +146,7 @@ impl Topology {
     /// assert_eq!(topology.size(), 0);
     /// ```
     pub fn new() -> Topology {
-        unsafe {
-            Topology::from_ptr(chfl_topology())
-        }
+        unsafe { Topology::from_ptr(chfl_topology()) }
     }
 
     /// Get a reference of the atom at the given `index` in this topology.
@@ -170,9 +166,7 @@ impl Topology {
     /// ```
     pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
-            let handle = chfl_atom_from_topology(
-                self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64
-            );
+            let handle = chfl_atom_from_topology(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
         }
     }
@@ -196,9 +190,7 @@ impl Topology {
     /// ```
     pub fn atom_mut(&mut self, index: usize) -> AtomMut {
         unsafe {
-            let handle = chfl_atom_from_topology(
-                self.as_mut_ptr(), index as u64
-            );
+            let handle = chfl_atom_from_topology(self.as_mut_ptr(), index as u64);
             Atom::ref_mut_from_ptr(handle)
         }
     }
@@ -446,9 +438,7 @@ impl Topology {
         let count = size as u64;
         let mut dihedrals = vec![[u64::max_value(); 4]; size];
         unsafe {
-            check_success(chfl_topology_dihedrals(
-                self.as_ptr(), dihedrals.as_mut_ptr(), count
-            ));
+            check_success(chfl_topology_dihedrals(self.as_ptr(), dihedrals.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return dihedrals
@@ -483,9 +473,7 @@ impl Topology {
         let count = size as u64;
         let mut impropers = vec![[u64::max_value(); 4]; size];
         unsafe {
-            check_success(chfl_topology_impropers(
-                self.as_ptr(), impropers.as_mut_ptr(), count
-            ));
+            check_success(chfl_topology_impropers(self.as_ptr(), impropers.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return impropers
@@ -564,7 +552,10 @@ impl Topology {
     pub fn add_bond_with_order(&mut self, i: usize, j: usize, order: BondOrder) {
         unsafe {
             check_success(chfl_topology_bond_with_order(
-                self.as_mut_ptr(), i as u64, j as u64, order.as_raw()
+                self.as_mut_ptr(),
+                i as u64,
+                j as u64,
+                order.as_raw(),
             ));
         }
     }
@@ -585,11 +576,9 @@ impl Topology {
     pub fn bond_order(&self, i: usize, j: usize) -> BondOrder {
         let mut order = chfl_bond_order::CHFL_BOND_UNKNOWN;
         unsafe {
-            check_success(chfl_topology_bond_order(
-                self.as_ptr(), i as u64, j as u64, &mut order
-            ));
+            check_success(chfl_topology_bond_order(self.as_ptr(), i as u64, j as u64, &mut order));
         }
-        return order.into()
+        return order.into();
     }
 
     /// Get the bond order for all the bonds in the topology
@@ -616,7 +605,7 @@ impl Topology {
                 // Casting BondOrder to chfl_bond_order is safe, as they are
                 // both `repr(C)` enums with the same values.
                 bonds.as_mut_ptr().cast(),
-                count
+                count,
             ));
         }
         return bonds;
@@ -697,15 +686,11 @@ impl Topology {
     /// assert!(topology.residue_for_atom(6).is_none());
     /// ```
     pub fn residue_for_atom(&self, index: usize) -> Option<ResidueRef> {
-        let handle = unsafe {
-            chfl_residue_for_atom(self.as_ptr(), index as u64)
-        };
+        let handle = unsafe { chfl_residue_for_atom(self.as_ptr(), index as u64) };
         if handle.is_null() {
             None
         } else {
-            unsafe {
-                Some(Residue::ref_from_ptr(handle))
-            }
+            unsafe { Some(Residue::ref_from_ptr(handle)) }
         }
     }
 
@@ -746,9 +731,7 @@ impl Topology {
     /// assert_eq!(residue.name(), "water");
     /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<(), Error> {
-        unsafe {
-            check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr()))
-        }
+        unsafe { check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())) }
     }
 
     /// Check if the two residues `first` and `second` from the `topology` are
@@ -774,7 +757,7 @@ impl Topology {
                 self.as_ptr(),
                 first.as_ptr(),
                 second.as_ptr(),
-                &mut linked
+                &mut linked,
             ));
         }
         return linked != 0;
@@ -858,7 +841,6 @@ mod test {
         topology.resize(18);
         topology.remove(33);
     }
-
 
     #[test]
     fn bonds() {
