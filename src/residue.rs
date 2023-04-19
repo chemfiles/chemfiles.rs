@@ -1,12 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Deref};
 use std::marker::PhantomData;
+use std::ops::{Deref, Drop};
 use std::ptr;
 
 use chemfiles_sys::*;
 use errors::{check_not_null, check_success};
-use property::{Property, RawProperty, PropertiesIter};
+use property::{PropertiesIter, Property, RawProperty};
 use strings;
 
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
@@ -19,7 +19,7 @@ pub struct Residue {
 /// An analog to a reference to a residue (`&Residue`)
 pub struct ResidueRef<'a> {
     inner: Residue,
-    marker: PhantomData<&'a Residue>
+    marker: PhantomData<&'a Residue>,
 }
 
 impl<'a> Deref for ResidueRef<'a> {
@@ -45,9 +45,7 @@ impl Residue {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Residue {
         check_not_null(ptr);
-        Residue {
-            handle: ptr
-        }
+        Residue { handle: ptr }
     }
 
     /// Create a borrowed `Residue` from a C pointer.
@@ -141,9 +139,7 @@ impl Residue {
     /// ```
     pub fn id(&self) -> Option<i64> {
         let mut resid = 0;
-        let status = unsafe {
-            chfl_residue_id(self.as_ptr(), &mut resid)
-        };
+        let status = unsafe { chfl_residue_id(self.as_ptr(), &mut resid) };
 
         if status == chfl_status::CHFL_SUCCESS {
             return Some(resid);
@@ -230,11 +226,7 @@ impl Residue {
         let count = size as u64;
         let mut indices = vec![u64::max_value(); size];
         unsafe {
-            check_success(chfl_residue_atoms(
-                self.as_ptr(),
-                indices.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_residue_atoms(self.as_ptr(), indices.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return indices.into_iter().map(|idx| idx as usize).collect();
@@ -260,7 +252,9 @@ impl Residue {
         let property = property.into().as_raw();
         unsafe {
             check_success(chfl_residue_set_property(
-                self.as_mut_ptr(), buffer.as_ptr(), property.as_ptr()
+                self.as_mut_ptr(),
+                buffer.as_ptr(),
+                property.as_ptr(),
             ));
         }
     }
@@ -326,7 +320,7 @@ impl Residue {
 
         PropertiesIter {
             names: names.into_iter(),
-            getter: Box::new(move |name| self.get(name).expect("failed to get property"))
+            getter: Box::new(move |name| self.get(name).expect("failed to get property")),
         }
     }
 }

@@ -5,9 +5,7 @@ fn main() {
     cfg.header("chemfiles.h");
     cfg.include("../chemfiles-sys/chemfiles/include");
     cfg.include(".");
-    cfg.type_name(|ty, _is_struct, _is_union| {
-        ty.to_string()
-    });
+    cfg.type_name(|ty, _is_struct, _is_union| ty.to_string());
 
     cfg.skip_roundtrip(|s| s == "chfl_vector3d" || s == "c_bool" || s == "chfl_warning_callback");
 

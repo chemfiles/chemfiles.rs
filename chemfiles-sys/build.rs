@@ -2,8 +2,8 @@
 
 extern crate cmake;
 
-use std::io::prelude::*;
 use std::fs::File;
+use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
 fn main() {
@@ -20,7 +20,10 @@ fn build_chemfiles() -> PathBuf {
     }
 
     let mut cmake = cmake::Config::new(".");
-    cmake.define("CHEMFILES_VERSION", std::env::var("CARGO_PKG_VERSION").expect("cargo should set CARGO_PKG_VERSION"));
+    cmake.define(
+        "CHEMFILES_VERSION",
+        std::env::var("CARGO_PKG_VERSION").expect("cargo should set CARGO_PKG_VERSION"),
+    );
 
     let target = std::env::var("TARGET").expect("cargo should set TARGET");
     if !cfg!(feature = "build-from-sources") {

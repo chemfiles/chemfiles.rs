@@ -1,13 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::{Drop, Index};
 use std::iter::IntoIterator;
+use std::ops::{Drop, Index};
 use std::slice::Iter;
 
 use chemfiles_sys::*;
 use errors::{check, check_not_null, check_success, Error, Status};
-use strings;
 use frame::Frame;
+use strings;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It can
@@ -56,10 +56,7 @@ impl Match {
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Match {
-            size,
-            atoms: matches,
-        }
+        Match { size, atoms: matches }
     }
 
     /// Iterate over the atomic indexes in the match.
@@ -130,9 +127,7 @@ impl Selection {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Selection {
         check_not_null(ptr);
-        Selection {
-            handle: ptr
-        }
+        Selection { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -165,7 +160,7 @@ impl Selection {
             if handle.is_null() {
                 Err(Error {
                     status: Status::SelectionError,
-                    message: Error::last_error()
+                    message: Error::last_error(),
                 })
             } else {
                 Ok(Selection::from_ptr(handle))
@@ -237,22 +232,19 @@ impl Selection {
         #![allow(clippy::cast_possible_truncation)]
         let mut count = 0;
         unsafe {
-            check(chfl_selection_evaluate(
-                self.as_mut_ptr(), frame.as_ptr(), &mut count
-            )).expect("failed to evaluate selection");
+            check(chfl_selection_evaluate(self.as_mut_ptr(), frame.as_ptr(), &mut count))
+                .expect("failed to evaluate selection");
         }
 
         let size = count as usize;
         let mut chfl_matches = vec![chfl_match { size: 0, atoms: [0; 4] }; size];
         unsafe {
-            check(chfl_selection_matches(
-                self.handle,
-                chfl_matches.as_mut_ptr(),
-                count
-            )).expect("failed to extract matches");
+            check(chfl_selection_matches(self.handle, chfl_matches.as_mut_ptr(), count))
+                .expect("failed to extract matches");
         }
 
-        return chfl_matches.into_iter()
+        return chfl_matches
+            .into_iter()
             .map(|chfl_match| Match {
                 size: chfl_match.size as usize,
                 atoms: [
@@ -291,19 +283,16 @@ impl Selection {
         if self.size() != 1 {
             panic!("can not call `Selection::list` on a multiple selection");
         }
-        return self.evaluate(frame)
-            .into_iter()
-            .map(|m| m[0] as usize)
-            .collect();
+        return self.evaluate(frame).into_iter().map(|m| m[0] as usize).collect();
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use Atom;
     use Frame;
     use Topology;
-    use Atom;
 
     #[test]
     fn clone() {
