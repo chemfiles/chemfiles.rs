@@ -74,7 +74,7 @@ impl Atom {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_ATOM) -> Self {
         check_not_null(ptr);
-        Atom { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `Atom` from a C pointer.
@@ -419,7 +419,7 @@ impl Atom {
 impl Drop for Atom {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _: std::ffi::c_void = chfl_free(self.as_ptr().cast());
         }
     }
 }

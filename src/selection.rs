@@ -53,7 +53,7 @@ impl Match {
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Match { size, atoms: matches }
+        Self { size, atoms: matches }
     }
 
     /// Iterate over the atomic indexes in the match.
@@ -114,7 +114,7 @@ impl Clone for Selection {
 impl Drop for Selection {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _: std::ffi::c_void = chfl_free(self.as_ptr().cast());
         }
     }
 }
@@ -127,7 +127,7 @@ impl Selection {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Self {
         check_not_null(ptr);
-        Selection { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -280,10 +280,11 @@ impl Selection {
     /// assert_eq!(matches[1], 2);
     /// ```
     pub fn list(&mut self, frame: &Frame) -> Vec<usize> {
-        if self.size() != 1 {
-            panic!("can not call `Selection::list` on a multiple selection");
-        }
-        return self.evaluate(frame).into_iter().map(|m| m[0] as usize).collect();
+        assert!(
+            self.size() == 1,
+            "can not call `Selection::list` on a multiple selection"
+        );
+        return self.evaluate(frame).into_iter().map(|m| m[0]).collect();
     }
 }
 
@@ -350,13 +351,13 @@ mod tests {
         #[should_panic]
         fn out_of_bound() {
             let m = Match::new(&[1, 2]);
-            let _ = m[2];
+            let _: usize = m[2];
         }
 
         #[test]
         #[should_panic]
         fn too_big() {
-            let _ = Match::new(&[1, 2, 3, 5, 4]);
+            let _: Match = Match::new(&[1, 2, 3, 5, 4]);
         }
     }
 

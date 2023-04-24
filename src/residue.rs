@@ -46,7 +46,7 @@ impl Residue {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Self {
         check_not_null(ptr);
-        Residue { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `Residue` from a C pointer.
@@ -332,7 +332,7 @@ impl Residue {
 impl Drop for Residue {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _: std::ffi::c_void = chfl_free(self.as_ptr().cast());
         }
     }
 }

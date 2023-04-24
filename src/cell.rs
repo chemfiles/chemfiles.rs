@@ -107,7 +107,7 @@ impl UnitCell {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Self {
         check_not_null(ptr);
-        UnitCell { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `UnitCell` from a C pointer.
@@ -162,7 +162,7 @@ impl UnitCell {
     pub fn new(lengths: [f64; 3]) -> Self {
         unsafe {
             let handle = chfl_cell(lengths.as_ptr(), std::ptr::null());
-            UnitCell::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -420,7 +420,7 @@ impl UnitCell {
 impl Drop for UnitCell {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _: std::ffi::c_void = chfl_free(self.as_ptr().cast());
         }
     }
 }

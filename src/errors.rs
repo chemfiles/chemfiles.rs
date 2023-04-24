@@ -62,8 +62,8 @@ impl From<chfl_status> for Error {
             chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
 
-        let message = Error::last_error();
-        Error { status, message }
+        let message = Self::last_error();
+        Self { status, message }
     }
 }
 
@@ -108,7 +108,7 @@ pub fn check(status: chfl_status) -> Result<(), Error> {
 }
 
 /// Check return value of a C function, panic if it failed.
-pub(crate) fn check_success(status: chfl_status) {
+pub fn check_success(status: chfl_status) {
     assert!(
         status == chfl_status::CHFL_SUCCESS,
         "unexpected failure: {}",

@@ -100,7 +100,7 @@ impl Topology {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Self {
         check_not_null(ptr);
-        Topology { handle: ptr }
+        Self { handle: ptr }
     }
 
     /// Create a borrowed `Topology` from a C pointer.
@@ -148,8 +148,8 @@ impl Topology {
     /// let topology = Topology::new();
     /// assert_eq!(topology.size(), 0);
     /// ```
-    pub fn new() -> Topology {
-        unsafe { Topology::from_ptr(chfl_topology()) }
+    pub fn new() -> Self {
+        unsafe { Self::from_ptr(chfl_topology()) }
     }
 
     /// Get a reference of the atom at the given `index` in this topology.
@@ -778,7 +778,7 @@ impl Topology {
 impl Drop for Topology {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _: std::ffi::c_void = chfl_free(self.as_ptr().cast());
         }
     }
 }

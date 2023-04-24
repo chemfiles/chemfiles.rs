@@ -30,7 +30,7 @@ impl Trajectory {
                 message: Error::last_error(),
             })
         } else {
-            Ok(Trajectory { handle: ptr })
+            Ok(Self { handle: ptr })
         }
     }
 
@@ -114,7 +114,7 @@ impl Trajectory {
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
             let handle = chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
-            Trajectory::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -138,7 +138,7 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// assert_eq!(frame.size(), 6);
     /// ```
-    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Trajectory, Error>
+    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Self, Error>
     where
         S: Into<&'a str>,
     {
@@ -146,7 +146,7 @@ impl Trajectory {
         let format = strings::to_c(format.into());
         unsafe {
             let handle = chfl_trajectory_memory_reader(data.as_ptr(), data.as_bytes().len() as u64, format.as_ptr());
-            Trajectory::from_ptr(handle)
+            Self::from_ptr(handle)
         }
     }
 
@@ -171,7 +171,7 @@ impl Trajectory {
     /// // Binary formats typically do not support this feature
     /// assert!(Trajectory::memory_writer("XTC").is_err());
     /// ```
-    pub fn memory_writer<'a, S>(format: S) -> Result<Trajectory, Error>
+    pub fn memory_writer<'a, S>(format: S) -> Result<Self, Error>
     where
         S: Into<&'a str>,
     {
@@ -440,7 +440,7 @@ impl Trajectory {
 impl Drop for Trajectory {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_trajectory_close(self.as_ptr());
+            let _: std::ffi::c_void = chfl_trajectory_close(self.as_ptr());
         }
     }
 }
@@ -568,7 +568,7 @@ X 1 2 3"
 
         let mut file = std::fs::File::open(filename).unwrap();
         let mut content = String::new();
-        let _ = file.read_to_string(&mut content).unwrap();
+        let _: usize = file.read_to_string(&mut content).unwrap();
 
         assert_eq!(expected_content, content.lines().collect::<Vec<_>>());
         std::fs::remove_file(filename).unwrap();

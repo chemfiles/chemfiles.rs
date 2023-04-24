@@ -178,10 +178,7 @@ impl Frame {
     /// ```
     pub fn add_atom(&mut self, atom: &Atom, position: [f64; 3], velocity: impl Into<Option<[f64; 3]>>) {
         let velocity = velocity.into();
-        let velocity_ptr = match velocity {
-            Some(ref data) => data.as_ptr(),
-            None => std::ptr::null(),
-        };
+        let velocity_ptr = velocity.as_ref().map_or(std::ptr::null(), |data| data.as_ptr());
 
         unsafe {
             check_success(chfl_frame_add_atom(
@@ -903,7 +900,7 @@ impl Frame {
 impl Drop for Frame {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _: std::ffi::c_void = chfl_free(self.as_ptr().cast());
         }
     }
 }
