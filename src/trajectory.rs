@@ -270,10 +270,7 @@ impl Trajectory {
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) {
         unsafe {
-            check_success(chfl_trajectory_set_topology(
-                self.as_mut_ptr(),
-                topology.as_ptr(),
-            ));
+            check_success(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()));
         }
     }
 
@@ -435,8 +432,7 @@ impl Trajectory {
     /// ```
     pub fn path(&self) -> String {
         let get_string = |ptr, len| unsafe { chfl_trajectory_path(self.as_ptr(), ptr, len) };
-        let path =
-            strings::call_autogrow_buffer(1024, get_string).expect("failed to get path string");
+        let path = strings::call_autogrow_buffer(1024, get_string).expect("failed to get path string");
         return strings::from_c(path.as_ptr());
     }
 }

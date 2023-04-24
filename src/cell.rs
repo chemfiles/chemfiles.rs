@@ -179,8 +179,7 @@ impl UnitCell {
     /// ```
     pub fn infinite() -> Self {
         let mut cell = Self::new([0.0, 0.0, 0.0]);
-        cell.set_shape(CellShape::Infinite)
-            .expect("could not set cell shape");
+        cell.set_shape(CellShape::Infinite).expect("could not set cell shape");
         return cell;
     }
 

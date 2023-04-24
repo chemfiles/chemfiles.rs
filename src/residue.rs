@@ -163,8 +163,7 @@ impl Residue {
     /// ```
     pub fn name(&self) -> String {
         let get_name = |ptr, len| unsafe { chfl_residue_name(self.as_ptr(), ptr, len) };
-        let name =
-            strings::call_autogrow_buffer(64, get_name).expect("getting residue name failed");
+        let name = strings::call_autogrow_buffer(64, get_name).expect("getting residue name failed");
         return strings::from_c(name.as_ptr());
     }
 
@@ -207,11 +206,7 @@ impl Residue {
     pub fn contains(&self, atom: usize) -> bool {
         let mut inside = 0;
         unsafe {
-            check_success(chfl_residue_contains(
-                self.as_ptr(),
-                atom as u64,
-                &mut inside,
-            ));
+            check_success(chfl_residue_contains(self.as_ptr(), atom as u64, &mut inside));
         }
         return inside != 0;
     }
@@ -319,11 +314,7 @@ impl Residue {
         let size = count as usize;
         let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_residue_list_properties(
-                self.as_ptr(),
-                c_names.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_residue_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
 
         let mut names = Vec::new();

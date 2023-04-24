@@ -387,11 +387,7 @@ impl Topology {
         let count = size as u64;
         let mut bonds = vec![[u64::max_value(); 2]; size];
         unsafe {
-            check_success(chfl_topology_bonds(
-                self.as_ptr(),
-                bonds.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_topology_bonds(self.as_ptr(), bonds.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return bonds
@@ -418,11 +414,7 @@ impl Topology {
         let count = size as u64;
         let mut angles = vec![[u64::max_value(); 3]; size];
         unsafe {
-            check_success(chfl_topology_angles(
-                self.as_ptr(),
-                angles.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_topology_angles(self.as_ptr(), angles.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return angles
@@ -544,11 +536,7 @@ impl Topology {
     /// ```
     pub fn add_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_topology_add_bond(
-                self.as_mut_ptr(),
-                i as u64,
-                j as u64,
-            ));
+            check_success(chfl_topology_add_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -655,11 +643,7 @@ impl Topology {
     /// ```
     pub fn remove_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_topology_remove_bond(
-                self.as_mut_ptr(),
-                i as u64,
-                j as u64,
-            ));
+            check_success(chfl_topology_remove_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 

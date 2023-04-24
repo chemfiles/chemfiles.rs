@@ -267,8 +267,7 @@ impl Atom {
     /// ```
     pub fn full_name(&self) -> String {
         let get_full_name = |ptr, len| unsafe { chfl_atom_full_name(self.as_ptr(), ptr, len) };
-        let name =
-            strings::call_autogrow_buffer(10, get_full_name).expect("getting full name failed");
+        let name = strings::call_autogrow_buffer(10, get_full_name).expect("getting full name failed");
         return strings::from_c(name.as_ptr());
     }
 
@@ -402,11 +401,7 @@ impl Atom {
         let size = count as usize;
         let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_atom_list_properties(
-                self.as_ptr(),
-                c_names.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_atom_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
 
         let mut names = Vec::new();

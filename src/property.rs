@@ -88,10 +88,7 @@ impl RawProperty {
     fn get_vector3d(&self) -> Result<[f64; 3], Error> {
         let mut value = [0.0; 3];
         unsafe {
-            check(chfl_property_get_vector3d(
-                self.as_ptr(),
-                value.as_mut_ptr(),
-            ))?;
+            check(chfl_property_get_vector3d(self.as_ptr(), value.as_mut_ptr()))?;
         }
         return Ok(value);
     }
@@ -212,30 +209,21 @@ mod tests {
         #[test]
         fn double() {
             let property = RawProperty::double(45.0);
-            assert_eq!(
-                property.get_kind(),
-                chfl_property_kind::CHFL_PROPERTY_DOUBLE
-            );
+            assert_eq!(property.get_kind(), chfl_property_kind::CHFL_PROPERTY_DOUBLE);
             assert_eq!(property.get_double(), Ok(45.0));
         }
 
         #[test]
         fn string() {
             let property = RawProperty::string("test");
-            assert_eq!(
-                property.get_kind(),
-                chfl_property_kind::CHFL_PROPERTY_STRING
-            );
+            assert_eq!(property.get_kind(), chfl_property_kind::CHFL_PROPERTY_STRING);
             assert_eq!(property.get_string(), Ok("test".into()));
         }
 
         #[test]
         fn vector3d() {
             let property = RawProperty::vector3d([1.2, 3.4, 5.6]);
-            assert_eq!(
-                property.get_kind(),
-                chfl_property_kind::CHFL_PROPERTY_VECTOR3D
-            );
+            assert_eq!(property.get_kind(), chfl_property_kind::CHFL_PROPERTY_VECTOR3D);
             assert_eq!(property.get_vector3d(), Ok([1.2, 3.4, 5.6]));
         }
     }

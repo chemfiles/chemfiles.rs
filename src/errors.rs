@@ -120,11 +120,7 @@ pub(crate) fn check_success(status: chfl_status) {
 
 /// Check a pointer for null.
 pub fn check_not_null<T>(ptr: *const T) {
-    assert!(
-        !ptr.is_null(),
-        "unexpected null pointer: {}",
-        Error::last_error()
-    );
+    assert!(!ptr.is_null(), "unexpected null pointer: {}", Error::last_error());
 }
 
 pub trait WarningCallback: RefUnwindSafe + Fn(&str) {}

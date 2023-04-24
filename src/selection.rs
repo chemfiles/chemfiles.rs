@@ -200,8 +200,7 @@ impl Selection {
     /// ```
     pub fn string(&self) -> String {
         let get_string = |ptr, len| unsafe { chfl_selection_string(self.as_ptr(), ptr, len) };
-        let selection = strings::call_autogrow_buffer(1024, get_string)
-            .expect("failed to get selection string");
+        let selection = strings::call_autogrow_buffer(1024, get_string).expect("failed to get selection string");
         return strings::from_c(selection.as_ptr());
     }
 
@@ -238,13 +237,7 @@ impl Selection {
         }
 
         let size = count as usize;
-        let mut chfl_matches = vec![
-            chfl_match {
-                size: 0,
-                atoms: [0; 4]
-            };
-            size
-        ];
+        let mut chfl_matches = vec![chfl_match { size: 0, atoms: [0; 4] }; size];
         unsafe {
             check(chfl_selection_matches(self.handle, chfl_matches.as_mut_ptr(), count))
                 .expect("failed to extract matches");
@@ -345,9 +338,7 @@ mod tests {
         #[test]
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
-            assert_eq!(match_.iter().copied().collect::<Vec<usize>>(), vec![
-                1, 2, 3, 4
-            ]);
+            assert_eq!(match_.iter().copied().collect::<Vec<usize>>(), vec![1, 2, 3, 4]);
 
             let v = vec![1, 2, 3, 4];
             for (i, &m) in match_.iter().enumerate() {
