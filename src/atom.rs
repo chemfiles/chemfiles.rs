@@ -1,14 +1,17 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{
-    marker::PhantomData,
-    ops::{Deref, DerefMut, Drop},
-    ptr,
-};
+use std::marker::PhantomData;
+use std::ops::Deref;
+use std::ops::DerefMut;
+use std::ops::Drop;
+use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check_not_null, check_success};
-use property::{PropertiesIter, Property, RawProperty};
+use errors::check_not_null;
+use errors::check_success;
+use property::PropertiesIter;
+use property::Property;
+use property::RawProperty;
 use strings;
 
 /// An `Atom` is a particle in the current `Frame`. It stores the following
@@ -34,6 +37,7 @@ pub struct AtomRef<'a> {
 
 impl<'a> Deref for AtomRef<'a> {
     type Target = Atom;
+
     fn deref(&self) -> &Atom {
         &self.inner
     }
@@ -47,6 +51,7 @@ pub struct AtomMut<'a> {
 
 impl<'a> Deref for AtomMut<'a> {
     type Target = Atom;
+
     fn deref(&self) -> &Atom {
         &self.inner
     }

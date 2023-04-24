@@ -2,13 +2,13 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 
 //! String conversions between C and Rust
-use std::{
-    ffi::{CStr, CString},
-    os::raw::c_char,
-};
+use std::ffi::CStr;
+use std::ffi::CString;
+use std::os::raw::c_char;
 
 use chemfiles_sys::chfl_status;
-use errors::{check, Error};
+use errors::check;
+use errors::Error;
 
 /// Create a Rust string from a C string. Clones all characters in `buffer`.
 pub fn from_c(buffer: *const c_char) -> String {

@@ -1,13 +1,16 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{
-    marker::PhantomData,
-    ops::{Deref, DerefMut, Drop},
-    ptr,
-};
+use std::marker::PhantomData;
+use std::ops::Deref;
+use std::ops::DerefMut;
+use std::ops::Drop;
+use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
+use errors::check;
+use errors::check_not_null;
+use errors::check_success;
+use errors::Error;
 
 /// Available unit cell shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -67,6 +70,7 @@ pub struct UnitCellRef<'a> {
 
 impl<'a> Deref for UnitCellRef<'a> {
     type Target = UnitCell;
+
     fn deref(&self) -> &UnitCell {
         &self.inner
     }
@@ -80,6 +84,7 @@ pub struct UnitCellMut<'a> {
 
 impl<'a> Deref for UnitCellMut<'a> {
     type Target = UnitCell;
+
     fn deref(&self) -> &UnitCell {
         &self.inner
     }
@@ -103,7 +108,8 @@ impl Clone for UnitCell {
 impl UnitCell {
     /// Create an owned `UnitCell` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Self {
         check_not_null(ptr);
@@ -147,7 +153,8 @@ impl UnitCell {
         self.handle
     }
 
-    /// Create an `Orthorhombic` `UnitCell` from the three lengths, in Angstroms.
+    /// Create an `Orthorhombic` `UnitCell` from the three lengths, in
+    /// Angstroms.
     ///
     /// # Example
     /// ```
@@ -220,9 +227,7 @@ impl UnitCell {
     /// # Example
     /// ```
     /// # use chemfiles::{UnitCell, CellShape};
-    /// let cell = UnitCell::from_matrix([
-    ///     [1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]
-    /// ]);
+    /// let cell = UnitCell::from_matrix([[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]);
     ///
     /// assert_eq!(cell.lengths(), [1.0, 2.0, 3.0]);
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
@@ -500,11 +505,9 @@ mod test {
         assert_eq!(cell.shape(), CellShape::Orthorhombic);
         assert_eq!(cell.lengths(), [10.0, 21.0, 32.0]);
 
-        let result_matrix = [
-            [123.0, 4.08386, 71.7295],
-            [0.0, 233.964, 133.571],
-            [0.0, 0.0, 309.901],
-        ];
+        let result_matrix = [[123.0, 4.08386, 71.7295], [0.0, 233.964, 133.571], [
+            0.0, 0.0, 309.901,
+        ]];
         let cell = UnitCell::from_matrix(result_matrix);
 
         assert_eq!(cell.shape(), CellShape::Triclinic);

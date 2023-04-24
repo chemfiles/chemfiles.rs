@@ -46,24 +46,35 @@
 extern crate approx;
 
 extern crate chemfiles_sys;
-use chemfiles_sys::{chfl_add_configuration, chfl_version};
+use chemfiles_sys::chfl_add_configuration;
+use chemfiles_sys::chfl_version;
 
 mod strings;
 
 mod errors;
-pub use errors::{set_warning_callback, Error, Status};
+pub use errors::set_warning_callback;
+pub use errors::Error;
+pub use errors::Status;
 
 mod atom;
-pub use atom::{Atom, AtomMut, AtomRef};
+pub use atom::Atom;
+pub use atom::AtomMut;
+pub use atom::AtomRef;
 
 mod cell;
-pub use cell::{CellShape, UnitCell, UnitCellMut, UnitCellRef};
+pub use cell::CellShape;
+pub use cell::UnitCell;
+pub use cell::UnitCellMut;
+pub use cell::UnitCellRef;
 
 mod residue;
-pub use residue::{Residue, ResidueRef};
+pub use residue::Residue;
+pub use residue::ResidueRef;
 
 mod topology;
-pub use topology::{BondOrder, Topology, TopologyRef};
+pub use topology::BondOrder;
+pub use topology::Topology;
+pub use topology::TopologyRef;
 
 mod frame;
 pub use frame::Frame;
@@ -72,13 +83,17 @@ mod trajectory;
 pub use trajectory::Trajectory;
 
 mod selection;
-pub use selection::{Match, Selection};
+pub use selection::Match;
+pub use selection::Selection;
 
 mod property;
-pub use property::{PropertiesIter, Property};
+pub use property::PropertiesIter;
+pub use property::Property;
 
 mod misc;
-pub use misc::{formats_list, guess_format, FormatMetadata};
+pub use misc::formats_list;
+pub use misc::guess_format;
+pub use misc::FormatMetadata;
 
 /// Get the version of the chemfiles library.
 ///

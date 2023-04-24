@@ -2,11 +2,10 @@
 
 extern crate cmake;
 
-use std::{
-    fs::File,
-    io::prelude::*,
-    path::{Path, PathBuf},
-};
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+use std::path::PathBuf;
 
 fn main() {
     let out_dir = build_chemfiles();

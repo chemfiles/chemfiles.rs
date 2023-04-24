@@ -1,8 +1,9 @@
-/* This file is an example for the chemfiles library
- * Any copyright is dedicated to the Public Domain.
- * http://creativecommons.org/publicdomain/zero/1.0/ */
+// This file is an example for the chemfiles library
+// Any copyright is dedicated to the Public Domain.
+// http://creativecommons.org/publicdomain/zero/1.0/
 extern crate chemfiles;
-use chemfiles::{Frame, Trajectory};
+use chemfiles::Frame;
+use chemfiles::Trajectory;
 
 fn main() {
     let mut file = Trajectory::open("filename.xyz", 'r').unwrap();

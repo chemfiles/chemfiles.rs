@@ -2,11 +2,11 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 extern crate libc;
 
-use std::{
-    error, fmt,
-    panic::{self, RefUnwindSafe},
-    path::Path,
-};
+use std::error;
+use std::fmt;
+use std::panic::RefUnwindSafe;
+use std::panic::{self};
+use std::path::Path;
 
 use chemfiles_sys::*;
 use strings;

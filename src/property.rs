@@ -1,9 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{ops::Drop, vec::IntoIter};
+use std::ops::Drop;
+use std::vec::IntoIter;
 
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
+use errors::check;
+use errors::check_not_null;
+use errors::check_success;
+use errors::Error;
 use strings;
 
 /// A thin wrapper around `CHFL_PROPERTY`
@@ -14,7 +18,8 @@ pub struct RawProperty {
 impl RawProperty {
     /// Create a `RawProperty` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer.
     pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> Self {
         check_not_null(ptr);
         Self { handle: ptr }
@@ -186,6 +191,7 @@ pub struct PropertiesIter<'a> {
 
 impl<'a> Iterator for PropertiesIter<'a> {
     type Item = (String, Property);
+
     fn next(&mut self) -> Option<Self::Item> {
         self.names.next().map(|name| {
             let property = (self.getter)(&name);

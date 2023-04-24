@@ -1,13 +1,16 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{
-    iter::IntoIterator,
-    ops::{Drop, Index},
-    slice::Iter,
-};
+use std::iter::IntoIterator;
+use std::ops::Drop;
+use std::ops::Index;
+use std::slice::Iter;
 
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error, Status};
+use errors::check;
+use errors::check_not_null;
+use errors::check_success;
+use errors::Error;
+use errors::Status;
 use frame::Frame;
 use strings;
 
@@ -85,6 +88,7 @@ impl Match {
 
 impl Index<usize> for Match {
     type Output = usize;
+
     fn index(&self, i: usize) -> &Self::Output {
         assert!(i < self.len());
         &self.atoms[i]
@@ -92,8 +96,9 @@ impl Index<usize> for Match {
 }
 
 impl<'a> IntoIterator for &'a Match {
-    type Item = &'a usize;
     type IntoIter = Iter<'a, usize>;
+    type Item = &'a usize;
+
     fn into_iter(self) -> Iter<'a, usize> {
         self.atoms[..self.len()].iter()
     }
@@ -128,7 +133,8 @@ impl Drop for Selection {
 impl Selection {
     /// Create a `Selection` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Self {
         check_not_null(ptr);
@@ -265,14 +271,16 @@ impl Selection {
 
         return chfl_matches
             .into_iter()
-            .map(|chfl_match| Match {
-                size: chfl_match.size as usize,
-                atoms: [
-                    chfl_match.atoms[0] as usize,
-                    chfl_match.atoms[1] as usize,
-                    chfl_match.atoms[2] as usize,
-                    chfl_match.atoms[3] as usize,
-                ],
+            .map(|chfl_match| {
+                Match {
+                    size: chfl_match.size as usize,
+                    atoms: [
+                        chfl_match.atoms[0] as usize,
+                        chfl_match.atoms[1] as usize,
+                        chfl_match.atoms[2] as usize,
+                        chfl_match.atoms[3] as usize,
+                    ],
+                }
             })
             .collect();
     }
@@ -361,10 +369,9 @@ mod tests {
         #[test]
         fn iter() {
             let match_ = Match::new(&[1, 2, 3, 4]);
-            assert_eq!(
-                match_.iter().copied().collect::<Vec<usize>>(),
-                vec![1, 2, 3, 4]
-            );
+            assert_eq!(match_.iter().copied().collect::<Vec<usize>>(), vec![
+                1, 2, 3, 4
+            ]);
 
             let v = vec![1, 2, 3, 4];
             for (i, &m) in match_.iter().enumerate() {

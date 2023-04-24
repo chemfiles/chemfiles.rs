@@ -1,8 +1,10 @@
-/* This file is an example for the chemfiles library
- * Any copyright is dedicated to the Public Domain.
- * http://creativecommons.org/publicdomain/zero/1.0/ */
+// This file is an example for the chemfiles library
+// Any copyright is dedicated to the Public Domain.
+// http://creativecommons.org/publicdomain/zero/1.0/
 extern crate chemfiles;
-use chemfiles::{Frame, Selection, Trajectory};
+use chemfiles::Frame;
+use chemfiles::Selection;
+use chemfiles::Trajectory;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut input = Trajectory::open("input.arc", 'r')?;

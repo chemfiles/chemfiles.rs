@@ -1,14 +1,20 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{
-    marker::PhantomData,
-    ops::{Deref, Drop},
-};
+use std::marker::PhantomData;
+use std::ops::Deref;
+use std::ops::Drop;
 
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
+use errors::check;
+use errors::check_not_null;
+use errors::check_success;
+use errors::Error;
 
-use super::{Atom, AtomMut, AtomRef, Residue, ResidueRef};
+use super::Atom;
+use super::AtomMut;
+use super::AtomRef;
+use super::Residue;
+use super::ResidueRef;
 
 /// Possible bond order associated with bonds
 #[repr(C)]
@@ -78,6 +84,7 @@ pub struct TopologyRef<'a> {
 
 impl<'a> Deref for TopologyRef<'a> {
     type Target = Topology;
+
     fn deref(&self) -> &Topology {
         &self.inner
     }
@@ -95,8 +102,8 @@ impl Clone for Topology {
 impl Topology {
     /// Create a `Topology` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer,
-    /// except for it being non-null.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Self {
         check_not_null(ptr);
@@ -128,7 +135,8 @@ impl Topology {
         self.handle
     }
 
-    /// Get the underlying C pointer as a mutable pointer FROM A SHARED REFERENCE.
+    /// Get the underlying C pointer as a mutable pointer FROM A SHARED
+    /// REFERENCE.
     ///
     /// For uses with functions of the C API using mut pointers for both read
     /// and write access. Users should check that this does not lead to multiple
@@ -174,7 +182,8 @@ impl Topology {
         }
     }
 
-    /// Get a mutable reference to the atom at the given `index` in this topology.
+    /// Get a mutable reference to the atom at the given `index` in this
+    /// topology.
     ///
     /// # Panics
     ///
@@ -621,7 +630,10 @@ impl Topology {
     /// topology.add_bond_with_order(0, 1, BondOrder::Double);
     /// topology.add_bond_with_order(0, 2, BondOrder::Single);
     ///
-    /// assert_eq!(topology.bond_orders(), &[BondOrder::Double, BondOrder::Single]);
+    /// assert_eq!(topology.bond_orders(), &[
+    ///     BondOrder::Double,
+    ///     BondOrder::Single
+    /// ]);
     /// ```
     pub fn bond_orders(&self) -> Vec<BondOrder> {
         let size = self.bonds_count();
@@ -735,7 +747,9 @@ impl Topology {
     /// assert_eq!(topology.residues_count(), 0);
     ///
     /// topology.add_residue(&Residue::with_id("water", 0)).unwrap();
-    /// topology.add_residue(&Residue::with_id("protein", 1)).unwrap();
+    /// topology
+    ///     .add_residue(&Residue::with_id("protein", 1))
+    ///     .unwrap();
     /// assert_eq!(topology.residues_count(), 2);
     /// ```
     pub fn residues_count(&self) -> u64 {
@@ -781,7 +795,9 @@ impl Topology {
     /// let mut topology = Topology::new();
     ///
     /// topology.add_residue(&Residue::with_id("water", 0)).unwrap();
-    /// topology.add_residue(&Residue::with_id("protein", 1)).unwrap();
+    /// topology
+    ///     .add_residue(&Residue::with_id("protein", 1))
+    ///     .unwrap();
     ///
     /// let first = topology.residue(0).unwrap();
     /// let second = topology.residue(1).unwrap();

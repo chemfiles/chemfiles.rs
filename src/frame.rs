@@ -1,16 +1,29 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{ops::Drop, ptr, slice};
+use std::ops::Drop;
+use std::ptr;
+use std::slice;
 
 use chemfiles_sys::*;
-use errors::{check, check_not_null, check_success, Error};
-use property::{PropertiesIter, Property, RawProperty};
+use errors::check;
+use errors::check_not_null;
+use errors::check_success;
+use errors::Error;
+use property::PropertiesIter;
+use property::Property;
+use property::RawProperty;
 use strings;
 
-use super::{
-    Atom, AtomMut, AtomRef, BondOrder, Residue, Topology, TopologyRef, UnitCell, UnitCellMut,
-    UnitCellRef,
-};
+use super::Atom;
+use super::AtomMut;
+use super::AtomRef;
+use super::BondOrder;
+use super::Residue;
+use super::Topology;
+use super::TopologyRef;
+use super::UnitCell;
+use super::UnitCellMut;
+use super::UnitCellRef;
 
 /// A `Frame` contains data from one simulation step: the current unit
 /// cell, the topology, the positions, and the velocities of the particles in
@@ -38,8 +51,8 @@ pub struct AtomIter<'a> {
 impl Frame {
     /// Create a `Frame` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer,
-    /// except for it being non-null.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer, except for it being non-null.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_FRAME) -> Self {
         check_not_null(ptr);
@@ -58,7 +71,8 @@ impl Frame {
         self.handle
     }
 
-    /// Get the underlying C pointer as a mutable pointer FROM A SHARED REFERENCE.
+    /// Get the underlying C pointer as a mutable pointer FROM A SHARED
+    /// REFERENCE.
     ///
     /// For uses with functions of the C API using mut pointers for both read
     /// and write access. Users should check that this does not lead to multiple
@@ -818,7 +832,10 @@ impl Frame {
     /// frame.set("a string", "hello");
     /// frame.set("a double", 4.3);
     ///
-    /// assert_eq!(frame.get("a string"), Some(Property::String("hello".into())));
+    /// assert_eq!(
+    ///     frame.get("a string"),
+    ///     Some(Property::String("hello".into()))
+    /// );
     /// assert_eq!(frame.get("a double"), Some(Property::Double(4.3)));
     /// ```
     pub fn set(&mut self, name: &str, property: impl Into<Property>) {
@@ -1038,12 +1055,9 @@ mod test {
     fn positions() {
         let mut frame = Frame::new();
         frame.resize(4);
-        let expected = &[
-            [1.0, 2.0, 3.0],
-            [4.0, 5.0, 6.0],
-            [7.0, 8.0, 9.0],
-            [10.0, 11.0, 12.0],
-        ];
+        let expected = &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [
+            10.0, 11.0, 12.0,
+        ]];
 
         frame.positions_mut().clone_from_slice(expected);
         assert_eq!(frame.positions(), expected);
@@ -1057,12 +1071,9 @@ mod test {
         frame.add_velocities();
         assert!(frame.has_velocities());
 
-        let expected = &[
-            [1.0, 2.0, 3.0],
-            [4.0, 5.0, 6.0],
-            [7.0, 8.0, 9.0],
-            [10.0, 11.0, 12.0],
-        ];
+        let expected = &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [
+            10.0, 11.0, 12.0,
+        ]];
 
         frame.velocities_mut().unwrap().clone_from_slice(expected);
         assert_eq!(frame.velocities().unwrap(), expected);

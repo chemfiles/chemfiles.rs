@@ -1,9 +1,15 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{convert::TryInto, os::raw::c_char, path::Path, ptr};
+use std::convert::TryInto;
+use std::os::raw::c_char;
+use std::path::Path;
+use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check, check_success, Error, Status};
+use errors::check;
+use errors::check_success;
+use errors::Error;
+use errors::Status;
 use strings;
 use Frame;
 use Topology;
@@ -19,7 +25,8 @@ pub struct Trajectory {
 impl Trajectory {
     /// Create a `Trajectory` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Self, Error> {
         if ptr.is_null() {
@@ -187,8 +194,8 @@ impl Trajectory {
 
     /// Read the next step of this trajectory into a `frame`.
     ///
-    /// If the number of atoms in frame does not correspond to the number of atom
-    /// in the next step, the frame is resized.
+    /// If the number of atoms in frame does not correspond to the number of
+    /// atom in the next step, the frame is resized.
     ///
     /// # Errors
     ///
@@ -330,7 +337,9 @@ impl Trajectory {
     /// ```no_run
     /// # use chemfiles::Trajectory;
     /// let mut trajectory = Trajectory::open("water.nc", 'r').unwrap();
-    /// trajectory.set_topology_with_format("topology.mol", "PDB").unwrap();
+    /// trajectory
+    ///     .set_topology_with_format("topology.mol", "PDB")
+    ///     .unwrap();
     /// ```
     pub fn set_topology_with_format<'a, P, S>(&mut self, path: P, format: S) -> Result<(), Error>
     where
@@ -459,7 +468,9 @@ impl Drop for Trajectory {
 
 #[cfg(test)]
 mod test {
-    use std::{fs, io::Read, path::Path};
+    use std::fs;
+    use std::io::Read;
+    use std::path::Path;
 
     use approx::assert_ulps_eq;
     use Atom;
@@ -590,7 +601,8 @@ X 1 2 3"
 
     #[test]
     fn memory() {
-        // formats in decreasing order of their memory buffer length to check null termination
+        // formats in decreasing order of their memory buffer length to check null
+        // termination
         for format in &["CSSR", "GRO", "XYZ"] {
             let mut frame_write = Frame::new();
             frame_write.add_atom(&Atom::new("H"), [1.5, 3.0, -10.0], None);

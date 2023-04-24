@@ -1,8 +1,12 @@
-/* This file is an example for the chemfiles library
- * Any copyright is dedicated to the Public Domain.
- * http://creativecommons.org/publicdomain/zero/1.0/ */
+// This file is an example for the chemfiles library
+// Any copyright is dedicated to the Public Domain.
+// http://creativecommons.org/publicdomain/zero/1.0/
 extern crate chemfiles;
-use chemfiles::{Atom, Frame, Topology, Trajectory, UnitCell};
+use chemfiles::Atom;
+use chemfiles::Frame;
+use chemfiles::Topology;
+use chemfiles::Trajectory;
+use chemfiles::UnitCell;
 
 fn main() {
     let mut topology = Topology::new();

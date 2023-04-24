@@ -1,9 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2020 Guillaume Fraux -- BSD licensed
 
-use std::{convert::TryInto, ffi::CStr};
+use std::convert::TryInto;
+use std::ffi::CStr;
 
-use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_guess_format};
+use chemfiles_sys::chfl_format_metadata;
+use chemfiles_sys::chfl_formats_list;
+use chemfiles_sys::chfl_free;
+use chemfiles_sys::chfl_guess_format;
 use errors::check_success;
 
 /// `FormatMetadata` contains metadata associated with one format.
@@ -68,7 +72,8 @@ impl FormatMetadata {
     }
 }
 
-/// Get the list of formats known by chemfiles, as well as all associated metadata.
+/// Get the list of formats known by chemfiles, as well as all associated
+/// metadata.
 ///
 /// # Example
 /// ```

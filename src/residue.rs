@@ -1,14 +1,16 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::{
-    marker::PhantomData,
-    ops::{Deref, Drop},
-    ptr,
-};
+use std::marker::PhantomData;
+use std::ops::Deref;
+use std::ops::Drop;
+use std::ptr;
 
 use chemfiles_sys::*;
-use errors::{check_not_null, check_success};
-use property::{PropertiesIter, Property, RawProperty};
+use errors::check_not_null;
+use errors::check_success;
+use property::PropertiesIter;
+use property::Property;
+use property::RawProperty;
 use strings;
 
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
@@ -26,6 +28,7 @@ pub struct ResidueRef<'a> {
 
 impl<'a> Deref for ResidueRef<'a> {
     type Target = Residue;
+
     fn deref(&self) -> &Residue {
         &self.inner
     }
@@ -43,7 +46,8 @@ impl Clone for Residue {
 impl Residue {
     /// Create a `Residue` from a C pointer.
     ///
-    /// This function is unsafe because no validity check is made on the pointer.
+    /// This function is unsafe because no validity check is made on the
+    /// pointer.
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Self {
         check_not_null(ptr);
@@ -255,7 +259,10 @@ impl Residue {
     /// residue.set("a string", "hello");
     /// residue.set("a double", 3.2);
     ///
-    /// assert_eq!(residue.get("a string"), Some(Property::String("hello".into())));
+    /// assert_eq!(
+    ///     residue.get("a string"),
+    ///     Some(Property::String("hello".into()))
+    /// );
     /// assert_eq!(residue.get("a double"), Some(Property::Double(3.2)));
     /// ```
     pub fn set(&mut self, name: &str, property: impl Into<Property>) {
