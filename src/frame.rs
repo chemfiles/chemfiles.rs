@@ -10,17 +10,6 @@ use crate::errors::{check, check_not_null, check_success, Error};
 use crate::property::{PropertiesIter, Property, RawProperty};
 use crate::strings;
 
-use super::Atom;
-use super::AtomMut;
-use super::AtomRef;
-use super::BondOrder;
-use super::Residue;
-use super::Topology;
-use super::TopologyRef;
-use super::UnitCell;
-use super::UnitCellMut;
-use super::UnitCellRef;
-
 /// A `Frame` contains data from one simulation step: the current unit
 /// cell, the topology, the positions, and the velocities of the particles in
 /// the system. If some information is missing (topology or velocity or unit
@@ -934,9 +923,6 @@ impl<'a> Iterator for AtomIter<'a> {
 
 #[cfg(test)]
 mod test {
-    use Atom;
-    use Topology;
-    use UnitCell;
 
     use super::*;
 

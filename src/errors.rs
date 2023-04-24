@@ -8,8 +8,6 @@ use chemfiles_sys::*;
 
 use crate::strings;
 
-use self::libc::c_char;
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 /// Error type for Chemfiles.
 pub struct Error {
@@ -193,8 +191,6 @@ impl std::error::Error for Error {
 mod test {
     use super::*;
     use crate::Trajectory;
-
-    use super::*;
 
     #[test]
     fn errors() {

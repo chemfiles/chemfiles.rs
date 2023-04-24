@@ -785,8 +785,6 @@ impl Drop for Topology {
 
 #[cfg(test)]
 mod test {
-    use Atom;
-    use Residue;
 
     use super::*;
 

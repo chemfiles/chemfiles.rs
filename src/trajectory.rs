@@ -453,11 +453,6 @@ mod test {
     use std::path::Path;
 
     use approx::assert_ulps_eq;
-    use Atom;
-    use CellShape;
-    use Frame;
-    use Topology;
-    use UnitCell;
 
     use crate::{Atom, CellShape, Frame, Topology, UnitCell};
 
