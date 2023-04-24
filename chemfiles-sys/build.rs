@@ -1,11 +1,8 @@
 #![allow(clippy::needless_return)]
 
-extern crate cmake;
-
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn main() {
     let out_dir = build_chemfiles();

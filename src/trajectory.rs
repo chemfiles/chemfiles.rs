@@ -3,17 +3,12 @@
 use std::convert::TryInto;
 use std::os::raw::c_char;
 use std::path::Path;
-use std::ptr;
 
 use chemfiles_sys::*;
-use errors::check;
-use errors::check_success;
-use errors::Error;
-use errors::Status;
-use strings;
-use Frame;
-use Topology;
-use UnitCell;
+
+use crate::errors::{check, check_success, Error, Status};
+use crate::strings;
+use crate::{Frame, Topology, UnitCell};
 
 /// The `Trajectory` type is the main entry point when using chemfiles. A
 /// `Trajectory` behave a bit like a file, allowing to read and/or write
@@ -35,7 +30,7 @@ impl Trajectory {
                 message: Error::last_error(),
             })
         } else {
-            Ok(Self { handle: ptr })
+            Ok(Trajectory { handle: ptr })
         }
     }
 
@@ -118,9 +113,8 @@ impl Trajectory {
         let format = strings::to_c(format.into());
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
-            let handle =
-                chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
-            Self::from_ptr(handle)
+            let handle = chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
+            Trajectory::from_ptr(handle)
         }
     }
 
@@ -144,19 +138,15 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// assert_eq!(frame.size(), 6);
     /// ```
-    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Self, Error>
+    pub fn memory_reader<'a, S>(data: S, format: S) -> Result<Trajectory, Error>
     where
         S: Into<&'a str>,
     {
         let data = strings::to_c(data.into());
         let format = strings::to_c(format.into());
         unsafe {
-            let handle = chfl_trajectory_memory_reader(
-                data.as_ptr(),
-                data.as_bytes().len() as u64,
-                format.as_ptr(),
-            );
-            Self::from_ptr(handle)
+            let handle = chfl_trajectory_memory_reader(data.as_ptr(), data.as_bytes().len() as u64, format.as_ptr());
+            Trajectory::from_ptr(handle)
         }
     }
 
@@ -181,7 +171,7 @@ impl Trajectory {
     /// // Binary formats typically do not support this feature
     /// assert!(Trajectory::memory_writer("XTC").is_err());
     /// ```
-    pub fn memory_writer<'a, S>(format: S) -> Result<Self, Error>
+    pub fn memory_writer<'a, S>(format: S) -> Result<Trajectory, Error>
     where
         S: Into<&'a str>,
     {
@@ -316,7 +306,7 @@ impl Trajectory {
             check(chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
                 path.as_ptr(),
-                ptr::null(),
+                std::ptr::null(),
             ))
         }
     }
@@ -426,15 +416,8 @@ impl Trajectory {
         let mut ptr: *const c_char = std::ptr::null();
         let mut count: u64 = 0;
         let buffer = unsafe {
-            check(chfl_trajectory_memory_buffer(
-                self.as_ptr(),
-                &mut ptr,
-                &mut count,
-            ))?;
-            std::slice::from_raw_parts(
-                ptr.cast(),
-                count.try_into().expect("failed to convert u64 to usize"),
-            )
+            check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
+            std::slice::from_raw_parts(ptr.cast(), count.try_into().expect("failed to convert u64 to usize"))
         };
 
         let string = std::str::from_utf8(buffer)?;
@@ -468,7 +451,8 @@ impl Drop for Trajectory {
 
 #[cfg(test)]
 mod test {
-    use std::fs;
+    use super::*;
+
     use std::io::Read;
     use std::path::Path;
 
@@ -479,7 +463,7 @@ mod test {
     use Topology;
     use UnitCell;
 
-    use super::*;
+    use crate::{Atom, CellShape, Frame, Topology, UnitCell};
 
     #[allow(clippy::cognitive_complexity)]
     #[test]
@@ -591,12 +575,12 @@ X 1 2 3"
             .lines()
             .collect::<Vec<_>>();
 
-        let mut file = fs::File::open(filename).unwrap();
+        let mut file = std::fs::File::open(filename).unwrap();
         let mut content = String::new();
         let _ = file.read_to_string(&mut content).unwrap();
 
         assert_eq!(expected_content, content.lines().collect::<Vec<_>>());
-        fs::remove_file(filename).unwrap();
+        std::fs::remove_file(filename).unwrap();
     }
 
     #[test]

@@ -29,71 +29,54 @@
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]
 #![allow(clippy::must_use_candidate, clippy::wildcard_imports)]
 // Allow a few more clippy lints in test mode
-#![cfg_attr(
-    test,
-    allow(
-        clippy::float_cmp,
-        clippy::unreadable_literal,
-        clippy::shadow_unrelated
-    )
-)]
+#![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
 // deny(warnings) in doc tests
 #![doc(test(attr(deny(warnings))))]
 #![doc(test(attr(allow(unused_variables))))]
 
-#[cfg(test)]
-#[macro_use]
-extern crate approx;
-
-extern crate chemfiles_sys;
-use chemfiles_sys::chfl_add_configuration;
-use chemfiles_sys::chfl_version;
+use chemfiles_sys::{chfl_add_configuration, chfl_version};
 
 mod strings;
 
 mod errors;
-pub use errors::set_warning_callback;
-pub use errors::Error;
-pub use errors::Status;
+pub use self::errors::set_warning_callback;
+pub use self::errors::{Error, Status};
 
 mod atom;
-pub use atom::Atom;
-pub use atom::AtomMut;
-pub use atom::AtomRef;
+pub use self::atom::Atom;
+pub use self::atom::AtomMut;
+pub use self::atom::AtomRef;
 
 mod cell;
-pub use cell::CellShape;
-pub use cell::UnitCell;
-pub use cell::UnitCellMut;
-pub use cell::UnitCellRef;
+pub use self::cell::CellShape;
+pub use self::cell::UnitCell;
+pub use self::cell::UnitCellMut;
+pub use self::cell::UnitCellRef;
 
 mod residue;
-pub use residue::Residue;
-pub use residue::ResidueRef;
+pub use self::residue::Residue;
+pub use self::residue::ResidueRef;
 
 mod topology;
-pub use topology::BondOrder;
-pub use topology::Topology;
-pub use topology::TopologyRef;
+pub use self::topology::BondOrder;
+pub use self::topology::Topology;
+pub use self::topology::TopologyRef;
 
 mod frame;
-pub use frame::Frame;
+pub use self::frame::Frame;
 
 mod trajectory;
-pub use trajectory::Trajectory;
+pub use self::trajectory::Trajectory;
 
 mod selection;
-pub use selection::Match;
-pub use selection::Selection;
+pub use self::selection::{Match, Selection};
 
 mod property;
-pub use property::PropertiesIter;
-pub use property::Property;
+pub use self::property::PropertiesIter;
+pub use self::property::Property;
 
 mod misc;
-pub use misc::formats_list;
-pub use misc::guess_format;
-pub use misc::FormatMetadata;
+pub use self::misc::{formats_list, guess_format, FormatMetadata};
 
 /// Get the version of the chemfiles library.
 ///
@@ -144,5 +127,5 @@ mod tests {
 fn assert_vector3d_eq(lhs: &[f64; 3], rhs: &[f64; 3], eps: f64) {
     lhs.iter()
         .zip(rhs)
-        .for_each(|(l, r)| assert_ulps_eq!(l, r, epsilon = eps));
+        .for_each(|(l, r)| approx::assert_ulps_eq!(l, r, epsilon = eps));
 }

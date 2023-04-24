@@ -1,18 +1,10 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::iter::IntoIterator;
-use std::ops::Drop;
-use std::ops::Index;
-use std::slice::Iter;
-
 use chemfiles_sys::*;
-use errors::check;
-use errors::check_not_null;
-use errors::check_success;
-use errors::Error;
-use errors::Status;
-use frame::Frame;
-use strings;
+
+use crate::errors::{check, check_not_null, check_success, Error, Status};
+use crate::frame::Frame;
+use crate::strings;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A `Match` is a set of atomic indexes matching a given selection. It can
@@ -61,10 +53,7 @@ impl Match {
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
-        Self {
-            size,
-            atoms: matches,
-        }
+        Match { size, atoms: matches }
     }
 
     /// Iterate over the atomic indexes in the match.
@@ -81,12 +70,12 @@ impl Match {
     /// assert_eq!(iter.next(), Some(&5));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter(&self) -> Iter<usize> {
+    pub fn iter(&self) -> std::slice::Iter<usize> {
         self.atoms[..self.len()].iter()
     }
 }
 
-impl Index<usize> for Match {
+impl std::ops::Index<usize> for Match {
     type Output = usize;
 
     fn index(&self, i: usize) -> &Self::Output {
@@ -96,10 +85,10 @@ impl Index<usize> for Match {
 }
 
 impl<'a> IntoIterator for &'a Match {
-    type IntoIter = Iter<'a, usize>;
     type Item = &'a usize;
+    type IntoIter = std::slice::Iter<'a, usize>;
 
-    fn into_iter(self) -> Iter<'a, usize> {
+    fn into_iter(self) -> Self::IntoIter {
         self.atoms[..self.len()].iter()
     }
 }
@@ -138,7 +127,7 @@ impl Selection {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_SELECTION) -> Self {
         check_not_null(ptr);
-        Self { handle: ptr }
+        Selection { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -244,12 +233,8 @@ impl Selection {
         #![allow(clippy::cast_possible_truncation)]
         let mut count = 0;
         unsafe {
-            check(chfl_selection_evaluate(
-                self.as_mut_ptr(),
-                frame.as_ptr(),
-                &mut count,
-            ))
-            .expect("failed to evaluate selection");
+            check(chfl_selection_evaluate(self.as_mut_ptr(), frame.as_ptr(), &mut count))
+                .expect("failed to evaluate selection");
         }
 
         let size = count as usize;
@@ -261,26 +246,20 @@ impl Selection {
             size
         ];
         unsafe {
-            check(chfl_selection_matches(
-                self.handle,
-                chfl_matches.as_mut_ptr(),
-                count,
-            ))
-            .expect("failed to extract matches");
+            check(chfl_selection_matches(self.handle, chfl_matches.as_mut_ptr(), count))
+                .expect("failed to extract matches");
         }
 
         return chfl_matches
             .into_iter()
-            .map(|chfl_match| {
-                Match {
-                    size: chfl_match.size as usize,
-                    atoms: [
-                        chfl_match.atoms[0] as usize,
-                        chfl_match.atoms[1] as usize,
-                        chfl_match.atoms[2] as usize,
-                        chfl_match.atoms[3] as usize,
-                    ],
-                }
+            .map(|chfl_match| Match {
+                size: chfl_match.size as usize,
+                atoms: [
+                    chfl_match.atoms[0] as usize,
+                    chfl_match.atoms[1] as usize,
+                    chfl_match.atoms[2] as usize,
+                    chfl_match.atoms[3] as usize,
+                ],
             })
             .collect();
     }
@@ -311,17 +290,14 @@ impl Selection {
         if self.size() != 1 {
             panic!("can not call `Selection::list` on a multiple selection");
         }
-        return self.evaluate(frame).into_iter().map(|m| m[0]).collect();
+        return self.evaluate(frame).into_iter().map(|m| m[0] as usize).collect();
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use Atom;
-    use Frame;
-    use Topology;
-
     use super::*;
+    use crate::{Atom, Topology};
 
     #[test]
     fn clone() {

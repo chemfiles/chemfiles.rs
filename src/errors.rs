@@ -1,15 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-extern crate libc;
-
-use std::error;
-use std::fmt;
-use std::panic::RefUnwindSafe;
-use std::panic::{self};
+use std::os::raw::c_char;
+use std::panic::{self, RefUnwindSafe};
 use std::path::Path;
 
 use chemfiles_sys::*;
-use strings;
+
+use crate::strings;
 
 use self::libc::c_char;
 
@@ -67,8 +64,8 @@ impl From<chfl_status> for Error {
             chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
 
-        let message = Self::last_error();
-        Self { status, message }
+        let message = Error::last_error();
+        Error { status, message }
     }
 }
 
@@ -113,7 +110,7 @@ pub fn check(status: chfl_status) -> Result<(), Error> {
 }
 
 /// Check return value of a C function, panic if it failed.
-pub fn check_success(status: chfl_status) {
+pub(crate) fn check_success(status: chfl_status) {
     assert!(
         status == chfl_status::CHFL_SUCCESS,
         "unexpected failure: {}",
@@ -172,13 +169,13 @@ where
     }
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl std::fmt::Display for Error {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(fmt, "{}", self.message)
     }
 }
 
-impl error::Error for Error {
+impl std::error::Error for Error {
     fn description(&self) -> &str {
         match self.status {
             Status::Success => "Success",
@@ -198,7 +195,8 @@ impl error::Error for Error {
 
 #[cfg(test)]
 mod test {
-    use Trajectory;
+    use super::*;
+    use crate::Trajectory;
 
     use super::*;
 
@@ -217,38 +215,20 @@ mod test {
 
     #[test]
     fn codes() {
-        assert_eq!(
-            Error::from(chfl_status::CHFL_SUCCESS).status,
-            Status::Success
-        );
-        assert_eq!(
-            Error::from(chfl_status::CHFL_CXX_ERROR).status,
-            Status::StdCppError
-        );
+        assert_eq!(Error::from(chfl_status::CHFL_SUCCESS).status, Status::Success);
+        assert_eq!(Error::from(chfl_status::CHFL_CXX_ERROR).status, Status::StdCppError);
         assert_eq!(
             Error::from(chfl_status::CHFL_GENERIC_ERROR).status,
             Status::ChemfilesError
         );
-        assert_eq!(
-            Error::from(chfl_status::CHFL_MEMORY_ERROR).status,
-            Status::MemoryError
-        );
-        assert_eq!(
-            Error::from(chfl_status::CHFL_FILE_ERROR).status,
-            Status::FileError
-        );
-        assert_eq!(
-            Error::from(chfl_status::CHFL_FORMAT_ERROR).status,
-            Status::FormatError
-        );
+        assert_eq!(Error::from(chfl_status::CHFL_MEMORY_ERROR).status, Status::MemoryError);
+        assert_eq!(Error::from(chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
+        assert_eq!(Error::from(chfl_status::CHFL_FORMAT_ERROR).status, Status::FormatError);
         assert_eq!(
             Error::from(chfl_status::CHFL_SELECTION_ERROR).status,
             Status::SelectionError
         );
-        assert_eq!(
-            Error::from(chfl_status::CHFL_OUT_OF_BOUNDS).status,
-            Status::OutOfBounds
-        );
+        assert_eq!(Error::from(chfl_status::CHFL_OUT_OF_BOUNDS).status, Status::OutOfBounds);
         assert_eq!(
             Error::from(chfl_status::CHFL_PROPERTY_ERROR).status,
             Status::PropertyError

@@ -1,17 +1,12 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
-use std::ops::Deref;
-use std::ops::Drop;
-use std::ptr;
 
 use chemfiles_sys::*;
-use errors::check_not_null;
-use errors::check_success;
-use property::PropertiesIter;
-use property::Property;
-use property::RawProperty;
-use strings;
+
+use crate::errors::{check_not_null, check_success};
+use crate::property::{PropertiesIter, Property, RawProperty};
+use crate::strings;
 
 /// A `Residue` is a group of atoms belonging to the same logical unit. They
 /// can be small molecules, amino-acids in a protein, monomers in polymers,
@@ -26,7 +21,7 @@ pub struct ResidueRef<'a> {
     marker: PhantomData<&'a Residue>,
 }
 
-impl<'a> Deref for ResidueRef<'a> {
+impl<'a> std::ops::Deref for ResidueRef<'a> {
     type Target = Residue;
 
     fn deref(&self) -> &Residue {
@@ -51,7 +46,7 @@ impl Residue {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Self {
         check_not_null(ptr);
-        Self { handle: ptr }
+        Residue { handle: ptr }
     }
 
     /// Create a borrowed `Residue` from a C pointer.
@@ -237,11 +232,7 @@ impl Residue {
         let count = size as u64;
         let mut indices = vec![u64::max_value(); size];
         unsafe {
-            check_success(chfl_residue_atoms(
-                self.as_ptr(),
-                indices.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_residue_atoms(self.as_ptr(), indices.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return indices.into_iter().map(|idx| idx as usize).collect();
@@ -326,7 +317,7 @@ impl Residue {
 
         #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut c_names = vec![ptr::null_mut(); size];
+        let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
             check_success(chfl_residue_list_properties(
                 self.as_ptr(),

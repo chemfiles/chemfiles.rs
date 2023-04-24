@@ -1,20 +1,13 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
-use std::ops::Deref;
-use std::ops::Drop;
+use std::ops::{Deref, Drop};
 
 use chemfiles_sys::*;
-use errors::check;
-use errors::check_not_null;
-use errors::check_success;
-use errors::Error;
 
-use super::Atom;
-use super::AtomMut;
-use super::AtomRef;
-use super::Residue;
-use super::ResidueRef;
+use crate::errors::{check, check_not_null, check_success, Error};
+use crate::{Atom, AtomMut, AtomRef};
+use crate::{Residue, ResidueRef};
 
 /// Possible bond order associated with bonds
 #[repr(C)]
@@ -107,7 +100,7 @@ impl Topology {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Self {
         check_not_null(ptr);
-        Self { handle: ptr }
+        Topology { handle: ptr }
     }
 
     /// Create a borrowed `Topology` from a C pointer.
@@ -155,8 +148,8 @@ impl Topology {
     /// let topology = Topology::new();
     /// assert_eq!(topology.size(), 0);
     /// ```
-    pub fn new() -> Self {
-        unsafe { Self::from_ptr(chfl_topology()) }
+    pub fn new() -> Topology {
+        unsafe { Topology::from_ptr(chfl_topology()) }
     }
 
     /// Get a reference of the atom at the given `index` in this topology.
@@ -176,8 +169,7 @@ impl Topology {
     /// ```
     pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
-            let handle =
-                chfl_atom_from_topology(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
+            let handle = chfl_atom_from_topology(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
         }
     }
@@ -458,11 +450,7 @@ impl Topology {
         let count = size as u64;
         let mut dihedrals = vec![[u64::max_value(); 4]; size];
         unsafe {
-            check_success(chfl_topology_dihedrals(
-                self.as_ptr(),
-                dihedrals.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_topology_dihedrals(self.as_ptr(), dihedrals.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return dihedrals
@@ -497,11 +485,7 @@ impl Topology {
         let count = size as u64;
         let mut impropers = vec![[u64::max_value(); 4]; size];
         unsafe {
-            check_success(chfl_topology_impropers(
-                self.as_ptr(),
-                impropers.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_topology_impropers(self.as_ptr(), impropers.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return impropers
@@ -608,12 +592,7 @@ impl Topology {
     pub fn bond_order(&self, i: usize, j: usize) -> BondOrder {
         let mut order = chfl_bond_order::CHFL_BOND_UNKNOWN;
         unsafe {
-            check_success(chfl_topology_bond_order(
-                self.as_ptr(),
-                i as u64,
-                j as u64,
-                &mut order,
-            ));
+            check_success(chfl_topology_bond_order(self.as_ptr(), i as u64, j as u64, &mut order));
         }
         return order.into();
     }
@@ -777,12 +756,7 @@ impl Topology {
     /// assert_eq!(residue.name(), "water");
     /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<(), Error> {
-        unsafe {
-            check(chfl_topology_add_residue(
-                self.as_mut_ptr(),
-                residue.as_ptr(),
-            ))
-        }
+        unsafe { check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())) }
     }
 
     /// Check if the two residues `first` and `second` from the `topology` are

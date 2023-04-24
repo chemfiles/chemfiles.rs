@@ -1,18 +1,14 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
-use std::ptr;
-use std::slice;
-
 use chemfiles_sys::*;
-use errors::check;
-use errors::check_not_null;
-use errors::check_success;
-use errors::Error;
-use property::PropertiesIter;
-use property::Property;
-use property::RawProperty;
-use strings;
+
+use crate::{Atom, AtomMut, AtomRef};
+use crate::{BondOrder, Residue, Topology, TopologyRef};
+use crate::{UnitCell, UnitCellMut, UnitCellRef};
+
+use crate::errors::{check, check_not_null, check_success, Error};
+use crate::property::{PropertiesIter, Property, RawProperty};
+use crate::strings;
 
 use super::Atom;
 use super::AtomMut;
@@ -113,8 +109,7 @@ impl Frame {
     /// ```
     pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
-            let handle =
-                chfl_atom_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
+            let handle = chfl_atom_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
         }
     }
@@ -192,16 +187,12 @@ impl Frame {
     /// frame.add_velocities();
     /// frame.add_atom(&Atom::new("Zn"), [-1.0, 1.0, 2.0], [0.2, 0.1, 0.0]);
     /// ```
-    pub fn add_atom(
-        &mut self,
-        atom: &Atom,
-        position: [f64; 3],
-        velocity: impl Into<Option<[f64; 3]>>,
-    ) {
+    pub fn add_atom(&mut self, atom: &Atom, position: [f64; 3], velocity: impl Into<Option<[f64; 3]>>) {
         let velocity = velocity.into();
-        let velocity_ptr = velocity
-            .as_ref()
-            .map_or_else(ptr::null, |data| data.as_ptr());
+        let velocity_ptr = match velocity {
+            Some(ref data) => data.as_ptr(),
+            None => std::ptr::null(),
+        };
 
         unsafe {
             check_success(chfl_frame_add_atom(
@@ -307,11 +298,7 @@ impl Frame {
     /// ```
     pub fn remove_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_frame_remove_bond(
-                self.as_mut_ptr(),
-                i as u64,
-                j as u64,
-            ));
+            check_success(chfl_frame_remove_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -355,12 +342,7 @@ impl Frame {
     pub fn distance(&self, i: usize, j: usize) -> f64 {
         let mut distance = 0.0;
         unsafe {
-            check_success(chfl_frame_distance(
-                self.as_ptr(),
-                i as u64,
-                j as u64,
-                &mut distance,
-            ));
+            check_success(chfl_frame_distance(self.as_ptr(), i as u64, j as u64, &mut distance));
         }
         return distance;
     }
@@ -471,7 +453,7 @@ impl Frame {
     /// assert_eq!(positions[0], [0.0, 0.0, 0.0]);
     /// ```
     pub fn positions(&self) -> &[[f64; 3]] {
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             check_success(chfl_frame_positions(
@@ -484,7 +466,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return slice::from_raw_parts(ptr, size);
+            return std::slice::from_raw_parts(ptr, size);
         }
     }
 
@@ -505,19 +487,15 @@ impl Frame {
     /// assert_eq!(positions[0], [1.0, 2.0, 3.0]);
     /// ```
     pub fn positions_mut(&mut self) -> &mut [[f64; 3]] {
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            check_success(chfl_frame_positions(
-                self.as_mut_ptr(),
-                &mut ptr,
-                &mut natoms,
-            ));
+            check_success(chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms));
         }
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return slice::from_raw_parts_mut(ptr, size);
+            return std::slice::from_raw_parts_mut(ptr, size);
         }
     }
 
@@ -539,7 +517,7 @@ impl Frame {
             return None;
         }
 
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
             check_success(chfl_frame_velocities(
@@ -551,7 +529,7 @@ impl Frame {
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return Some(slice::from_raw_parts(ptr, size));
+            return Some(std::slice::from_raw_parts(ptr, size));
         }
     }
 
@@ -577,19 +555,15 @@ impl Frame {
             return None;
         }
 
-        let mut ptr = ptr::null_mut();
+        let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            check_success(chfl_frame_velocities(
-                self.as_mut_ptr(),
-                &mut ptr,
-                &mut natoms,
-            ));
+            check_success(chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms));
         }
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
         unsafe {
-            return Some(slice::from_raw_parts_mut(ptr, size));
+            return Some(std::slice::from_raw_parts_mut(ptr, size));
         }
     }
 
@@ -725,12 +699,7 @@ impl Frame {
     /// assert_eq!(frame.atom(0).name(), "Cl");
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) -> Result<(), Error> {
-        unsafe {
-            check(chfl_frame_set_topology(
-                self.as_mut_ptr(),
-                topology.as_ptr(),
-            ))
-        }
+        unsafe { check(chfl_frame_set_topology(self.as_mut_ptr(), topology.as_ptr())) }
     }
 
     /// Get this frame step, i.e. the frame number in the trajectory
@@ -899,13 +868,9 @@ impl Frame {
 
         #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
-        let mut c_names = vec![ptr::null_mut(); size];
+        let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_frame_list_properties(
-                self.as_ptr(),
-                c_names.as_mut_ptr(),
-                count,
-            ));
+            check_success(chfl_frame_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
         }
 
         let mut names = Vec::new();
@@ -1055,9 +1020,7 @@ mod test {
     fn positions() {
         let mut frame = Frame::new();
         frame.resize(4);
-        let expected = &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [
-            10.0, 11.0, 12.0,
-        ]];
+        let expected = &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [10.0, 11.0, 12.0]];
 
         frame.positions_mut().clone_from_slice(expected);
         assert_eq!(frame.positions(), expected);
@@ -1071,9 +1034,7 @@ mod test {
         frame.add_velocities();
         assert!(frame.has_velocities());
 
-        let expected = &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [
-            10.0, 11.0, 12.0,
-        ]];
+        let expected = &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [10.0, 11.0, 12.0]];
 
         frame.velocities_mut().unwrap().clone_from_slice(expected);
         assert_eq!(frame.velocities().unwrap(), expected);

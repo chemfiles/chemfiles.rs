@@ -1,16 +1,10 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
-use std::ops::Deref;
-use std::ops::DerefMut;
-use std::ops::Drop;
-use std::ptr;
 
 use chemfiles_sys::*;
-use errors::check;
-use errors::check_not_null;
-use errors::check_success;
-use errors::Error;
+
+use crate::errors::{check, check_not_null, check_success, Error};
 
 /// Available unit cell shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -68,7 +62,7 @@ pub struct UnitCellRef<'a> {
     marker: PhantomData<&'a UnitCell>,
 }
 
-impl<'a> Deref for UnitCellRef<'a> {
+impl<'a> std::ops::Deref for UnitCellRef<'a> {
     type Target = UnitCell;
 
     fn deref(&self) -> &UnitCell {
@@ -82,7 +76,7 @@ pub struct UnitCellMut<'a> {
     marker: PhantomData<&'a mut UnitCell>,
 }
 
-impl<'a> Deref for UnitCellMut<'a> {
+impl<'a> std::ops::Deref for UnitCellMut<'a> {
     type Target = UnitCell;
 
     fn deref(&self) -> &UnitCell {
@@ -90,7 +84,7 @@ impl<'a> Deref for UnitCellMut<'a> {
     }
 }
 
-impl<'a> DerefMut for UnitCellMut<'a> {
+impl<'a> std::ops::DerefMut for UnitCellMut<'a> {
     fn deref_mut(&mut self) -> &mut UnitCell {
         &mut self.inner
     }
@@ -113,7 +107,7 @@ impl UnitCell {
     #[inline]
     pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> Self {
         check_not_null(ptr);
-        Self { handle: ptr }
+        UnitCell { handle: ptr }
     }
 
     /// Create a borrowed `UnitCell` from a C pointer.
@@ -167,8 +161,8 @@ impl UnitCell {
     /// ```
     pub fn new(lengths: [f64; 3]) -> Self {
         unsafe {
-            let handle = chfl_cell(lengths.as_ptr(), ptr::null());
-            Self::from_ptr(handle)
+            let handle = chfl_cell(lengths.as_ptr(), std::ptr::null());
+            UnitCell::from_ptr(handle)
         }
     }
 
@@ -494,7 +488,7 @@ mod test {
 
         for i in 0..3 {
             for j in 0..3 {
-                assert_ulps_eq!(matrix[i][j], result[i][j], epsilon = 1e-12);
+                approx::assert_ulps_eq!(matrix[i][j], result[i][j], epsilon = 1e-12);
             }
         }
     }
@@ -505,21 +499,19 @@ mod test {
         assert_eq!(cell.shape(), CellShape::Orthorhombic);
         assert_eq!(cell.lengths(), [10.0, 21.0, 32.0]);
 
-        let result_matrix = [[123.0, 4.08386, 71.7295], [0.0, 233.964, 133.571], [
-            0.0, 0.0, 309.901,
-        ]];
+        let result_matrix = [[123.0, 4.08386, 71.7295], [0.0, 233.964, 133.571], [0.0, 0.0, 309.901]];
         let cell = UnitCell::from_matrix(result_matrix);
 
         assert_eq!(cell.shape(), CellShape::Triclinic);
         for i in 0..3 {
-            assert_ulps_eq!(cell.lengths()[i], [123.0, 234.0, 345.0][i], epsilon = 1e-3);
-            assert_ulps_eq!(cell.angles()[i], [67.0, 78.0, 89.0][i], epsilon = 1e-3);
+            approx::assert_ulps_eq!(cell.lengths()[i], [123.0, 234.0, 345.0][i], epsilon = 1e-3);
+            approx::assert_ulps_eq!(cell.angles()[i], [67.0, 78.0, 89.0][i], epsilon = 1e-3);
         }
 
         let matrix = cell.matrix();
         for i in 0..3 {
             for j in 0..3 {
-                assert_ulps_eq!(matrix[i][j], result_matrix[i][j], epsilon = 1e-12);
+                approx::assert_ulps_eq!(matrix[i][j], result_matrix[i][j], epsilon = 1e-12);
             }
         }
     }

@@ -1,14 +1,11 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2020 Guillaume Fraux -- BSD licensed
-
 use std::convert::TryInto;
 use std::ffi::CStr;
 
-use chemfiles_sys::chfl_format_metadata;
-use chemfiles_sys::chfl_formats_list;
-use chemfiles_sys::chfl_free;
-use chemfiles_sys::chfl_guess_format;
-use errors::check_success;
+use chemfiles_sys::{chfl_format_metadata, chfl_formats_list, chfl_free, chfl_guess_format};
+
+use crate::errors::check_success;
 
 /// `FormatMetadata` contains metadata associated with one format.
 #[allow(clippy::struct_excessive_bools)]
@@ -44,11 +41,7 @@ pub struct FormatMetadata {
 
 impl FormatMetadata {
     pub(crate) fn from_raw(raw: &chfl_format_metadata) -> Self {
-        let str_from_ptr = |ptr| unsafe {
-            CStr::from_ptr(ptr)
-                .to_str()
-                .expect("Invalid Rust str from C")
-        };
+        let str_from_ptr = |ptr| unsafe { CStr::from_ptr(ptr).to_str().expect("Invalid Rust str from C") };
         let extension = if raw.extension.is_null() {
             None
         } else {

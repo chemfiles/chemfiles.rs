@@ -1,14 +1,9 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-use std::ops::Drop;
-use std::vec::IntoIter;
-
 use chemfiles_sys::*;
-use errors::check;
-use errors::check_not_null;
-use errors::check_success;
-use errors::Error;
-use strings;
+
+use crate::errors::{check, check_not_null, check_success, Error};
+use crate::strings;
 
 /// A thin wrapper around `CHFL_PROPERTY`
 pub struct RawProperty {
@@ -22,7 +17,7 @@ impl RawProperty {
     /// pointer.
     pub unsafe fn from_ptr(ptr: *mut CHFL_PROPERTY) -> Self {
         check_not_null(ptr);
-        Self { handle: ptr }
+        RawProperty { handle: ptr }
     }
 
     /// Get the underlying C pointer as a const pointer.
@@ -165,17 +160,11 @@ impl Property {
     }
 
     #[allow(clippy::needless_pass_by_value)] // raw property
-    pub(crate) fn from_raw(raw: RawProperty) -> Self {
+    pub(crate) fn from_raw(raw: RawProperty) -> Property {
         match raw.get_kind() {
-            chfl_property_kind::CHFL_PROPERTY_BOOL => {
-                Self::Bool(raw.get_bool().expect("shoudl be a bool"))
-            }
-            chfl_property_kind::CHFL_PROPERTY_DOUBLE => {
-                Self::Double(raw.get_double().expect("should be a double"))
-            }
-            chfl_property_kind::CHFL_PROPERTY_STRING => {
-                Self::String(raw.get_string().expect("should be a string"))
-            }
+            chfl_property_kind::CHFL_PROPERTY_BOOL => Property::Bool(raw.get_bool().expect("shoudl be a bool")),
+            chfl_property_kind::CHFL_PROPERTY_DOUBLE => Property::Double(raw.get_double().expect("should be a double")),
+            chfl_property_kind::CHFL_PROPERTY_STRING => Property::String(raw.get_string().expect("should be a string")),
             chfl_property_kind::CHFL_PROPERTY_VECTOR3D => {
                 Self::Vector3D(raw.get_vector3d().expect("should be a vector3d"))
             }
@@ -185,7 +174,7 @@ impl Property {
 
 /// An iterator over the properties in an atom/frame/residue
 pub struct PropertiesIter<'a> {
-    pub(crate) names: IntoIter<String>,
+    pub(crate) names: std::vec::IntoIter<String>,
     pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }
 
