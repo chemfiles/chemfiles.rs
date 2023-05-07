@@ -278,10 +278,11 @@ impl Selection {
     /// assert_eq!(matches[1], 2);
     /// ```
     pub fn list(&mut self, frame: &Frame) -> Vec<usize> {
-        if self.size() != 1 {
-            panic!("can not call `Selection::list` on a multiple selection");
-        }
-        return self.evaluate(frame).into_iter().map(|m| m[0] as usize).collect();
+        assert!(
+            self.size() == 1,
+            "can not call `Selection::list` on a multiple selection"
+        );
+        return self.evaluate(frame).into_iter().map(|m| m[0]).collect();
     }
 }
 

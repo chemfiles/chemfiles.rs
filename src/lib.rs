@@ -28,6 +28,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]
 #![allow(clippy::must_use_candidate, clippy::wildcard_imports)]
+#![allow(clippy::let_underscore_untyped, clippy::bool_to_int_with_if)]
 // Allow a few more clippy lints in test mode
 #![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
 // deny(warnings) in doc tests
