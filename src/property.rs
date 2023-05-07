@@ -178,7 +178,7 @@ impl<'a> Iterator for PropertiesIter<'a> {
     type Item = (String, Property);
     fn next(&mut self) -> Option<Self::Item> {
         self.names.next().map(|name| {
-            let property = (self.getter)(&*name);
+            let property = (self.getter)(&name);
             (name, property)
         })
     }

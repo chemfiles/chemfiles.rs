@@ -655,7 +655,7 @@ impl Topology {
     /// let residue = topology.residue(0).unwrap();
     /// assert_eq!(residue.name(), "water");
     /// ```
-    pub fn residue(&self, index: u64) -> Option<ResidueRef> {
+    pub fn residue(&self, index: usize) -> Option<ResidueRef> {
         unsafe {
             let handle = chfl_residue_from_topology(self.as_ptr(), index as u64);
             if handle.is_null() {
@@ -776,7 +776,6 @@ impl Drop for Topology {
 #[cfg(test)]
 mod test {
     use super::*;
-    use {Atom, Residue};
 
     #[test]
     fn clone() {
