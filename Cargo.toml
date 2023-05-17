@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles"
-version = "0.10.3"
+version = "0.10.4"
 edition = "2021"
 authors = ["Guillaume Fraux <guillaume.fraux@epfl.ch>"]
 documentation = "http://chemfiles.org/chemfiles.rs/"
@@ -16,7 +16,7 @@ exclude = ["data/*"]
 name = "chemfiles"
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.10.2"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.10.4"}
 
 [dev-dependencies]
 approx = "0.4"

@@ -1,62 +1,62 @@
-/// Get the julia triple & sha256 corresponding to the prebuilt chemfiles v0.10.3
+/// Get the julia triple & sha256 corresponding to the prebuilt chemfiles v0.10.4
 /// for a given rust triple, if it exists
 pub fn get_prebuilt_info(target: &str) -> Option<(&'static str, &'static str)> {
     match target {
         "aarch64-apple-darwin" => Some((
             "aarch64-apple-darwin",
-            "d363921687c3d9a292a680567f3244cd1159f2c17a4b897361d7703a954b3d31",
+            "fa31fd1c43fbf3954b00013f756c22f082d373f768aac853fad01142fedfce5d",
         )),
         "aarch64-unknown-linux-gnu" => Some((
             "aarch64-linux-gnu",
-            "503b5a384cbc627d6dfa0e3c38923fd4b881619aa2c58d8d37257fb00d593b73",
+            "39c7d72a8a55783635783dee6777a9ada40318b95acdd2b8b072df23aec6c80f",
         )),
         "aarch64-unknown-linux-musl" => Some((
             "aarch64-linux-musl",
-            "26da29259916f1b57c567a7e4ad72fa113065d69b2c131a0de92ed77bdc1c943",
+            "8a475ff74178781862a08f1fc219f64421c46477450d7f5a38b021e4736554bf",
         )),
         "armv7-unknown-linux-gnueabihf" => Some((
             "armv7l-linux-gnueabihf",
-            "14e950a8e10c2e1e3408c9fbfee0da463a978f3c139fc9ddb6f79323c7eab48d",
+            "483c742b5b2121c976af0d1bb4d7faff79f4ca264213eab057c25969193735b0",
         )),
         "armv7-unknown-linux-musleabihf" => Some((
             "armv7l-linux-musleabihf",
-            "444d30b2c82c1ba9f9be2c0ba5092b3d86bfbb02f995935490ab12bea0767423",
+            "eea196c4a27eb1078dd4bed62a1c80043b57bf86ceee4401e265279a418f9c71",
         )),
         "i686-unknown-linux-gnu" => Some((
             "i686-linux-gnu",
-            "d4d4833269b7589e8035b5718236c40477969c3c281b20cdb3a9f09eeb291396",
+            "6b6c983dbc8603fd9dca4c865c4f5b78f694fcfc1857fae652d4efd1176f9422",
         )),
         "i686-unknown-linux-musl" => Some((
             "i686-linux-musl",
-            "b8914c51fe06fd1848ceaf0b5666e05ff4b1dd3edb05dea26b9bbc99d51426e3",
+            "8ab6dc7e548d5db8988cd57afee28d45e6abce087630b705fa502587d0c94fe5",
         )),
         "i686-pc-windows-gnu" => Some((
             "i686-w64-mingw32",
-            "f4cae7e8fcca7d32e539f9c080dfd950cf5b835ffa3d75aae7dd16f597829573",
+            "4eda8baf539a83b7d58eda0ea5da520581040969c83dfe26135853dd6f21a1c1",
         )),
         "powerpc64le-unknown-linux-gnu" => Some((
             "powerpc64le-linux-gnu",
-            "af7adf574ddc953593dda2e89b39d71c6674e44cd8a3fc729edc1f48b9f01542",
+            "050732e22340a79c5acb724d04a191558cca6eddc320165210636c7fbe36a7be",
         )),
         "x86_64-apple-darwin" => Some((
             "x86_64-apple-darwin",
-            "0783cb15705576f4b5af6bed583540a256a83a906d160dc6f157b7d5f594579b",
+            "2c0be68e33ea1432477b28f41cdb2cceb40697aab222974c8682beacaccee84e",
         )),
         "x86_64-unknown-linux-gnu" => Some((
             "x86_64-linux-gnu",
-            "0a2a839885effae7df0c279ad024b6fa7cb73666c2c2fe9b6675cebc614b088e",
+            "2ac97eba5b79f8051cd86184e00379271c72e85d2bbcbcd50626b0ec602a1978",
         )),
         "x86_64-unknown-linux-musl" => Some((
             "x86_64-linux-musl",
-            "866edb9fb201e05b24c04d115ba9cb27e5381f94bf5637c7409e43b4513ba4a4",
+            "afc7db8d2b4e5c55197d46cfb7453cb650e99162972290d7cd27b48d375b8512",
         )),
         "x86_64-unknown-freebsd" => Some((
             "x86_64-unknown-freebsd",
-            "51f659041fb65f43038541dabb2dfa47712bb0ec08ea57065954e42334d9f797",
+            "f5b31e7b8aa4d17c14f343aaddfddf5a43125f26358b9823a4c386facbf099ee",
         )),
         "x86_64-pc-windows-gnu" => Some((
             "x86_64-w64-mingw32",
-            "e183dfbef91e5ce608be7ae8c3ca902982ab0f5b7276d4049958cbc75c0155c6",
+            "7a2c2922f2be57c7fbbe48e468dd55fff259aa65648d80cf05acb7ecbc26b011",
         )),
         _ => None,
     }
