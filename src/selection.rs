@@ -390,6 +390,13 @@ mod tests {
     }
 
     #[test]
+    fn invalid() {
+        let error = Selection::new("foo").unwrap_err();
+        assert_eq!(error.message, "unexpected identifier 'foo' in mathematical expression");
+        assert_eq!(error.status, Status::SelectionError);
+    }
+
+    #[test]
     fn evaluate() {
         let frame = testing_frame();
 
