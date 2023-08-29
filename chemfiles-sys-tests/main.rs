@@ -1,4 +1,4 @@
-#![allow(bad_style, unused)]
+#![allow(warnings)]
 use chemfiles_sys::*;
 use libc::*;
 

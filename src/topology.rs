@@ -3,7 +3,7 @@
 use std::marker::PhantomData;
 use std::ops::{Deref, Drop};
 
-use chemfiles_sys::*;
+use chemfiles_sys as ffi;
 
 use crate::errors::{check, check_not_null, check_success, Error};
 use crate::{Atom, AtomMut, AtomRef};
@@ -15,49 +15,49 @@ use crate::{Residue, ResidueRef};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum BondOrder {
     /// Unknown or unspecified bond order
-    Unknown = chfl_bond_order::CHFL_BOND_UNKNOWN as isize,
+    Unknown = ffi::chfl_bond_order::CHFL_BOND_UNKNOWN as isize,
     /// Single bond
-    Single = chfl_bond_order::CHFL_BOND_SINGLE as isize,
+    Single = ffi::chfl_bond_order::CHFL_BOND_SINGLE as isize,
     /// Double bond
-    Double = chfl_bond_order::CHFL_BOND_DOUBLE as isize,
+    Double = ffi::chfl_bond_order::CHFL_BOND_DOUBLE as isize,
     /// Triple bond
-    Triple = chfl_bond_order::CHFL_BOND_TRIPLE as isize,
+    Triple = ffi::chfl_bond_order::CHFL_BOND_TRIPLE as isize,
     /// Quadruple bond (present in some metals)
-    Quadruple = chfl_bond_order::CHFL_BOND_QUADRUPLE as isize,
+    Quadruple = ffi::chfl_bond_order::CHFL_BOND_QUADRUPLE as isize,
     /// Quintuplet bond (present in some metals)
-    Quintuplet = chfl_bond_order::CHFL_BOND_QUINTUPLET as isize,
+    Quintuplet = ffi::chfl_bond_order::CHFL_BOND_QUINTUPLET as isize,
     /// Amide bond (required by some file formats)
-    Amide = chfl_bond_order::CHFL_BOND_AMIDE as isize,
+    Amide = ffi::chfl_bond_order::CHFL_BOND_AMIDE as isize,
     /// Aromatic bond (required by some file formats)
-    Aromatic = chfl_bond_order::CHFL_BOND_AROMATIC as isize,
+    Aromatic = ffi::chfl_bond_order::CHFL_BOND_AROMATIC as isize,
 }
 
 impl BondOrder {
-    pub(crate) fn as_raw(self) -> chfl_bond_order {
+    pub(crate) fn as_raw(self) -> ffi::chfl_bond_order {
         match self {
-            BondOrder::Unknown => chfl_bond_order::CHFL_BOND_UNKNOWN,
-            BondOrder::Single => chfl_bond_order::CHFL_BOND_SINGLE,
-            BondOrder::Double => chfl_bond_order::CHFL_BOND_DOUBLE,
-            BondOrder::Triple => chfl_bond_order::CHFL_BOND_TRIPLE,
-            BondOrder::Quadruple => chfl_bond_order::CHFL_BOND_QUADRUPLE,
-            BondOrder::Quintuplet => chfl_bond_order::CHFL_BOND_QUINTUPLET,
-            BondOrder::Amide => chfl_bond_order::CHFL_BOND_AMIDE,
-            BondOrder::Aromatic => chfl_bond_order::CHFL_BOND_AROMATIC,
+            BondOrder::Unknown => ffi::chfl_bond_order::CHFL_BOND_UNKNOWN,
+            BondOrder::Single => ffi::chfl_bond_order::CHFL_BOND_SINGLE,
+            BondOrder::Double => ffi::chfl_bond_order::CHFL_BOND_DOUBLE,
+            BondOrder::Triple => ffi::chfl_bond_order::CHFL_BOND_TRIPLE,
+            BondOrder::Quadruple => ffi::chfl_bond_order::CHFL_BOND_QUADRUPLE,
+            BondOrder::Quintuplet => ffi::chfl_bond_order::CHFL_BOND_QUINTUPLET,
+            BondOrder::Amide => ffi::chfl_bond_order::CHFL_BOND_AMIDE,
+            BondOrder::Aromatic => ffi::chfl_bond_order::CHFL_BOND_AROMATIC,
         }
     }
 }
 
-impl From<chfl_bond_order> for BondOrder {
-    fn from(order: chfl_bond_order) -> BondOrder {
+impl From<ffi::chfl_bond_order> for BondOrder {
+    fn from(order: ffi::chfl_bond_order) -> BondOrder {
         match order {
-            chfl_bond_order::CHFL_BOND_UNKNOWN => BondOrder::Unknown,
-            chfl_bond_order::CHFL_BOND_SINGLE => BondOrder::Single,
-            chfl_bond_order::CHFL_BOND_DOUBLE => BondOrder::Double,
-            chfl_bond_order::CHFL_BOND_TRIPLE => BondOrder::Triple,
-            chfl_bond_order::CHFL_BOND_QUADRUPLE => BondOrder::Quadruple,
-            chfl_bond_order::CHFL_BOND_QUINTUPLET => BondOrder::Quintuplet,
-            chfl_bond_order::CHFL_BOND_AMIDE => BondOrder::Amide,
-            chfl_bond_order::CHFL_BOND_AROMATIC => BondOrder::Aromatic,
+            ffi::chfl_bond_order::CHFL_BOND_UNKNOWN => BondOrder::Unknown,
+            ffi::chfl_bond_order::CHFL_BOND_SINGLE => BondOrder::Single,
+            ffi::chfl_bond_order::CHFL_BOND_DOUBLE => BondOrder::Double,
+            ffi::chfl_bond_order::CHFL_BOND_TRIPLE => BondOrder::Triple,
+            ffi::chfl_bond_order::CHFL_BOND_QUADRUPLE => BondOrder::Quadruple,
+            ffi::chfl_bond_order::CHFL_BOND_QUINTUPLET => BondOrder::Quintuplet,
+            ffi::chfl_bond_order::CHFL_BOND_AMIDE => BondOrder::Amide,
+            ffi::chfl_bond_order::CHFL_BOND_AROMATIC => BondOrder::Aromatic,
         }
     }
 }
@@ -67,7 +67,7 @@ impl From<chfl_bond_order> for BondOrder {
 /// also contain all the residues information if it is available.
 #[derive(Debug)]
 pub struct Topology {
-    handle: *mut CHFL_TOPOLOGY,
+    handle: *mut ffi::CHFL_TOPOLOGY,
 }
 
 /// An analog to a reference to a topology (`&Topology`)
@@ -87,7 +87,7 @@ impl<'a> Deref for TopologyRef<'a> {
 impl Clone for Topology {
     fn clone(&self) -> Topology {
         unsafe {
-            let new_handle = chfl_topology_copy(self.as_ptr());
+            let new_handle = ffi::chfl_topology_copy(self.as_ptr());
             Topology::from_ptr(new_handle)
         }
     }
@@ -99,7 +99,7 @@ impl Topology {
     /// This function is unsafe because no validity check is made on the pointer,
     /// except for it being non-null.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TOPOLOGY) -> Topology {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::CHFL_TOPOLOGY) -> Topology {
         check_not_null(ptr);
         Topology { handle: ptr }
     }
@@ -110,22 +110,23 @@ impl Topology {
     /// pointer, except for it being non-null, and the caller is responsible
     /// for setting the right lifetime
     #[inline]
-    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_TOPOLOGY) -> TopologyRef<'a> {
+    #[allow(clippy::ptr_cast_constness)]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const ffi::CHFL_TOPOLOGY) -> TopologyRef<'a> {
         TopologyRef {
-            inner: Topology::from_ptr(ptr as *mut CHFL_TOPOLOGY),
+            inner: Topology::from_ptr(ptr as *mut ffi::CHFL_TOPOLOGY),
             marker: PhantomData,
         }
     }
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_TOPOLOGY {
+    pub(crate) fn as_ptr(&self) -> *const ffi::CHFL_TOPOLOGY {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_TOPOLOGY {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut ffi::CHFL_TOPOLOGY {
         self.handle
     }
 
@@ -136,7 +137,7 @@ impl Topology {
     /// mutable borrows
     #[inline]
     #[allow(non_snake_case)]
-    pub(crate) fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut CHFL_TOPOLOGY {
+    pub(crate) fn as_mut_ptr_MANUALLY_CHECKING_BORROW(&self) -> *mut ffi::CHFL_TOPOLOGY {
         self.handle
     }
 
@@ -149,7 +150,7 @@ impl Topology {
     /// assert_eq!(topology.size(), 0);
     /// ```
     pub fn new() -> Topology {
-        unsafe { Topology::from_ptr(chfl_topology()) }
+        unsafe { Topology::from_ptr(ffi::chfl_topology()) }
     }
 
     /// Get a reference of the atom at the given `index` in this topology.
@@ -169,7 +170,7 @@ impl Topology {
     /// ```
     pub fn atom(&self, index: usize) -> AtomRef {
         unsafe {
-            let handle = chfl_atom_from_topology(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
+            let handle = ffi::chfl_atom_from_topology(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
         }
     }
@@ -193,7 +194,7 @@ impl Topology {
     /// ```
     pub fn atom_mut(&mut self, index: usize) -> AtomMut {
         unsafe {
-            let handle = chfl_atom_from_topology(self.as_mut_ptr(), index as u64);
+            let handle = ffi::chfl_atom_from_topology(self.as_mut_ptr(), index as u64);
             Atom::ref_mut_from_ptr(handle)
         }
     }
@@ -212,7 +213,7 @@ impl Topology {
     pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
-            check_success(chfl_topology_atoms_count(self.as_ptr(), &mut size));
+            check_success(ffi::chfl_topology_atoms_count(self.as_ptr(), &mut size));
         }
         #[allow(clippy::cast_possible_truncation)]
         return size as usize;
@@ -232,7 +233,7 @@ impl Topology {
     /// ```
     pub fn resize(&mut self, natoms: usize) {
         unsafe {
-            check_success(chfl_topology_resize(self.as_mut_ptr(), natoms as u64));
+            check_success(ffi::chfl_topology_resize(self.as_mut_ptr(), natoms as u64));
         }
     }
 
@@ -249,7 +250,7 @@ impl Topology {
     /// ```
     pub fn add_atom(&mut self, atom: &Atom) {
         unsafe {
-            check_success(chfl_topology_add_atom(self.as_mut_ptr(), atom.as_ptr()));
+            check_success(ffi::chfl_topology_add_atom(self.as_mut_ptr(), atom.as_ptr()));
         }
     }
 
@@ -272,7 +273,7 @@ impl Topology {
     /// ```
     pub fn remove(&mut self, index: usize) {
         unsafe {
-            check_success(chfl_topology_remove(self.as_mut_ptr(), index as u64));
+            check_success(ffi::chfl_topology_remove(self.as_mut_ptr(), index as u64));
         }
     }
 
@@ -293,7 +294,7 @@ impl Topology {
     pub fn bonds_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(chfl_topology_bonds_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_bonds_count(self.as_ptr(), &mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -316,7 +317,7 @@ impl Topology {
     pub fn angles_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(chfl_topology_angles_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_angles_count(self.as_ptr(), &mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -339,7 +340,7 @@ impl Topology {
     pub fn dihedrals_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(chfl_topology_dihedrals_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_dihedrals_count(self.as_ptr(), &mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -362,7 +363,7 @@ impl Topology {
     pub fn impropers_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(chfl_topology_impropers_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_impropers_count(self.as_ptr(), &mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -386,7 +387,7 @@ impl Topology {
         let count = size as u64;
         let mut bonds = vec![[u64::max_value(); 2]; size];
         unsafe {
-            check_success(chfl_topology_bonds(self.as_ptr(), bonds.as_mut_ptr(), count));
+            check_success(ffi::chfl_topology_bonds(self.as_ptr(), bonds.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return bonds
@@ -413,7 +414,7 @@ impl Topology {
         let count = size as u64;
         let mut angles = vec![[u64::max_value(); 3]; size];
         unsafe {
-            check_success(chfl_topology_angles(self.as_ptr(), angles.as_mut_ptr(), count));
+            check_success(ffi::chfl_topology_angles(self.as_ptr(), angles.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return angles
@@ -441,7 +442,11 @@ impl Topology {
         let count = size as u64;
         let mut dihedrals = vec![[u64::max_value(); 4]; size];
         unsafe {
-            check_success(chfl_topology_dihedrals(self.as_ptr(), dihedrals.as_mut_ptr(), count));
+            check_success(ffi::chfl_topology_dihedrals(
+                self.as_ptr(),
+                dihedrals.as_mut_ptr(),
+                count,
+            ));
         }
         #[allow(clippy::cast_possible_truncation)]
         return dihedrals
@@ -476,7 +481,11 @@ impl Topology {
         let count = size as u64;
         let mut impropers = vec![[u64::max_value(); 4]; size];
         unsafe {
-            check_success(chfl_topology_impropers(self.as_ptr(), impropers.as_mut_ptr(), count));
+            check_success(ffi::chfl_topology_impropers(
+                self.as_ptr(),
+                impropers.as_mut_ptr(),
+                count,
+            ));
         }
         #[allow(clippy::cast_possible_truncation)]
         return impropers
@@ -512,7 +521,7 @@ impl Topology {
     /// ```
     pub fn clear_bonds(&mut self) {
         unsafe {
-            check_success(chfl_topology_clear_bonds(self.as_mut_ptr()));
+            check_success(ffi::chfl_topology_clear_bonds(self.as_mut_ptr()));
         }
     }
 
@@ -535,7 +544,7 @@ impl Topology {
     /// ```
     pub fn add_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_topology_add_bond(self.as_mut_ptr(), i as u64, j as u64));
+            check_success(ffi::chfl_topology_add_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -554,7 +563,7 @@ impl Topology {
     /// ```
     pub fn add_bond_with_order(&mut self, i: usize, j: usize, order: BondOrder) {
         unsafe {
-            check_success(chfl_topology_bond_with_order(
+            check_success(ffi::chfl_topology_bond_with_order(
                 self.as_mut_ptr(),
                 i as u64,
                 j as u64,
@@ -577,9 +586,14 @@ impl Topology {
     /// assert_eq!(topology.bond_order(0, 1), BondOrder::Double);
     /// ```
     pub fn bond_order(&self, i: usize, j: usize) -> BondOrder {
-        let mut order = chfl_bond_order::CHFL_BOND_UNKNOWN;
+        let mut order = ffi::chfl_bond_order::CHFL_BOND_UNKNOWN;
         unsafe {
-            check_success(chfl_topology_bond_order(self.as_ptr(), i as u64, j as u64, &mut order));
+            check_success(ffi::chfl_topology_bond_order(
+                self.as_ptr(),
+                i as u64,
+                j as u64,
+                &mut order,
+            ));
         }
         return order.into();
     }
@@ -603,9 +617,9 @@ impl Topology {
         let count = size as u64;
         let mut bonds = vec![BondOrder::Unknown; size];
         unsafe {
-            check_success(chfl_topology_bond_orders(
+            check_success(ffi::chfl_topology_bond_orders(
                 self.as_ptr(),
-                // Casting BondOrder to chfl_bond_order is safe, as they are
+                // Casting BondOrder to ffi::chfl_bond_order is safe, as they are
                 // both `repr(C)` enums with the same values.
                 bonds.as_mut_ptr().cast(),
                 count,
@@ -639,7 +653,7 @@ impl Topology {
     /// ```
     pub fn remove_bond(&mut self, i: usize, j: usize) {
         unsafe {
-            check_success(chfl_topology_remove_bond(self.as_mut_ptr(), i as u64, j as u64));
+            check_success(ffi::chfl_topology_remove_bond(self.as_mut_ptr(), i as u64, j as u64));
         }
     }
 
@@ -659,7 +673,7 @@ impl Topology {
     /// ```
     pub fn residue(&self, index: usize) -> Option<ResidueRef> {
         unsafe {
-            let handle = chfl_residue_from_topology(self.as_ptr(), index as u64);
+            let handle = ffi::chfl_residue_from_topology(self.as_ptr(), index as u64);
             if handle.is_null() {
                 None
             } else {
@@ -689,7 +703,7 @@ impl Topology {
     /// assert!(topology.residue_for_atom(6).is_none());
     /// ```
     pub fn residue_for_atom(&self, index: usize) -> Option<ResidueRef> {
-        let handle = unsafe { chfl_residue_for_atom(self.as_ptr(), index as u64) };
+        let handle = unsafe { ffi::chfl_residue_for_atom(self.as_ptr(), index as u64) };
         if handle.is_null() {
             None
         } else {
@@ -712,7 +726,7 @@ impl Topology {
     pub fn residues_count(&self) -> u64 {
         let mut count = 0;
         unsafe {
-            check_success(chfl_topology_residues_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_residues_count(self.as_ptr(), &mut count));
         }
         return count;
     }
@@ -734,7 +748,7 @@ impl Topology {
     /// assert_eq!(residue.name(), "water");
     /// ```
     pub fn add_residue(&mut self, residue: &Residue) -> Result<(), Error> {
-        unsafe { check(chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())) }
+        unsafe { check(ffi::chfl_topology_add_residue(self.as_mut_ptr(), residue.as_ptr())) }
     }
 
     /// Check if the two residues `first` and `second` from the `topology` are
@@ -756,7 +770,7 @@ impl Topology {
     pub fn are_linked(&self, first: &Residue, second: &Residue) -> bool {
         let mut linked = 0;
         unsafe {
-            check_success(chfl_topology_residues_linked(
+            check_success(ffi::chfl_topology_residues_linked(
                 self.as_ptr(),
                 first.as_ptr(),
                 second.as_ptr(),
@@ -770,7 +784,7 @@ impl Topology {
 impl Drop for Topology {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _ = ffi::chfl_free(self.as_ptr().cast());
         }
     }
 }

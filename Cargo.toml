@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles"
-version = "0.10.4"
+version = "0.10.40"
 edition = "2021"
 authors = ["Guillaume Fraux <guillaume.fraux@epfl.ch>"]
 documentation = "http://chemfiles.org/chemfiles.rs/"
@@ -16,10 +16,10 @@ exclude = ["data/*"]
 name = "chemfiles"
 
 [dependencies]
-chemfiles-sys = {path = "chemfiles-sys", version = "0.10.4"}
+chemfiles-sys = {path = "chemfiles-sys", version = "0.10.40"}
 
 [dev-dependencies]
-approx = "0.4"
+approx = "0.5"
 
 [features]
 # force a build from sources even if there is a matching pre-built version
