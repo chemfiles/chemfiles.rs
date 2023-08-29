@@ -15,7 +15,7 @@ Add this to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-chemfiles = "0.9"
+chemfiles = "0.10"
 ```
 
 Here is a simple usage example. See the `examples` folder for additional
