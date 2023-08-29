@@ -18,14 +18,6 @@ jobs:
             os: ubuntu-20.04
             rust-version: stable
             rust-target: x86_64-unknown-linux-gnu
-          - name: Linux (beta rustc)
-            os: ubuntu-20.04
-            rust-version: beta
-            rust-target: x86_64-unknown-linux-gnu
-          - name: 32-bit MSVC Windows
-            os: windows-2019
-            rust-version: stable
-            rust-target: i686-pc-windows-msvc
           - name: 64-bit MSVC Windows
             os: windows-2019
             rust-version: stable

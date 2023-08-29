@@ -1,6 +1,6 @@
 [package]
 name = "chemfiles-sys"
-version = "0.10.4"
+version = "0.10.40"
 edition = "2021"
 authors = ["Guillaume Fraux <guillaume.fraux@epfl.ch>"]
 links = "chemfiles"

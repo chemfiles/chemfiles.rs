@@ -18,10 +18,7 @@ fn build_chemfiles() -> PathBuf {
     }
 
     let mut cmake = cmake::Config::new(".");
-    cmake.define(
-        "CHEMFILES_VERSION",
-        std::env::var("CARGO_PKG_VERSION").expect("cargo should set CARGO_PKG_VERSION"),
-    );
+    cmake.define("CHEMFILES_VERSION", "0.10.4");
 
     let target = std::env::var("TARGET").expect("cargo should set TARGET");
     if !cfg!(feature = "build-from-sources") {

@@ -50,6 +50,10 @@ pub fn get_prebuilt_info(target: &str) -> Option<(&'static str, &'static str)> {
             "x86_64-linux-musl",
             "afc7db8d2b4e5c55197d46cfb7453cb650e99162972290d7cd27b48d375b8512",
         )),
+        "x86_64-pc-windows-msvc" => Some((
+            "x86_64-pc-windows-msvc",
+            "8ad4077c3f440566cb2a8455b646939662e679b323866339a91cec0a334c6168",
+        )),
         "x86_64-unknown-freebsd" => Some((
             "x86_64-unknown-freebsd",
             "f5b31e7b8aa4d17c14f343aaddfddf5a43125f26358b9823a4c386facbf099ee",
