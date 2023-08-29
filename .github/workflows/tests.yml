@@ -9,8 +9,7 @@ on:
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
-    env:
-      KCOV_VERSION: c18c77531f3fc00440571a9a04dd33ee4fcd4c39
+    name: ${{ matrix.name }}
     strategy:
       matrix:
         include:
@@ -18,7 +17,11 @@ jobs:
             os: ubuntu-20.04
             rust-version: stable
             rust-target: x86_64-unknown-linux-gnu
-          - name: 64-bit MSVC Windows
+          - name: rustc 1.63
+            os: ubuntu-20.04
+            rust-version: "1.63"
+            rust-target: x86_64-unknown-linux-gnu
+          - name: Windows MSVC
             os: windows-2019
             rust-version: stable
             rust-target: x86_64-pc-windows-msvc
@@ -35,27 +38,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: cache kcov
-        uses: actions/cache@v3
-        if: matrix.os == 'ubuntu-20.04'
-        with:
-          path: ~/kcov/
-          key: ${{ runner.os }}-kcov-${{ env.KCOV_VERSION }}
-      - name: build kcov
-        if: matrix.os == 'ubuntu-20.04'
-        run: |
-          sudo apt update
-          sudo apt install libcurl4-openssl-dev libelf-dev libdw-dev
-          if [ -f ~/kcov/bin/kcov ]; then
-              echo "Using cached kcov from ~/kcov/bin/kcov"
-          else
-              mkdir -p ~/kcov
-              cd
-              wget https://github.com/SimonKagstrom/kcov/archive/${KCOV_VERSION}.tar.gz
-              tar xzf ${KCOV_VERSION}.tar.gz && mkdir kcov-${KCOV_VERSION}/build && cd kcov-${KCOV_VERSION}/build
-              cmake -DCMAKE_INSTALL_PREFIX=$HOME/kcov ..
-              make install -j4
-          fi
       - name: setup rust
         uses: dtolnay/rust-toolchain@master
         with:
@@ -66,18 +48,32 @@ jobs:
       - name: run tests in release mode
         run: cargo test --all --release --target ${{ matrix.rust-target }} -- --test-threads=2
       - name: run extra checks
-        run: |
-          ./scripts/check-used-functions.py
+        run: ./scripts/check-used-functions.py
+
+  coverage:
+    runs-on: ubuntu-20.04
+    env:
+      KCOV_VERSION: c18c77531f3fc00440571a9a04dd33ee4fcd4c39
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: setup rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: install cargo tarpaulin
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin
+
       - name: collect coverage
-        if: matrix.os == 'ubuntu-20.04'
         run: |
-          mkdir target/kcov
-          for test in $(find target/${{ matrix.rust-target }}/debug/deps/ -maxdepth 1 -executable -type f)
-          do
-              ~/kcov/bin/kcov --include-pattern=$(pwd)/src --exclude-pattern=target target/kcov $test
-          done
+          cargo tarpaulin --out Xml
+
       - uses: codecov/codecov-action@v3
-        if: matrix.os == 'ubuntu-20.04'
         with:
           fail_ci_if_error: true
           verbose: true
