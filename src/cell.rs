@@ -2,7 +2,8 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
 
-use chemfiles_sys::*;
+#[allow(clippy::wildcard_imports)]
+use chemfiles_sys as ffi;
 
 use crate::errors::{check, check_not_null, check_success, Error};
 
@@ -17,22 +18,22 @@ pub enum CellShape {
     Infinite,
 }
 
-impl From<chfl_cellshape> for CellShape {
-    fn from(celltype: chfl_cellshape) -> CellShape {
+impl From<ffi::chfl_cellshape> for CellShape {
+    fn from(celltype: ffi::chfl_cellshape) -> CellShape {
         match celltype {
-            chfl_cellshape::CHFL_CELL_ORTHORHOMBIC => CellShape::Orthorhombic,
-            chfl_cellshape::CHFL_CELL_TRICLINIC => CellShape::Triclinic,
-            chfl_cellshape::CHFL_CELL_INFINITE => CellShape::Infinite,
+            ffi::chfl_cellshape::CHFL_CELL_ORTHORHOMBIC => CellShape::Orthorhombic,
+            ffi::chfl_cellshape::CHFL_CELL_TRICLINIC => CellShape::Triclinic,
+            ffi::chfl_cellshape::CHFL_CELL_INFINITE => CellShape::Infinite,
         }
     }
 }
 
-impl From<CellShape> for chfl_cellshape {
-    fn from(celltype: CellShape) -> chfl_cellshape {
+impl From<CellShape> for ffi::chfl_cellshape {
+    fn from(celltype: CellShape) -> ffi::chfl_cellshape {
         match celltype {
-            CellShape::Orthorhombic => chfl_cellshape::CHFL_CELL_ORTHORHOMBIC,
-            CellShape::Triclinic => chfl_cellshape::CHFL_CELL_TRICLINIC,
-            CellShape::Infinite => chfl_cellshape::CHFL_CELL_INFINITE,
+            CellShape::Orthorhombic => ffi::chfl_cellshape::CHFL_CELL_ORTHORHOMBIC,
+            CellShape::Triclinic => ffi::chfl_cellshape::CHFL_CELL_TRICLINIC,
+            CellShape::Infinite => ffi::chfl_cellshape::CHFL_CELL_INFINITE,
         }
     }
 }
@@ -54,7 +55,7 @@ impl From<CellShape> for chfl_cellshape {
 /// ```
 #[derive(Debug)]
 pub struct UnitCell {
-    handle: *mut CHFL_CELL,
+    handle: *mut ffi::CHFL_CELL,
 }
 
 /// An analog to a reference to an unit cell (`&UnitCell`)
@@ -94,7 +95,7 @@ impl<'a> std::ops::DerefMut for UnitCellMut<'a> {
 impl Clone for UnitCell {
     fn clone(&self) -> UnitCell {
         unsafe {
-            let new_handle = chfl_cell_copy(self.as_ptr());
+            let new_handle = ffi::chfl_cell_copy(self.as_ptr());
             UnitCell::from_ptr(new_handle)
         }
     }
@@ -105,7 +106,7 @@ impl UnitCell {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_CELL) -> UnitCell {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::CHFL_CELL) -> UnitCell {
         check_not_null(ptr);
         UnitCell { handle: ptr }
     }
@@ -115,9 +116,10 @@ impl UnitCell {
     /// This function is unsafe because no validity check is made on the
     /// pointer, and the caller is responsible for setting the right lifetime.
     #[inline]
-    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_CELL) -> UnitCellRef<'a> {
+    #[allow(clippy::ptr_cast_constness)]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const ffi::CHFL_CELL) -> UnitCellRef<'a> {
         UnitCellRef {
-            inner: UnitCell::from_ptr(ptr as *mut CHFL_CELL),
+            inner: UnitCell::from_ptr(ptr as *mut ffi::CHFL_CELL),
             marker: PhantomData,
         }
     }
@@ -128,7 +130,7 @@ impl UnitCell {
     /// pointer, except for it being non-null, and the caller is responsible for
     /// setting the right lifetime
     #[inline]
-    pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut CHFL_CELL) -> UnitCellMut<'a> {
+    pub(crate) unsafe fn ref_mut_from_ptr<'a>(ptr: *mut ffi::CHFL_CELL) -> UnitCellMut<'a> {
         UnitCellMut {
             inner: UnitCell::from_ptr(ptr),
             marker: PhantomData,
@@ -137,13 +139,13 @@ impl UnitCell {
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_CELL {
+    pub(crate) fn as_ptr(&self) -> *const ffi::CHFL_CELL {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_CELL {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut ffi::CHFL_CELL {
         self.handle
     }
 
@@ -160,7 +162,7 @@ impl UnitCell {
     /// ```
     pub fn new(lengths: [f64; 3]) -> UnitCell {
         unsafe {
-            let handle = chfl_cell(lengths.as_ptr(), std::ptr::null());
+            let handle = ffi::chfl_cell(lengths.as_ptr(), std::ptr::null());
             UnitCell::from_ptr(handle)
         }
     }
@@ -201,7 +203,7 @@ impl UnitCell {
     /// ```
     pub fn triclinic(lengths: [f64; 3], angles: [f64; 3]) -> UnitCell {
         unsafe {
-            let handle = chfl_cell(lengths.as_ptr(), angles.as_ptr());
+            let handle = ffi::chfl_cell(lengths.as_ptr(), angles.as_ptr());
             UnitCell::from_ptr(handle)
         }
     }
@@ -229,7 +231,7 @@ impl UnitCell {
     /// ```
     pub fn from_matrix(mut matrix: [[f64; 3]; 3]) -> UnitCell {
         unsafe {
-            let handle = chfl_cell_from_matrix(matrix.as_mut_ptr());
+            let handle = ffi::chfl_cell_from_matrix(matrix.as_mut_ptr());
             UnitCell::from_ptr(handle)
         }
     }
@@ -245,7 +247,7 @@ impl UnitCell {
     pub fn lengths(&self) -> [f64; 3] {
         let mut lengths = [0.0; 3];
         unsafe {
-            check_success(chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr()));
+            check_success(ffi::chfl_cell_lengths(self.as_ptr(), lengths.as_mut_ptr()));
         }
         return lengths;
     }
@@ -268,7 +270,7 @@ impl UnitCell {
     /// assert!(UnitCell::infinite().set_lengths([1.0, 1.0, 1.0]).is_err());
     /// ```
     pub fn set_lengths(&mut self, lengths: [f64; 3]) -> Result<(), Error> {
-        unsafe { check(chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())) }
+        unsafe { check(ffi::chfl_cell_set_lengths(self.as_mut_ptr(), lengths.as_ptr())) }
     }
 
     /// Get the three angles of the cell, in degrees.
@@ -288,7 +290,7 @@ impl UnitCell {
     pub fn angles(&self) -> [f64; 3] {
         let mut angles = [0.0; 3];
         unsafe {
-            check_success(chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr()));
+            check_success(ffi::chfl_cell_angles(self.as_ptr(), angles.as_mut_ptr()));
         }
         return angles;
     }
@@ -312,7 +314,7 @@ impl UnitCell {
     /// assert_eq!(cell.angles(), [90.0, 90.0, 90.0]);
     /// ```
     pub fn set_angles(&mut self, angles: [f64; 3]) -> Result<(), Error> {
-        unsafe { check(chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())) }
+        unsafe { check(ffi::chfl_cell_set_angles(self.as_mut_ptr(), angles.as_ptr())) }
     }
 
     /// Get the unit cell matricial representation.
@@ -343,7 +345,7 @@ impl UnitCell {
     pub fn matrix(&self) -> [[f64; 3]; 3] {
         let mut matrix = [[0.0; 3]; 3];
         unsafe {
-            check_success(chfl_cell_matrix(self.as_ptr(), matrix.as_mut_ptr()));
+            check_success(ffi::chfl_cell_matrix(self.as_ptr(), matrix.as_mut_ptr()));
         }
         return matrix;
     }
@@ -357,9 +359,9 @@ impl UnitCell {
     /// assert_eq!(cell.shape(), CellShape::Orthorhombic);
     /// ```
     pub fn shape(&self) -> CellShape {
-        let mut shape = chfl_cellshape::CHFL_CELL_INFINITE;
+        let mut shape = ffi::chfl_cellshape::CHFL_CELL_INFINITE;
         unsafe {
-            check_success(chfl_cell_shape(self.as_ptr(), &mut shape));
+            check_success(ffi::chfl_cell_shape(self.as_ptr(), &mut shape));
         }
         return CellShape::from(shape);
     }
@@ -381,7 +383,7 @@ impl UnitCell {
     /// assert_eq!(cell.shape(), CellShape::Triclinic);
     /// ```
     pub fn set_shape(&mut self, shape: CellShape) -> Result<(), Error> {
-        unsafe { check(chfl_cell_set_shape(self.as_mut_ptr(), shape.into())) }
+        unsafe { check(ffi::chfl_cell_set_shape(self.as_mut_ptr(), shape.into())) }
     }
 
     /// Get the volume of the unit cell.
@@ -395,7 +397,7 @@ impl UnitCell {
     pub fn volume(&self) -> f64 {
         let mut volume = 0.0;
         unsafe {
-            check_success(chfl_cell_volume(self.as_ptr(), &mut volume));
+            check_success(ffi::chfl_cell_volume(self.as_ptr(), &mut volume));
         }
         return volume;
     }
@@ -413,7 +415,7 @@ impl UnitCell {
     /// ```
     pub fn wrap(&self, vector: &mut [f64; 3]) {
         unsafe {
-            check_success(chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr()));
+            check_success(ffi::chfl_cell_wrap(self.as_ptr(), vector.as_mut_ptr()));
         }
     }
 }
@@ -421,7 +423,7 @@ impl UnitCell {
 impl Drop for UnitCell {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _ = ffi::chfl_free(self.as_ptr().cast());
         }
     }
 }

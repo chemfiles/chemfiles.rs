@@ -4,7 +4,7 @@ use std::os::raw::c_char;
 use std::panic::{self, RefUnwindSafe};
 use std::path::Path;
 
-use chemfiles_sys::*;
+use chemfiles_sys as ffi;
 
 use crate::strings;
 
@@ -23,43 +23,43 @@ pub struct Error {
 /// Possible causes of error in chemfiles
 pub enum Status {
     /// No error
-    Success = chfl_status::CHFL_SUCCESS as isize,
+    Success = ffi::chfl_status::CHFL_SUCCESS as isize,
     /// Error in memory allocations
-    MemoryError = chfl_status::CHFL_MEMORY_ERROR as isize,
+    MemoryError = ffi::chfl_status::CHFL_MEMORY_ERROR as isize,
     /// Error while reading or writing a file
-    FileError = chfl_status::CHFL_FILE_ERROR as isize,
+    FileError = ffi::chfl_status::CHFL_FILE_ERROR as isize,
     /// Error in file formatting, *i.e.* the file is invalid
-    FormatError = chfl_status::CHFL_FORMAT_ERROR as isize,
+    FormatError = ffi::chfl_status::CHFL_FORMAT_ERROR as isize,
     /// Error in selection string syntax
-    SelectionError = chfl_status::CHFL_SELECTION_ERROR as isize,
+    SelectionError = ffi::chfl_status::CHFL_SELECTION_ERROR as isize,
     /// Error in configuration files syntax
-    ConfigurationError = chfl_status::CHFL_CONFIGURATION_ERROR as isize,
+    ConfigurationError = ffi::chfl_status::CHFL_CONFIGURATION_ERROR as isize,
     /// Error for out of bounds indexing
-    OutOfBounds = chfl_status::CHFL_OUT_OF_BOUNDS as isize,
+    OutOfBounds = ffi::chfl_status::CHFL_OUT_OF_BOUNDS as isize,
     /// Error related to properties
-    PropertyError = chfl_status::CHFL_PROPERTY_ERROR as isize,
+    PropertyError = ffi::chfl_status::CHFL_PROPERTY_ERROR as isize,
     /// Exception in the C++ chemfiles library
-    ChemfilesError = chfl_status::CHFL_GENERIC_ERROR as isize,
+    ChemfilesError = ffi::chfl_status::CHFL_GENERIC_ERROR as isize,
     /// Exception in the C++ standard library
-    StdCppError = chfl_status::CHFL_CXX_ERROR as isize,
+    StdCppError = ffi::chfl_status::CHFL_CXX_ERROR as isize,
     /// The given path is not valid UTF8
     // TODO: rename this to UTF8Error in the next breaking release
     UTF8PathError,
 }
 
-impl From<chfl_status> for Error {
-    fn from(status: chfl_status) -> Error {
+impl From<ffi::chfl_status> for Error {
+    fn from(status: ffi::chfl_status) -> Error {
         let status = match status {
-            chfl_status::CHFL_SUCCESS => Status::Success,
-            chfl_status::CHFL_CXX_ERROR => Status::StdCppError,
-            chfl_status::CHFL_GENERIC_ERROR => Status::ChemfilesError,
-            chfl_status::CHFL_MEMORY_ERROR => Status::MemoryError,
-            chfl_status::CHFL_FILE_ERROR => Status::FileError,
-            chfl_status::CHFL_FORMAT_ERROR => Status::FormatError,
-            chfl_status::CHFL_SELECTION_ERROR => Status::SelectionError,
-            chfl_status::CHFL_CONFIGURATION_ERROR => Status::ConfigurationError,
-            chfl_status::CHFL_OUT_OF_BOUNDS => Status::OutOfBounds,
-            chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
+            ffi::chfl_status::CHFL_SUCCESS => Status::Success,
+            ffi::chfl_status::CHFL_CXX_ERROR => Status::StdCppError,
+            ffi::chfl_status::CHFL_GENERIC_ERROR => Status::ChemfilesError,
+            ffi::chfl_status::CHFL_MEMORY_ERROR => Status::MemoryError,
+            ffi::chfl_status::CHFL_FILE_ERROR => Status::FileError,
+            ffi::chfl_status::CHFL_FORMAT_ERROR => Status::FormatError,
+            ffi::chfl_status::CHFL_SELECTION_ERROR => Status::SelectionError,
+            ffi::chfl_status::CHFL_CONFIGURATION_ERROR => Status::ConfigurationError,
+            ffi::chfl_status::CHFL_OUT_OF_BOUNDS => Status::OutOfBounds,
+            ffi::chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
 
         let message = Error::last_error();
@@ -87,20 +87,20 @@ impl Error {
 
     /// Get the last error message from the C++ library.
     pub fn last_error() -> String {
-        unsafe { strings::from_c(chfl_last_error()) }
+        unsafe { strings::from_c(ffi::chfl_last_error()) }
     }
 
     /// Clear any error from the C++ library
     pub fn cleanup() {
         unsafe {
-            check(chfl_clear_errors()).expect("error in chfl_clear_errors. Things went very bad");
+            check(ffi::chfl_clear_errors()).expect("error in ffi::chfl_clear_errors. Things went very bad");
         }
     }
 }
 
 /// Check return value of a C function, and get the error if needed.
-pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
-    if status == chfl_status::CHFL_SUCCESS {
+pub(crate) fn check(status: ffi::chfl_status) -> Result<(), Error> {
+    if status == ffi::chfl_status::CHFL_SUCCESS {
         Ok(())
     } else {
         Err(Error::from(status))
@@ -108,9 +108,9 @@ pub(crate) fn check(status: chfl_status) -> Result<(), Error> {
 }
 
 /// Check return value of a C function, panic if it failed.
-pub(crate) fn check_success(status: chfl_status) {
+pub(crate) fn check_success(status: ffi::chfl_status) {
     assert!(
-        status == chfl_status::CHFL_SUCCESS,
+        status == ffi::chfl_status::CHFL_SUCCESS,
         "unexpected failure: {}",
         Error::last_error()
     );
@@ -155,7 +155,7 @@ where
             // set the LOGGING_CALLBACK
             LOGGING_CALLBACK = Some(callback);
             // Tell C code to use Rust-provided callback
-            check_success(chfl_set_warning_callback(warning_callback));
+            check_success(ffi::chfl_set_warning_callback(warning_callback));
         }
     }
 }
@@ -204,22 +204,34 @@ mod test {
 
     #[test]
     fn codes() {
-        assert_eq!(Error::from(chfl_status::CHFL_SUCCESS).status, Status::Success);
-        assert_eq!(Error::from(chfl_status::CHFL_CXX_ERROR).status, Status::StdCppError);
+        assert_eq!(Error::from(ffi::chfl_status::CHFL_SUCCESS).status, Status::Success);
         assert_eq!(
-            Error::from(chfl_status::CHFL_GENERIC_ERROR).status,
+            Error::from(ffi::chfl_status::CHFL_CXX_ERROR).status,
+            Status::StdCppError
+        );
+        assert_eq!(
+            Error::from(ffi::chfl_status::CHFL_GENERIC_ERROR).status,
             Status::ChemfilesError
         );
-        assert_eq!(Error::from(chfl_status::CHFL_MEMORY_ERROR).status, Status::MemoryError);
-        assert_eq!(Error::from(chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
-        assert_eq!(Error::from(chfl_status::CHFL_FORMAT_ERROR).status, Status::FormatError);
         assert_eq!(
-            Error::from(chfl_status::CHFL_SELECTION_ERROR).status,
+            Error::from(ffi::chfl_status::CHFL_MEMORY_ERROR).status,
+            Status::MemoryError
+        );
+        assert_eq!(Error::from(ffi::chfl_status::CHFL_FILE_ERROR).status, Status::FileError);
+        assert_eq!(
+            Error::from(ffi::chfl_status::CHFL_FORMAT_ERROR).status,
+            Status::FormatError
+        );
+        assert_eq!(
+            Error::from(ffi::chfl_status::CHFL_SELECTION_ERROR).status,
             Status::SelectionError
         );
-        assert_eq!(Error::from(chfl_status::CHFL_OUT_OF_BOUNDS).status, Status::OutOfBounds);
         assert_eq!(
-            Error::from(chfl_status::CHFL_PROPERTY_ERROR).status,
+            Error::from(ffi::chfl_status::CHFL_OUT_OF_BOUNDS).status,
+            Status::OutOfBounds
+        );
+        assert_eq!(
+            Error::from(ffi::chfl_status::CHFL_PROPERTY_ERROR).status,
             Status::PropertyError
         );
     }

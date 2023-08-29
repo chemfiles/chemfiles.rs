@@ -2,7 +2,7 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
 
-use chemfiles_sys::*;
+use chemfiles_sys as ffi;
 
 use crate::errors::{check_not_null, check_success};
 use crate::property::{PropertiesIter, Property, RawProperty};
@@ -13,7 +13,7 @@ use crate::strings;
 /// *etc.*
 #[derive(Debug)]
 pub struct Residue {
-    handle: *mut CHFL_RESIDUE,
+    handle: *mut ffi::CHFL_RESIDUE,
 }
 
 /// An analog to a reference to a residue (`&Residue`)
@@ -33,7 +33,7 @@ impl<'a> std::ops::Deref for ResidueRef<'a> {
 impl Clone for Residue {
     fn clone(&self) -> Residue {
         unsafe {
-            let new_handle = chfl_residue_copy(self.as_ptr());
+            let new_handle = ffi::chfl_residue_copy(self.as_ptr());
             Residue::from_ptr(new_handle)
         }
     }
@@ -44,7 +44,7 @@ impl Residue {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_RESIDUE) -> Residue {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::CHFL_RESIDUE) -> Residue {
         check_not_null(ptr);
         Residue { handle: ptr }
     }
@@ -55,22 +55,23 @@ impl Residue {
     /// pointer, except for it being non-null, and the caller is responsible
     /// for setting the right lifetime
     #[inline]
-    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const CHFL_RESIDUE) -> ResidueRef<'a> {
+    #[allow(clippy::ptr_cast_constness)]
+    pub(crate) unsafe fn ref_from_ptr<'a>(ptr: *const ffi::CHFL_RESIDUE) -> ResidueRef<'a> {
         ResidueRef {
-            inner: Residue::from_ptr(ptr as *mut CHFL_RESIDUE),
+            inner: Residue::from_ptr(ptr as *mut ffi::CHFL_RESIDUE),
             marker: PhantomData,
         }
     }
 
     /// Get the underlying C pointer as a const pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_RESIDUE {
+    pub(crate) fn as_ptr(&self) -> *const ffi::CHFL_RESIDUE {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_RESIDUE {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut ffi::CHFL_RESIDUE {
         self.handle
     }
 
@@ -86,7 +87,7 @@ impl Residue {
     pub fn new<'a>(name: impl Into<&'a str>) -> Residue {
         let buffer = strings::to_c(name.into());
         unsafe {
-            let handle = chfl_residue(buffer.as_ptr());
+            let handle = ffi::chfl_residue(buffer.as_ptr());
             Residue::from_ptr(handle)
         }
     }
@@ -103,7 +104,7 @@ impl Residue {
     pub fn with_id<'a>(name: impl Into<&'a str>, id: i64) -> Residue {
         let buffer = strings::to_c(name.into());
         unsafe {
-            let handle = chfl_residue_with_id(buffer.as_ptr(), id);
+            let handle = ffi::chfl_residue_with_id(buffer.as_ptr(), id);
             Residue::from_ptr(handle)
         }
     }
@@ -124,7 +125,7 @@ impl Residue {
     pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
-            check_success(chfl_residue_atoms_count(self.as_ptr(), &mut size));
+            check_success(ffi::chfl_residue_atoms_count(self.as_ptr(), &mut size));
         }
         #[allow(clippy::cast_possible_truncation)]
         return size as usize;
@@ -140,11 +141,11 @@ impl Residue {
     /// ```
     pub fn id(&self) -> Option<i64> {
         let mut resid = 0;
-        let status = unsafe { chfl_residue_id(self.as_ptr(), &mut resid) };
+        let status = unsafe { ffi::chfl_residue_id(self.as_ptr(), &mut resid) };
 
-        if status == chfl_status::CHFL_SUCCESS {
+        if status == ffi::chfl_status::CHFL_SUCCESS {
             return Some(resid);
-        } else if status == chfl_status::CHFL_GENERIC_ERROR {
+        } else if status == ffi::chfl_status::CHFL_GENERIC_ERROR {
             return None;
         }
 
@@ -162,7 +163,7 @@ impl Residue {
     /// assert_eq!(residue.name(), "water");
     /// ```
     pub fn name(&self) -> String {
-        let get_name = |ptr, len| unsafe { chfl_residue_name(self.as_ptr(), ptr, len) };
+        let get_name = |ptr, len| unsafe { ffi::chfl_residue_name(self.as_ptr(), ptr, len) };
         let name = strings::call_autogrow_buffer(64, get_name).expect("getting residue name failed");
         return strings::from_c(name.as_ptr());
     }
@@ -188,7 +189,7 @@ impl Residue {
     /// ```
     pub fn add_atom(&mut self, atom: usize) {
         unsafe {
-            check_success(chfl_residue_add_atom(self.as_mut_ptr(), atom as u64));
+            check_success(ffi::chfl_residue_add_atom(self.as_mut_ptr(), atom as u64));
         }
     }
 
@@ -206,7 +207,7 @@ impl Residue {
     pub fn contains(&self, atom: usize) -> bool {
         let mut inside = 0;
         unsafe {
-            check_success(chfl_residue_contains(self.as_ptr(), atom as u64, &mut inside));
+            check_success(ffi::chfl_residue_contains(self.as_ptr(), atom as u64, &mut inside));
         }
         return inside != 0;
     }
@@ -227,7 +228,7 @@ impl Residue {
         let count = size as u64;
         let mut indices = vec![u64::max_value(); size];
         unsafe {
-            check_success(chfl_residue_atoms(self.as_ptr(), indices.as_mut_ptr(), count));
+            check_success(ffi::chfl_residue_atoms(self.as_ptr(), indices.as_mut_ptr(), count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return indices.into_iter().map(|idx| idx as usize).collect();
@@ -252,7 +253,7 @@ impl Residue {
         let buffer = strings::to_c(name);
         let property = property.into().as_raw();
         unsafe {
-            check_success(chfl_residue_set_property(
+            check_success(ffi::chfl_residue_set_property(
                 self.as_mut_ptr(),
                 buffer.as_ptr(),
                 property.as_ptr(),
@@ -274,7 +275,7 @@ impl Residue {
     pub fn get(&self, name: &str) -> Option<Property> {
         let buffer = strings::to_c(name);
         unsafe {
-            let handle = chfl_residue_get_property(self.as_ptr(), buffer.as_ptr());
+            let handle = ffi::chfl_residue_get_property(self.as_ptr(), buffer.as_ptr());
             if handle.is_null() {
                 None
             } else {
@@ -304,14 +305,18 @@ impl Residue {
     pub fn properties(&self) -> PropertiesIter {
         let mut count = 0;
         unsafe {
-            check_success(chfl_residue_properties_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_residue_properties_count(self.as_ptr(), &mut count));
         }
 
         #[allow(clippy::cast_possible_truncation)]
         let size = count as usize;
         let mut c_names = vec![std::ptr::null_mut(); size];
         unsafe {
-            check_success(chfl_residue_list_properties(self.as_ptr(), c_names.as_mut_ptr(), count));
+            check_success(ffi::chfl_residue_list_properties(
+                self.as_ptr(),
+                c_names.as_mut_ptr(),
+                count,
+            ));
         }
 
         let mut names = Vec::new();
@@ -329,7 +334,7 @@ impl Residue {
 impl Drop for Residue {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_free(self.as_ptr().cast());
+            let _ = ffi::chfl_free(self.as_ptr().cast());
         }
     }
 }

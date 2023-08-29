@@ -27,15 +27,14 @@
 // Configuration for clippy lints
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]
-#![allow(clippy::must_use_candidate, clippy::wildcard_imports)]
-#![allow(clippy::let_underscore_untyped, clippy::bool_to_int_with_if)]
+#![allow(clippy::missing_panics_doc, clippy::must_use_candidate)]
 // Allow a few more clippy lints in test mode
 #![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
 // deny(warnings) in doc tests
 #![doc(test(attr(deny(warnings))))]
 #![doc(test(attr(allow(unused_variables))))]
 
-use chemfiles_sys::{chfl_add_configuration, chfl_version};
+use chemfiles_sys as ffi;
 
 mod strings;
 
@@ -88,7 +87,7 @@ pub use self::misc::{formats_list, guess_format, FormatMetadata};
 /// assert!(version.starts_with("0.10"));
 /// ```
 pub fn version() -> String {
-    unsafe { strings::from_c(chfl_version()) }
+    unsafe { strings::from_c(ffi::chfl_version()) }
 }
 
 /// Read configuration data from the file at `path`.
@@ -113,7 +112,14 @@ where
     S: AsRef<str>,
 {
     let buffer = strings::to_c(path.as_ref());
-    unsafe { errors::check(chfl_add_configuration(buffer.as_ptr())) }
+    unsafe { errors::check(ffi::chfl_add_configuration(buffer.as_ptr())) }
+}
+
+#[cfg(test)]
+fn assert_vector3d_eq(lhs: &[f64; 3], rhs: &[f64; 3], eps: f64) {
+    lhs.iter()
+        .zip(rhs)
+        .for_each(|(l, r)| approx::assert_ulps_eq!(l, r, epsilon = eps));
 }
 
 #[cfg(test)]
@@ -123,11 +129,4 @@ mod tests {
         assert!(!crate::version().is_empty());
         assert!(crate::version().starts_with("0.10"));
     }
-}
-
-#[cfg(test)]
-fn assert_vector3d_eq(lhs: &[f64; 3], rhs: &[f64; 3], eps: f64) {
-    lhs.iter()
-        .zip(rhs)
-        .for_each(|(l, r)| approx::assert_ulps_eq!(l, r, epsilon = eps));
 }

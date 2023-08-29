@@ -7,8 +7,6 @@ use std::os::raw::c_char;
 
 use crate::errors::{check, Error};
 
-use chemfiles_sys::chfl_status;
-
 /// Create a Rust string from a C string. Clones all characters in `buffer`.
 pub fn from_c(buffer: *const c_char) -> String {
     unsafe {
@@ -43,7 +41,7 @@ fn buffer_was_big_enough(buffer: &[c_char]) -> bool {
 /// get all the data. Then return the filled buffer to the caller.
 pub fn call_autogrow_buffer<F>(initial: usize, callback: F) -> Result<Vec<c_char>, Error>
 where
-    F: Fn(*mut c_char, u64) -> chfl_status,
+    F: Fn(*mut c_char, u64) -> chemfiles_sys::chfl_status,
 {
     let mut size = initial;
     let mut buffer = vec![0; size];

@@ -4,7 +4,7 @@ use std::convert::TryInto;
 use std::os::raw::c_char;
 use std::path::Path;
 
-use chemfiles_sys::*;
+use chemfiles_sys as ffi;
 
 use crate::errors::{check, check_success, Error, Status};
 use crate::strings;
@@ -15,13 +15,13 @@ use crate::{Frame, Topology, UnitCell};
 /// `Frame`.
 #[derive(Debug)]
 pub struct Trajectory {
-    handle: *mut CHFL_TRAJECTORY,
+    handle: *mut ffi::CHFL_TRAJECTORY,
 }
 
 impl Drop for Trajectory {
     fn drop(&mut self) {
         unsafe {
-            let _ = chfl_trajectory_close(self.as_ptr());
+            let _ = ffi::chfl_trajectory_close(self.as_ptr());
         }
     }
 }
@@ -31,7 +31,7 @@ impl Trajectory {
     ///
     /// This function is unsafe because no validity check is made on the pointer.
     #[inline]
-    pub(crate) unsafe fn from_ptr(ptr: *mut CHFL_TRAJECTORY) -> Result<Trajectory, Error> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::CHFL_TRAJECTORY) -> Result<Trajectory, Error> {
         if ptr.is_null() {
             Err(Error {
                 status: Status::FileError,
@@ -44,13 +44,13 @@ impl Trajectory {
 
     /// Get the underlying C pointer as a pointer.
     #[inline]
-    pub(crate) fn as_ptr(&self) -> *const CHFL_TRAJECTORY {
+    pub(crate) fn as_ptr(&self) -> *const ffi::CHFL_TRAJECTORY {
         self.handle
     }
 
     /// Get the underlying C pointer as a mutable pointer.
     #[inline]
-    pub(crate) fn as_mut_ptr(&mut self) -> *mut CHFL_TRAJECTORY {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut ffi::CHFL_TRAJECTORY {
         self.handle
     }
 
@@ -81,7 +81,7 @@ impl Trajectory {
         let path = strings::to_c(path);
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
-            let handle = chfl_trajectory_open(path.as_ptr(), mode as c_char);
+            let handle = ffi::chfl_trajectory_open(path.as_ptr(), mode as c_char);
             Trajectory::from_ptr(handle)
         }
     }
@@ -121,7 +121,7 @@ impl Trajectory {
         let format = strings::to_c(format.into());
         unsafe {
             #[allow(clippy::cast_possible_wrap)]
-            let handle = chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
+            let handle = ffi::chfl_trajectory_with_format(filename.as_ptr(), mode as c_char, format.as_ptr());
             Trajectory::from_ptr(handle)
         }
     }
@@ -153,7 +153,7 @@ impl Trajectory {
     {
         let format = strings::to_c(format.into());
         unsafe {
-            let handle = chfl_trajectory_memory_writer(format.as_ptr());
+            let handle = ffi::chfl_trajectory_memory_writer(format.as_ptr());
             Trajectory::from_ptr(handle)
         }
     }
@@ -177,7 +177,7 @@ impl Trajectory {
     /// trajectory.read(&mut frame).unwrap();
     /// ```
     pub fn read(&mut self, frame: &mut Frame) -> Result<(), Error> {
-        unsafe { check(chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr())) }
+        unsafe { check(ffi::chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr())) }
     }
 
     /// Read a specific `step` of this trajectory into a `frame`.
@@ -200,7 +200,7 @@ impl Trajectory {
     /// ```
     pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
-            check(chfl_trajectory_read_step(
+            check(ffi::chfl_trajectory_read_step(
                 self.as_mut_ptr(),
                 step as u64,
                 frame.as_mut_ptr(),
@@ -224,7 +224,7 @@ impl Trajectory {
     /// trajectory.write(&mut frame).unwrap();
     /// ```
     pub fn write(&mut self, frame: &Frame) -> Result<(), Error> {
-        unsafe { check(chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())) }
+        unsafe { check(ffi::chfl_trajectory_write(self.as_mut_ptr(), frame.as_ptr())) }
     }
 
     /// Set the `topology` associated with this trajectory. This topology will
@@ -246,7 +246,7 @@ impl Trajectory {
     /// ```
     pub fn set_topology(&mut self, topology: &Topology) {
         unsafe {
-            check_success(chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()));
+            check_success(ffi::chfl_trajectory_set_topology(self.as_mut_ptr(), topology.as_ptr()));
         }
     }
 
@@ -276,7 +276,7 @@ impl Trajectory {
 
         let path = strings::to_c(path);
         unsafe {
-            check(chfl_trajectory_topology_file(
+            check(ffi::chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
                 path.as_ptr(),
                 std::ptr::null(),
@@ -315,7 +315,7 @@ impl Trajectory {
         let format = strings::to_c(format.into());
         let path = strings::to_c(path);
         unsafe {
-            check(chfl_trajectory_topology_file(
+            check(ffi::chfl_trajectory_topology_file(
                 self.as_mut_ptr(),
                 path.as_ptr(),
                 format.as_ptr(),
@@ -335,7 +335,7 @@ impl Trajectory {
     /// ```
     pub fn set_cell(&mut self, cell: &UnitCell) {
         unsafe {
-            check_success(chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr()));
+            check_success(ffi::chfl_trajectory_set_cell(self.as_mut_ptr(), cell.as_ptr()));
         }
     }
 
@@ -353,7 +353,7 @@ impl Trajectory {
     pub fn nsteps(&mut self) -> usize {
         let mut res = 0;
         unsafe {
-            check(chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))
+            check(ffi::chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))
                 .expect("failed to get the number of steps in this trajectory");
         }
         #[allow(clippy::cast_possible_truncation)]
@@ -387,7 +387,7 @@ impl Trajectory {
         let mut ptr: *const c_char = std::ptr::null();
         let mut count: u64 = 0;
         let buffer = unsafe {
-            check(chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
+            check(ffi::chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
             std::slice::from_raw_parts(ptr.cast(), count.try_into().expect("failed to convert u64 to usize"))
         };
 
@@ -405,7 +405,7 @@ impl Trajectory {
     /// assert_eq!(trajectory.path(), "water.xyz");
     /// ```
     pub fn path(&self) -> String {
-        let get_string = |ptr, len| unsafe { chfl_trajectory_path(self.as_ptr(), ptr, len) };
+        let get_string = |ptr, len| unsafe { ffi::chfl_trajectory_path(self.as_ptr(), ptr, len) };
         let path = strings::call_autogrow_buffer(1024, get_string).expect("failed to get path string");
         return strings::from_c(path.as_ptr());
     }
@@ -446,7 +446,7 @@ impl<'data> MemoryTrajectoryReader<'data> {
         let data = data.into();
         let format = strings::to_c(format.as_ref());
         let trajectory = unsafe {
-            let handle = chfl_trajectory_memory_reader(data.as_ptr().cast(), data.len() as u64, format.as_ptr());
+            let handle = ffi::chfl_trajectory_memory_reader(data.as_ptr().cast(), data.len() as u64, format.as_ptr());
             Trajectory::from_ptr(handle)
         };
         Ok(MemoryTrajectoryReader {
