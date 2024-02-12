@@ -355,14 +355,14 @@ mod tests {
         }
 
         #[test]
-        #[should_panic]
+        #[should_panic(expected = "assertion failed: i < self.len()")]
         fn out_of_bound() {
             let m = Match::new(&[1, 2]);
             let _ = m[2];
         }
 
         #[test]
-        #[should_panic]
+        #[should_panic(expected = "assertion failed: atoms.len() <= 4")]
         fn too_big() {
             let _ = Match::new(&[1, 2, 3, 5, 4]);
         }

@@ -851,7 +851,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::remove`")]
     fn out_of_bounds_remove() {
         let mut topology = Topology::new();
         topology.resize(18);
@@ -886,7 +886,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::add_bond`")]
     fn out_of_bounds_bonds() {
         let mut topology = Topology::new();
         topology.resize(12);
@@ -894,7 +894,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::remove_bond`")]
     fn out_of_bounds_remove_bond() {
         let mut topology = Topology::new();
         topology.resize(12);
@@ -902,7 +902,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::add_bond`")]
     fn out_of_bounds_bonds_with_order() {
         let mut topology = Topology::new();
         topology.resize(12);

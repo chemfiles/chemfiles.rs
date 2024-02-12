@@ -979,7 +979,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = " out of bounds atomic index in `chfl_atom_from_frame`")]
     fn out_of_bounds_atom() {
         let mut frame = Frame::new();
         frame.resize(22);
@@ -1001,7 +1001,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Frame::remove`")]
     fn remove_out_of_bounds() {
         let mut frame = Frame::new();
         frame.resize(32);
@@ -1089,7 +1089,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::add_bond`")]
     fn out_of_bounds_bonds() {
         let mut frame = Frame::new();
         frame.resize(12);
@@ -1097,7 +1097,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::remove_bond`")]
     fn out_of_bounds_remove_bond() {
         let mut frame = Frame::new();
         frame.resize(12);
@@ -1105,7 +1105,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of bounds atomic index in `Topology::add_bond`")]
     fn out_of_bounds_bonds_with_order() {
         let mut frame = Frame::new();
         frame.resize(12);
