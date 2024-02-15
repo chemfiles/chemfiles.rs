@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["chemfiles"] = [{"text":"impl Debug for Error","synthetic":false,"types":[]},{"text":"impl Debug for Status","synthetic":false,"types":[]},{"text":"impl Debug for CellShape","synthetic":false,"types":[]},{"text":"impl Debug for BondOrder","synthetic":false,"types":[]},{"text":"impl Debug for Match","synthetic":false,"types":[]},{"text":"impl Debug for Property","synthetic":false,"types":[]},{"text":"impl Debug for FormatMetadata","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

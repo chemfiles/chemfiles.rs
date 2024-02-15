@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Frame","A `Frame` holds data from one step of a simulation: the current `Topology`, the positions, and maybe the velocities of the particles in the system."]]});

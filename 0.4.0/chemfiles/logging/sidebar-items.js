@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["LogLevel","Available log levels"]],"fn":[["level","Get current logging level"],["log_to_file","Write logs to the file at `path`, creating it if needed."],["log_to_stderr","Write logs to the standard error stream. This is the default."],["set_level","Set the logging level to `level`"]]});

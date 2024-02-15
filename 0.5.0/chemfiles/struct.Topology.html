@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Topology` struct in crate `chemfiles`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Topology">
+
+    <title>chemfiles::Topology - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>chemfiles</a></p><script>window.sidebarCurrent = {name: 'Topology', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>chemfiles</a>::<wbr><a class='struct' href=''>Topology</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-459' class='srclink' href='../src/chemfiles/src/topology.rs.html#20-22' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Topology {
+    // some fields omitted
+}</pre><div class='docblock'><p>A <code>Topology</code> contains the definition of all the particles in the system, and
+the liaisons between the particles (bonds, angles, dihedrals, ...).</p>
+
+<p>Only the atoms and the bonds are stored, the angles and the dihedrals are
+computed automaticaly.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Create a new empty topology</p>
+</div><h4 id='method.atom' class='method'><code>fn <a href='#method.atom' class='fnname'>atom</a>(&amp;self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get a specific <code>Atom</code> from a topology, given its <code>index</code> in the topology</p>
+</div><h4 id='method.natoms' class='method'><code>fn <a href='#method.natoms' class='fnname'>natoms</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the current number of atoms in the topology.</p>
+</div><h4 id='method.push' class='method'><code>fn <a href='#method.push' class='fnname'>push</a>(&amp;mut self, atom: &amp;<a class='struct' href='../chemfiles/struct.Atom.html' title='chemfiles::Atom'>Atom</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Add an <code>Atom</code> at the end of a topology</p>
+</div><h4 id='method.remove' class='method'><code>fn <a href='#method.remove' class='fnname'>remove</a>(&amp;mut self, index: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Remove an <code>Atom</code> from a topology by index. This modify all the other
+atoms indexes.</p>
+</div><h4 id='method.is_bond' class='method'><code>fn <a href='#method.is_bond' class='fnname'>is_bond</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, j: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Tell if the atoms at indexes <code>i</code> and <code>j</code> are bonded together</p>
+</div><h4 id='method.is_angle' class='method'><code>fn <a href='#method.is_angle' class='fnname'>is_angle</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, j: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, k: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Tell if the atoms at indexes <code>i</code>, <code>j</code> and <code>k</code> constitues an angle</p>
+</div><h4 id='method.is_dihedral' class='method'><code>fn <a href='#method.is_dihedral' class='fnname'>is_dihedral</a>(&amp;self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, j: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, k: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, m: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Tell if the atoms at indexes <code>i</code>, <code>j</code>, <code>k</code> and <code>m</code> constitues a dihedral
+angle</p>
+</div><h4 id='method.bonds_count' class='method'><code>fn <a href='#method.bonds_count' class='fnname'>bonds_count</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the number of bonds in the system</p>
+</div><h4 id='method.angles_count' class='method'><code>fn <a href='#method.angles_count' class='fnname'>angles_count</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the number of angles in the system</p>
+</div><h4 id='method.dihedrals_count' class='method'><code>fn <a href='#method.dihedrals_count' class='fnname'>dihedrals_count</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the number of dihedral angles in the system</p>
+</div><h4 id='method.bonds' class='method'><code>fn <a href='#method.bonds' class='fnname'>bonds</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>; 2]</a>&gt;, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the list of bonds in the system</p>
+</div><h4 id='method.angles' class='method'><code>fn <a href='#method.angles' class='fnname'>angles</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>; 3]</a>&gt;, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the list of angles in the system</p>
+</div><h4 id='method.dihedrals' class='method'><code>fn <a href='#method.dihedrals' class='fnname'>dihedrals</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.array.html'>; 4]</a>&gt;, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Get the list of dihedral angles in the system</p>
+</div><h4 id='method.add_bond' class='method'><code>fn <a href='#method.add_bond' class='fnname'>add_bond</a>(&amp;mut self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, j: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Add a bond between the atoms at indexes <code>i</code> and <code>j</code> in the system</p>
+</div><h4 id='method.remove_bond' class='method'><code>fn <a href='#method.remove_bond' class='fnname'>remove_bond</a>(&amp;mut self, i: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, j: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='../chemfiles/struct.Error.html' title='chemfiles::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Remove any existing bond between the atoms at indexes <code>i</code> and <code>j</code> in
+the system</p>
+</div><h4 id='method.from_ptr' class='method'><code>unsafe fn <a href='#method.from_ptr' class='fnname'>from_ptr</a>(ptr: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_TOPOLOGY.html' title='chemfiles_sys::CHFL_TOPOLOGY'>CHFL_TOPOLOGY</a>) -&gt; <a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a></code></h4>
+<div class='docblock'><p>Create a <code>Topology</code> from a C pointer. This function is unsafe because no
+validity check is made on the pointer.</p>
+</div><h4 id='method.as_ptr' class='method'><code>unsafe fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*const </a><a class='enum' href='../chemfiles_sys/enum.CHFL_TOPOLOGY.html' title='chemfiles_sys::CHFL_TOPOLOGY'>CHFL_TOPOLOGY</a></code></h4>
+<div class='docblock'><p>Get the underlying C pointer. This function is unsafe because no
+lifetime guarantee is made on the pointer.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../chemfiles/struct.Topology.html' title='chemfiles::Topology'>Topology</a></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

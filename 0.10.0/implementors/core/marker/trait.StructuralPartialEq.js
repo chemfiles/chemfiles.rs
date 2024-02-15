@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["chemfiles"] = [{"text":"impl StructuralPartialEq for Error","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for Status","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for CellShape","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for BondOrder","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for Match","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for Property","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for FormatMetadata","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

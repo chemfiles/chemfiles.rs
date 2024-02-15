@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Status` enum in crate `chemfiles`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Status">
+
+    <title>chemfiles::Status - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc enum">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Enum Status</p><div class="block items"><a class="sidebar-title" href="#variants">Variants</a><div class="sidebar-links"><a href="#variant.Success">Success</a><a href="#variant.CppStdError">CppStdError</a><a href="#variant.ChemfilesCppError">ChemfilesCppError</a><a href="#variant.MemoryError">MemoryError</a><a href="#variant.FileError">FileError</a><a href="#variant.FormatError">FormatError</a><a href="#variant.SelectionError">SelectionError</a><a href="#variant.ConfigurationError">ConfigurationError</a><a href="#variant.OutOfBounds">OutOfBounds</a><a href="#variant.PropertyError">PropertyError</a><a href="#variant.UTF8PathError">UTF8PathError</a><a href="#variant.NullPtr">NullPtr</a></div><a class="sidebar-title" href="#implementations">Trait Implementations</a><div class="sidebar-links"><a href="#impl-Clone">Clone</a><a href="#impl-Debug">Debug</a><a href="#impl-PartialEq">PartialEq</a></div></div><p class='location'><a href='index.html'>chemfiles</a></p><script>window.sidebarCurrent = {name: 'Status', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>chemfiles</a>::<wbr><a class="enum" href=''>Status</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/chemfiles/errors.rs.html#32-57' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Status {
+    Success,
+    CppStdError,
+    ChemfilesCppError,
+    MemoryError,
+    FileError,
+    FormatError,
+    SelectionError,
+    ConfigurationError,
+    OutOfBounds,
+    PropertyError,
+    UTF8PathError,
+    NullPtr,
+}</pre><div class='docblock'><p>Possible causes of error in chemfiles</p>
+</div><h2 id='variants' class='variants small-section-header'>
+                   Variants<a href='#variants' class='anchor'></a></h2>
+<span id="variant.Success" class="variant small-section-header"><a href="#variant.Success" class="anchor field"></a><span id='Success.v' class='invisible'><code>Success</code></span></span><div class='docblock'><p>No error</p>
+</div><span id="variant.CppStdError" class="variant small-section-header"><a href="#variant.CppStdError" class="anchor field"></a><span id='CppStdError.v' class='invisible'><code>CppStdError</code></span></span><div class='docblock'><p>Exception in the C++ standard library</p>
+</div><span id="variant.ChemfilesCppError" class="variant small-section-header"><a href="#variant.ChemfilesCppError" class="anchor field"></a><span id='ChemfilesCppError.v' class='invisible'><code>ChemfilesCppError</code></span></span><div class='docblock'><p>Exception in the C++ chemfiles library</p>
+</div><span id="variant.MemoryError" class="variant small-section-header"><a href="#variant.MemoryError" class="anchor field"></a><span id='MemoryError.v' class='invisible'><code>MemoryError</code></span></span><div class='docblock'><p>Error in memory allocations</p>
+</div><span id="variant.FileError" class="variant small-section-header"><a href="#variant.FileError" class="anchor field"></a><span id='FileError.v' class='invisible'><code>FileError</code></span></span><div class='docblock'><p>Error while reading or writing a file</p>
+</div><span id="variant.FormatError" class="variant small-section-header"><a href="#variant.FormatError" class="anchor field"></a><span id='FormatError.v' class='invisible'><code>FormatError</code></span></span><div class='docblock'><p>Error in file formatting, <em>i.e.</em> the file is invalid</p>
+</div><span id="variant.SelectionError" class="variant small-section-header"><a href="#variant.SelectionError" class="anchor field"></a><span id='SelectionError.v' class='invisible'><code>SelectionError</code></span></span><div class='docblock'><p>Error in selection string syntax</p>
+</div><span id="variant.ConfigurationError" class="variant small-section-header"><a href="#variant.ConfigurationError" class="anchor field"></a><span id='ConfigurationError.v' class='invisible'><code>ConfigurationError</code></span></span><div class='docblock'><p>Error in configuration files syntax</p>
+</div><span id="variant.OutOfBounds" class="variant small-section-header"><a href="#variant.OutOfBounds" class="anchor field"></a><span id='OutOfBounds.v' class='invisible'><code>OutOfBounds</code></span></span><div class='docblock'><p>Error for out of bounds indexing</p>
+</div><span id="variant.PropertyError" class="variant small-section-header"><a href="#variant.PropertyError" class="anchor field"></a><span id='PropertyError.v' class='invisible'><code>PropertyError</code></span></span><div class='docblock'><p>Error related to properties</p>
+</div><span id="variant.UTF8PathError" class="variant small-section-header"><a href="#variant.UTF8PathError" class="anchor field"></a><span id='UTF8PathError.v' class='invisible'><code>UTF8PathError</code></span></span><div class='docblock'><p>The given path is not valid UTF8</p>
+</div><span id="variant.NullPtr" class="variant small-section-header"><a href="#variant.NullPtr" class="anchor field"></a><span id='NullPtr.v' class='invisible'><code>NullPtr</code></span></span><div class='docblock'><p>We got a null pointer from C++</p>
+</div>
+            <h2 id='implementations' class='small-section-header'>
+              Trait Implementations<a href='#implementations' class='anchor'></a>
+            </h2>
+        <h3 id='impl-Clone' class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="enum" href="../chemfiles/enum.Status.html" title="enum chemfiles::Status">Status</a></code><a href='#impl-Clone' class='anchor'></a></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/chemfiles/errors.rs.html#30' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class="method"><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class="enum" href="../chemfiles/enum.Status.html" title="enum chemfiles::Status">Status</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/chemfiles/errors.rs.html#30' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class="method"><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;</a>Self)</code></span><span class='out-of-band'><div class='ghost'></div><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div><a class='srclink' href='https://doc.rust-lang.org/nightly/src/core/clone.rs.html#112-114' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 id='impl-Debug' class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../chemfiles/enum.Status.html" title="enum chemfiles::Status">Status</a></code><a href='#impl-Debug' class='anchor'></a></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/chemfiles/errors.rs.html#30' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/chemfiles/errors.rs.html#30' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></p>
+</div></div><h3 id='impl-PartialEq' class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="enum" href="../chemfiles/enum.Status.html" title="enum chemfiles::Status">Status</a></code><a href='#impl-PartialEq' class='anchor'></a></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/chemfiles/errors.rs.html#30' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.eq' class="method"><span id='eq.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class="enum" href="../chemfiles/enum.Status.html" title="enum chemfiles::Status">Status</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/chemfiles/errors.rs.html#30' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>This method tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq">Read more</a></p>
+</div><h4 id='method.ne' class="method"><span id='ne.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;</a>Rhs) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span><span class='out-of-band'><div class='ghost'></div><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div><a class='srclink' href='https://doc.rust-lang.org/nightly/src/core/cmp.rs.html#121' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>This method tests for <code>!=</code>.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>↑</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>↓</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>↹</dt>
+                    <dd>Switch tab</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt style="width:31px;">+ / -</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles";
+    </script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["chemfiles"] = [{"text":"impl StructuralEq for CellShape","synthetic":false,"types":[]},{"text":"impl StructuralEq for BondOrder","synthetic":false,"types":[]},{"text":"impl StructuralEq for Match","synthetic":false,"types":[]},{"text":"impl StructuralEq for FormatMetadata","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

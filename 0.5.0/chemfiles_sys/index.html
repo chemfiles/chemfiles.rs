@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `chemfiles_sys` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, chemfiles_sys">
+
+    <title>chemfiles_sys - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'chemfiles_sys', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>chemfiles_sys</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/chemfiles_sys/chemfiles-sys/lib.rs.html#1-128' title='goto source code'>[src]</a></span></h1>
+<h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CHFL_ATOM.html'
+                                  title='chemfiles_sys::CHFL_ATOM'>CHFL_ATOM</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CHFL_CELL.html'
+                                  title='chemfiles_sys::CHFL_CELL'>CHFL_CELL</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CHFL_FRAME.html'
+                                  title='chemfiles_sys::CHFL_FRAME'>CHFL_FRAME</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CHFL_TOPOLOGY.html'
+                                  title='chemfiles_sys::CHFL_TOPOLOGY'>CHFL_TOPOLOGY</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CHFL_TRAJECTORY.html'
+                                  title='chemfiles_sys::CHFL_TRAJECTORY'>CHFL_TRAJECTORY</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_CXX_ERROR.html'
+                                  title='chemfiles_sys::CHFL_CXX_ERROR'>CHFL_CXX_ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_FILE_ERROR.html'
+                                  title='chemfiles_sys::CHFL_FILE_ERROR'>CHFL_FILE_ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_FORMAT_ERROR.html'
+                                  title='chemfiles_sys::CHFL_FORMAT_ERROR'>CHFL_FORMAT_ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_GENERIC_ERROR.html'
+                                  title='chemfiles_sys::CHFL_GENERIC_ERROR'>CHFL_GENERIC_ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_MEMORY_ERROR.html'
+                                  title='chemfiles_sys::CHFL_MEMORY_ERROR'>CHFL_MEMORY_ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_SELECTION_ERROR.html'
+                                  title='chemfiles_sys::CHFL_SELECTION_ERROR'>CHFL_SELECTION_ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.CHFL_SUCCESS.html'
+                                  title='chemfiles_sys::CHFL_SUCCESS'>CHFL_SUCCESS</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.COARSE_GRAINED.html'
+                                  title='chemfiles_sys::COARSE_GRAINED'>COARSE_GRAINED</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.DEBUG.html'
+                                  title='chemfiles_sys::DEBUG'>DEBUG</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.DUMMY.html'
+                                  title='chemfiles_sys::DUMMY'>DUMMY</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.ELEMENT.html'
+                                  title='chemfiles_sys::ELEMENT'>ELEMENT</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.ERROR.html'
+                                  title='chemfiles_sys::ERROR'>ERROR</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.INFINITE.html'
+                                  title='chemfiles_sys::INFINITE'>INFINITE</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.INFO.html'
+                                  title='chemfiles_sys::INFO'>INFO</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.ORTHOROMBIC.html'
+                                  title='chemfiles_sys::ORTHOROMBIC'>ORTHOROMBIC</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.TRICLINIC.html'
+                                  title='chemfiles_sys::TRICLINIC'>TRICLINIC</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.UNDEFINED.html'
+                                  title='chemfiles_sys::UNDEFINED'>UNDEFINED</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='constant' href='constant.WARNING.html'
+                                  title='chemfiles_sys::WARNING'>WARNING</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom.html'
+                                  title='chemfiles_sys::chfl_atom'>chfl_atom</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_atomic_number.html'
+                                  title='chemfiles_sys::chfl_atom_atomic_number'>chfl_atom_atomic_number</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_charge.html'
+                                  title='chemfiles_sys::chfl_atom_charge'>chfl_atom_charge</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_covalent_radius.html'
+                                  title='chemfiles_sys::chfl_atom_covalent_radius'>chfl_atom_covalent_radius</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_free.html'
+                                  title='chemfiles_sys::chfl_atom_free'>chfl_atom_free</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_from_frame.html'
+                                  title='chemfiles_sys::chfl_atom_from_frame'>chfl_atom_from_frame</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_from_topology.html'
+                                  title='chemfiles_sys::chfl_atom_from_topology'>chfl_atom_from_topology</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_full_name.html'
+                                  title='chemfiles_sys::chfl_atom_full_name'>chfl_atom_full_name</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_mass.html'
+                                  title='chemfiles_sys::chfl_atom_mass'>chfl_atom_mass</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_name.html'
+                                  title='chemfiles_sys::chfl_atom_name'>chfl_atom_name</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_set_charge.html'
+                                  title='chemfiles_sys::chfl_atom_set_charge'>chfl_atom_set_charge</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_set_mass.html'
+                                  title='chemfiles_sys::chfl_atom_set_mass'>chfl_atom_set_mass</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_set_name.html'
+                                  title='chemfiles_sys::chfl_atom_set_name'>chfl_atom_set_name</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_set_type.html'
+                                  title='chemfiles_sys::chfl_atom_set_type'>chfl_atom_set_type</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_type.html'
+                                  title='chemfiles_sys::chfl_atom_type'>chfl_atom_type</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_atom_vdw_radius.html'
+                                  title='chemfiles_sys::chfl_atom_vdw_radius'>chfl_atom_vdw_radius</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell.html'
+                                  title='chemfiles_sys::chfl_cell'>chfl_cell</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_angles.html'
+                                  title='chemfiles_sys::chfl_cell_angles'>chfl_cell_angles</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_free.html'
+                                  title='chemfiles_sys::chfl_cell_free'>chfl_cell_free</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_from_frame.html'
+                                  title='chemfiles_sys::chfl_cell_from_frame'>chfl_cell_from_frame</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_lengths.html'
+                                  title='chemfiles_sys::chfl_cell_lengths'>chfl_cell_lengths</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_matrix.html'
+                                  title='chemfiles_sys::chfl_cell_matrix'>chfl_cell_matrix</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_set_angles.html'
+                                  title='chemfiles_sys::chfl_cell_set_angles'>chfl_cell_set_angles</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_set_lengths.html'
+                                  title='chemfiles_sys::chfl_cell_set_lengths'>chfl_cell_set_lengths</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_set_type.html'
+                                  title='chemfiles_sys::chfl_cell_set_type'>chfl_cell_set_type</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_triclinic.html'
+                                  title='chemfiles_sys::chfl_cell_triclinic'>chfl_cell_triclinic</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_type.html'
+                                  title='chemfiles_sys::chfl_cell_type'>chfl_cell_type</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_cell_volume.html'
+                                  title='chemfiles_sys::chfl_cell_volume'>chfl_cell_volume</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame.html'
+                                  title='chemfiles_sys::chfl_frame'>chfl_frame</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_add_velocities.html'
+                                  title='chemfiles_sys::chfl_frame_add_velocities'>chfl_frame_add_velocities</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_atoms_count.html'
+                                  title='chemfiles_sys::chfl_frame_atoms_count'>chfl_frame_atoms_count</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_free.html'
+                                  title='chemfiles_sys::chfl_frame_free'>chfl_frame_free</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_guess_topology.html'
+                                  title='chemfiles_sys::chfl_frame_guess_topology'>chfl_frame_guess_topology</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_has_velocities.html'
+                                  title='chemfiles_sys::chfl_frame_has_velocities'>chfl_frame_has_velocities</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_positions.html'
+                                  title='chemfiles_sys::chfl_frame_positions'>chfl_frame_positions</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_resize.html'
+                                  title='chemfiles_sys::chfl_frame_resize'>chfl_frame_resize</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_selection.html'
+                                  title='chemfiles_sys::chfl_frame_selection'>chfl_frame_selection</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_set_cell.html'
+                                  title='chemfiles_sys::chfl_frame_set_cell'>chfl_frame_set_cell</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_set_step.html'
+                                  title='chemfiles_sys::chfl_frame_set_step'>chfl_frame_set_step</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_set_topology.html'
+                                  title='chemfiles_sys::chfl_frame_set_topology'>chfl_frame_set_topology</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_step.html'
+                                  title='chemfiles_sys::chfl_frame_step'>chfl_frame_step</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_frame_velocities.html'
+                                  title='chemfiles_sys::chfl_frame_velocities'>chfl_frame_velocities</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_last_error.html'
+                                  title='chemfiles_sys::chfl_last_error'>chfl_last_error</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_log_callback.html'
+                                  title='chemfiles_sys::chfl_log_callback'>chfl_log_callback</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_log_silent.html'
+                                  title='chemfiles_sys::chfl_log_silent'>chfl_log_silent</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_log_stderr.html'
+                                  title='chemfiles_sys::chfl_log_stderr'>chfl_log_stderr</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_log_stdout.html'
+                                  title='chemfiles_sys::chfl_log_stdout'>chfl_log_stdout</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_logfile.html'
+                                  title='chemfiles_sys::chfl_logfile'>chfl_logfile</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_loglevel.html'
+                                  title='chemfiles_sys::chfl_loglevel'>chfl_loglevel</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_set_loglevel.html'
+                                  title='chemfiles_sys::chfl_set_loglevel'>chfl_set_loglevel</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_strerror.html'
+                                  title='chemfiles_sys::chfl_strerror'>chfl_strerror</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology.html'
+                                  title='chemfiles_sys::chfl_topology'>chfl_topology</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_add_bond.html'
+                                  title='chemfiles_sys::chfl_topology_add_bond'>chfl_topology_add_bond</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_angles.html'
+                                  title='chemfiles_sys::chfl_topology_angles'>chfl_topology_angles</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_angles_count.html'
+                                  title='chemfiles_sys::chfl_topology_angles_count'>chfl_topology_angles_count</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_append.html'
+                                  title='chemfiles_sys::chfl_topology_append'>chfl_topology_append</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_atoms_count.html'
+                                  title='chemfiles_sys::chfl_topology_atoms_count'>chfl_topology_atoms_count</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_bonds.html'
+                                  title='chemfiles_sys::chfl_topology_bonds'>chfl_topology_bonds</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_bonds_count.html'
+                                  title='chemfiles_sys::chfl_topology_bonds_count'>chfl_topology_bonds_count</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_dihedrals.html'
+                                  title='chemfiles_sys::chfl_topology_dihedrals'>chfl_topology_dihedrals</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_dihedrals_count.html'
+                                  title='chemfiles_sys::chfl_topology_dihedrals_count'>chfl_topology_dihedrals_count</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_free.html'
+                                  title='chemfiles_sys::chfl_topology_free'>chfl_topology_free</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_from_frame.html'
+                                  title='chemfiles_sys::chfl_topology_from_frame'>chfl_topology_from_frame</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_isangle.html'
+                                  title='chemfiles_sys::chfl_topology_isangle'>chfl_topology_isangle</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_isbond.html'
+                                  title='chemfiles_sys::chfl_topology_isbond'>chfl_topology_isbond</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_isdihedral.html'
+                                  title='chemfiles_sys::chfl_topology_isdihedral'>chfl_topology_isdihedral</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_remove.html'
+                                  title='chemfiles_sys::chfl_topology_remove'>chfl_topology_remove</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_topology_remove_bond.html'
+                                  title='chemfiles_sys::chfl_topology_remove_bond'>chfl_topology_remove_bond</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_close.html'
+                                  title='chemfiles_sys::chfl_trajectory_close'>chfl_trajectory_close</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_nsteps.html'
+                                  title='chemfiles_sys::chfl_trajectory_nsteps'>chfl_trajectory_nsteps</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_open.html'
+                                  title='chemfiles_sys::chfl_trajectory_open'>chfl_trajectory_open</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_read.html'
+                                  title='chemfiles_sys::chfl_trajectory_read'>chfl_trajectory_read</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_read_step.html'
+                                  title='chemfiles_sys::chfl_trajectory_read_step'>chfl_trajectory_read_step</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_set_cell.html'
+                                  title='chemfiles_sys::chfl_trajectory_set_cell'>chfl_trajectory_set_cell</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_set_topology.html'
+                                  title='chemfiles_sys::chfl_trajectory_set_topology'>chfl_trajectory_set_topology</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_set_topology_file.html'
+                                  title='chemfiles_sys::chfl_trajectory_set_topology_file'>chfl_trajectory_set_topology_file</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_sync.html'
+                                  title='chemfiles_sys::chfl_trajectory_sync'>chfl_trajectory_sync</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_with_format.html'
+                                  title='chemfiles_sys::chfl_trajectory_with_format'>chfl_trajectory_with_format</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_trajectory_write.html'
+                                  title='chemfiles_sys::chfl_trajectory_write'>chfl_trajectory_write</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.chfl_version.html'
+                                  title='chemfiles_sys::chfl_version'>chfl_version</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.CHFL_ATOM_TYPE.html'
+                                  title='chemfiles_sys::CHFL_ATOM_TYPE'>CHFL_ATOM_TYPE</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.CHFL_CELL_TYPE.html'
+                                  title='chemfiles_sys::CHFL_CELL_TYPE'>CHFL_CELL_TYPE</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.CHFL_LOG_LEVEL.html'
+                                  title='chemfiles_sys::CHFL_LOG_LEVEL'>CHFL_LOG_LEVEL</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.CHFL_STATUS.html'
+                                  title='chemfiles_sys::CHFL_STATUS'>CHFL_STATUS</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.c_bool.html'
+                                  title='chemfiles_sys::c_bool'>c_bool</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.chfl_logging_callback_t.html'
+                                  title='chemfiles_sys::chfl_logging_callback_t'>chfl_logging_callback_t</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "chemfiles_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
