@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut selection = Selection::new("name Zn or name N")?;
 
     let mut frame = Frame::new();
-    for _ in 0..input.nsteps() {
+    for _ in 0..input.size() {
         input.read(&mut frame)?;
 
         let mut to_remove = selection.list(&frame);

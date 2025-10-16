@@ -178,7 +178,7 @@ pub struct PropertiesIter<'a> {
     pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }
 
-impl<'a> Iterator for PropertiesIter<'a> {
+impl Iterator for PropertiesIter<'_> {
     type Item = (String, Property);
     fn next(&mut self) -> Option<Self::Item> {
         self.names.next().map(|name| {

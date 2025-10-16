@@ -23,7 +23,7 @@ pub struct ResidueRef<'a> {
     marker: PhantomData<&'a Residue>,
 }
 
-impl<'a> std::ops::Deref for ResidueRef<'a> {
+impl std::ops::Deref for ResidueRef<'_> {
     type Target = Residue;
     fn deref(&self) -> &Residue {
         &self.inner
@@ -226,7 +226,7 @@ impl Residue {
     pub fn atoms(&self) -> Vec<usize> {
         let size = self.size();
         let count = size as u64;
-        let mut indices = vec![u64::max_value(); size];
+        let mut indices = vec![u64::MAX; size];
         unsafe {
             check_success(ffi::chfl_residue_atoms(self.as_ptr(), indices.as_mut_ptr(), count));
         }
@@ -302,7 +302,7 @@ impl Residue {
     ///     }
     /// }
     /// ```
-    pub fn properties(&self) -> PropertiesIter {
+    pub fn properties(&self) -> PropertiesIter<'_> {
         let mut count = 0;
         unsafe {
             check_success(ffi::chfl_residue_properties_count(self.as_ptr(), &mut count));
