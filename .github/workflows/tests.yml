@@ -14,15 +14,15 @@ jobs:
       matrix:
         include:
           - name: Linux
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             rust-version: stable
             rust-target: x86_64-unknown-linux-gnu
-          - name: rustc 1.63
-            os: ubuntu-20.04
-            rust-version: "1.63"
+          - name: rustc 1.74
+            os: ubuntu-24.04
+            rust-version: "1.74"
             rust-target: x86_64-unknown-linux-gnu
           - name: Windows MSVC
-            os: windows-2019
+            os: windows-2022
             rust-version: stable
             rust-target: x86_64-pc-windows-msvc
           # This is failing, it needs to be investigated
@@ -31,11 +31,11 @@ jobs:
           #   rust-version: stable
           #   rust-target: x86_64-pc-windows-gnu
           - name: macOS
-            os: macos-11
+            os: macos-15
             rust-version: stable
-            rust-target: x86_64-apple-darwin
+            rust-target: aarch64-apple-darwin
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: setup rust
@@ -51,11 +51,11 @@ jobs:
         run: ./scripts/check-used-functions.py
 
   coverage:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       KCOV_VERSION: c18c77531f3fc00440571a9a04dd33ee4fcd4c39
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -73,7 +73,7 @@ jobs:
         run: |
           cargo tarpaulin --out Xml
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true
@@ -81,9 +81,9 @@ jobs:
 
   # check that the code can still build the C++ library from sources
   build-from-source:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: setup rust

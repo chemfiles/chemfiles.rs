@@ -1,6 +1,5 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
-#[allow(clippy::wildcard_imports)]
 use chemfiles_sys as ffi;
 
 use crate::{Atom, AtomMut, AtomRef};
@@ -98,7 +97,7 @@ impl Frame {
     /// let atom = frame.atom(0);
     /// assert_eq!(atom.name(), "Zn");
     /// ```
-    pub fn atom(&self, index: usize) -> AtomRef {
+    pub fn atom(&self, index: usize) -> AtomRef<'_> {
         unsafe {
             let handle = ffi::chfl_atom_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
@@ -122,7 +121,7 @@ impl Frame {
     /// frame.atom_mut(0).set_name("Fe");
     /// assert_eq!(frame.atom(0).name(), "Fe");
     /// ```
-    pub fn atom_mut(&mut self, index: usize) -> AtomMut {
+    pub fn atom_mut(&mut self, index: usize) -> AtomMut<'_> {
         unsafe {
             let handle = ffi::chfl_atom_from_frame(self.as_mut_ptr(), index as u64);
             Atom::ref_mut_from_ptr(handle)
@@ -610,7 +609,7 @@ impl Frame {
     /// let cell = frame.cell();
     /// assert_eq!(cell.shape(), CellShape::Infinite);
     /// ```
-    pub fn cell(&self) -> UnitCellRef {
+    pub fn cell(&self) -> UnitCellRef<'_> {
         unsafe {
             let handle = ffi::chfl_cell_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW());
             UnitCell::ref_from_ptr(handle)
@@ -629,7 +628,7 @@ impl Frame {
     /// frame.cell_mut().set_shape(CellShape::Triclinic).unwrap();
     /// assert_eq!(frame.cell().shape(), CellShape::Triclinic);
     /// ```
-    pub fn cell_mut(&mut self) -> UnitCellMut {
+    pub fn cell_mut(&mut self) -> UnitCellMut<'_> {
         unsafe {
             let handle = ffi::chfl_cell_from_frame(self.as_mut_ptr());
             UnitCell::ref_mut_from_ptr(handle)
@@ -666,7 +665,7 @@ impl Frame {
     /// let topology = frame.topology();
     /// assert_eq!(topology.size(), 42);
     /// ```
-    pub fn topology(&self) -> TopologyRef {
+    pub fn topology(&self) -> TopologyRef<'_> {
         unsafe {
             let handle = ffi::chfl_topology_from_frame(self.as_ptr());
             Topology::ref_from_ptr(handle)
@@ -698,37 +697,37 @@ impl Frame {
         unsafe { check(ffi::chfl_frame_set_topology(self.as_mut_ptr(), topology.as_ptr())) }
     }
 
-    /// Get this frame step, i.e. the frame number in the trajectory
+    /// Get this frame index, i.e. the frame number in the trajectory
     ///
     /// # Example
     /// ```
     /// # use chemfiles::Frame;
     /// let frame = Frame::new();
-    /// assert_eq!(frame.step(), 0);
+    /// assert_eq!(frame.index(), 0);
     /// ```
-    pub fn step(&self) -> usize {
-        let mut step = 0;
+    pub fn index(&self) -> usize {
+        let mut index = 0;
         unsafe {
-            check_success(ffi::chfl_frame_step(self.as_ptr(), &mut step));
+            check_success(ffi::chfl_frame_index(self.as_ptr(), &mut index));
         }
         #[allow(clippy::cast_possible_truncation)]
-        return step as usize;
+        return index as usize;
     }
 
-    /// Set this frame step to `step`.
+    /// Set this frame index to `index`.
     ///
     /// # Example
     /// ```
     /// # use chemfiles::Frame;
     /// let mut frame = Frame::new();
-    /// assert_eq!(frame.step(), 0);
+    /// assert_eq!(frame.index(), 0);
     ///
-    /// frame.set_step(10);
-    /// assert_eq!(frame.step(), 10);
+    /// frame.set_index(10);
+    /// assert_eq!(frame.index(), 10);
     /// ```
-    pub fn set_step(&mut self, step: usize) {
+    pub fn set_index(&mut self, index: usize) {
         unsafe {
-            check_success(ffi::chfl_frame_set_step(self.as_mut_ptr(), step as u64));
+            check_success(ffi::chfl_frame_set_index(self.as_mut_ptr(), index as u64));
         }
     }
 
@@ -853,7 +852,7 @@ impl Frame {
     ///     }
     /// }
     /// ```
-    pub fn properties(&self) -> PropertiesIter {
+    pub fn properties(&self) -> PropertiesIter<'_> {
         let mut count = 0;
         unsafe {
             check_success(ffi::chfl_frame_properties_count(self.as_ptr(), &mut count));
@@ -1127,11 +1126,11 @@ mod test {
     }
 
     #[test]
-    fn step() {
+    fn index() {
         let mut frame = Frame::new();
-        assert_eq!(frame.step(), 0);
-        frame.set_step(42);
-        assert_eq!(frame.step(), 42);
+        assert_eq!(frame.index(), 0);
+        frame.set_index(42);
+        assert_eq!(frame.index(), 42);
     }
 
     #[test]

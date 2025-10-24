@@ -32,8 +32,6 @@ pub enum Status {
     FormatError = ffi::chfl_status::CHFL_FORMAT_ERROR as isize,
     /// Error in selection string syntax
     SelectionError = ffi::chfl_status::CHFL_SELECTION_ERROR as isize,
-    /// Error in configuration files syntax
-    ConfigurationError = ffi::chfl_status::CHFL_CONFIGURATION_ERROR as isize,
     /// Error for out of bounds indexing
     OutOfBounds = ffi::chfl_status::CHFL_OUT_OF_BOUNDS as isize,
     /// Error related to properties
@@ -57,7 +55,6 @@ impl From<ffi::chfl_status> for Error {
             ffi::chfl_status::CHFL_FILE_ERROR => Status::FileError,
             ffi::chfl_status::CHFL_FORMAT_ERROR => Status::FormatError,
             ffi::chfl_status::CHFL_SELECTION_ERROR => Status::SelectionError,
-            ffi::chfl_status::CHFL_CONFIGURATION_ERROR => Status::ConfigurationError,
             ffi::chfl_status::CHFL_OUT_OF_BOUNDS => Status::OutOfBounds,
             ffi::chfl_status::CHFL_PROPERTY_ERROR => Status::PropertyError,
         };
@@ -177,7 +174,6 @@ impl std::error::Error for Error {
             Status::FormatError => "Error in file formatting, i.e. the file is invalid",
             Status::SelectionError => "Error in selection string syntax",
             Status::UTF8PathError => "A string is not valid UTF8",
-            Status::ConfigurationError => "Error in configuration files",
             Status::OutOfBounds => "Out of bounds indexing",
             Status::PropertyError => "Error in property",
         }

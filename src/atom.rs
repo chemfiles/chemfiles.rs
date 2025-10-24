@@ -31,7 +31,7 @@ pub struct AtomRef<'a> {
     marker: PhantomData<&'a Atom>,
 }
 
-impl<'a> std::ops::Deref for AtomRef<'a> {
+impl std::ops::Deref for AtomRef<'_> {
     type Target = Atom;
     fn deref(&self) -> &Atom {
         &self.inner
@@ -45,14 +45,14 @@ pub struct AtomMut<'a> {
     marker: PhantomData<&'a mut Atom>,
 }
 
-impl<'a> std::ops::Deref for AtomMut<'a> {
+impl std::ops::Deref for AtomMut<'_> {
     type Target = Atom;
     fn deref(&self) -> &Atom {
         &self.inner
     }
 }
 
-impl<'a> std::ops::DerefMut for AtomMut<'a> {
+impl std::ops::DerefMut for AtomMut<'_> {
     fn deref_mut(&mut self) -> &mut Atom {
         &mut self.inner
     }
@@ -393,7 +393,7 @@ impl Atom {
     ///     }
     /// }
     /// ```
-    pub fn properties(&self) -> PropertiesIter {
+    pub fn properties(&self) -> PropertiesIter<'_> {
         let mut count = 0;
         unsafe {
             check_success(ffi::chfl_atom_properties_count(self.as_ptr(), &mut count));

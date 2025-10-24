@@ -180,7 +180,7 @@ impl Trajectory {
         unsafe { check(ffi::chfl_trajectory_read(self.as_mut_ptr(), frame.as_mut_ptr())) }
     }
 
-    /// Read a specific `step` of this trajectory into a `frame`.
+    /// Read a specific `index` of this trajectory into a `frame`.
     ///
     /// If the number of atoms in frame does not correspond to the number of
     /// atom at this step, the frame is resized.
@@ -196,13 +196,13 @@ impl Trajectory {
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
     /// let mut frame = Frame::new();
     ///
-    /// trajectory.read_step(10, &mut frame).unwrap();
+    /// trajectory.read_at(10, &mut frame).unwrap();
     /// ```
-    pub fn read_step(&mut self, step: usize, frame: &mut Frame) -> Result<(), Error> {
+    pub fn read_at(&mut self, index: usize, frame: &mut Frame) -> Result<(), Error> {
         unsafe {
-            check(ffi::chfl_trajectory_read_step(
+            check(ffi::chfl_trajectory_read_at(
                 self.as_mut_ptr(),
-                step as u64,
+                index as u64,
                 frame.as_mut_ptr(),
             ))
         }
@@ -339,21 +339,21 @@ impl Trajectory {
         }
     }
 
-    /// Get the number of steps (the number of frames) in a trajectory.
+    /// Get the number of frames in a trajectory.
     ///
     /// # Example
     /// ```no_run
     /// # use chemfiles::Trajectory;
     /// let mut trajectory = Trajectory::open("water.xyz", 'r').unwrap();
     ///
-    /// println!("This trajectory contains {} steps", trajectory.nsteps());
+    /// println!("This trajectory contains {} frames", trajectory.size());
     /// ```
     // FIXME should this take &self instead? The file can be modified by this
     // function, but the format should reset the state.
-    pub fn nsteps(&mut self) -> usize {
+    pub fn size(&mut self) -> usize {
         let mut res = 0;
         unsafe {
-            check(ffi::chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))
+            check(ffi::chfl_trajectory_size(self.as_mut_ptr(), &mut res))
                 .expect("failed to get the number of steps in this trajectory");
         }
         #[allow(clippy::cast_possible_truncation)]
@@ -456,7 +456,7 @@ impl<'data> MemoryTrajectoryReader<'data> {
     }
 }
 
-impl<'a> std::ops::Deref for MemoryTrajectoryReader<'a> {
+impl std::ops::Deref for MemoryTrajectoryReader<'_> {
     type Target = Trajectory;
 
     #[inline]
@@ -465,7 +465,7 @@ impl<'a> std::ops::Deref for MemoryTrajectoryReader<'a> {
     }
 }
 
-impl<'a> std::ops::DerefMut for MemoryTrajectoryReader<'a> {
+impl std::ops::DerefMut for MemoryTrajectoryReader<'_> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
@@ -497,7 +497,7 @@ mod test {
             panic!("please add test for this OS!");
         }
 
-        assert_eq!(file.nsteps(), 100);
+        assert_eq!(file.size(), 100);
 
         let mut frame = Frame::new();
         assert!(file.read(&mut frame).is_ok());
@@ -513,7 +513,7 @@ mod test {
         assert_eq!(frame.atom(0).name(), "O");
 
         file.set_cell(&UnitCell::new([30.0, 30.0, 30.0]));
-        assert!(file.read_step(41, &mut frame).is_ok());
+        assert!(file.read_at(41, &mut frame).is_ok());
         let cell = frame.cell().clone();
         assert_eq!(cell.lengths(), [30.0, 30.0, 30.0]);
 
@@ -545,7 +545,7 @@ mod test {
         }
 
         file.set_topology(&topology);
-        assert!(file.read_step(10, &mut frame).is_ok());
+        assert!(file.read_at(10, &mut frame).is_ok());
         assert_eq!(frame.atom(42).name(), "Cs");
 
         let filename = root.join("data").join("topology.xyz");
@@ -622,7 +622,7 @@ X 1 2 3"
             let mut frame_read = Frame::new();
             trajectory_read.read(&mut frame_read).unwrap();
 
-            assert_eq!(trajectory_read.nsteps(), 1);
+            assert_eq!(trajectory_read.size(), 1);
             assert_eq!(frame_read.cell().shape(), CellShape::Orthorhombic);
             assert_eq!(frame_read.size(), 3);
             assert_eq!(frame_read.atom(1).name(), "O");

@@ -49,7 +49,7 @@ impl Match {
     pub fn new(atoms: &[usize]) -> Match {
         assert!(atoms.len() <= 4);
         let size = atoms.len();
-        let mut matches = [usize::max_value(); 4];
+        let mut matches = [usize::MAX; 4];
         for (i, atom) in atoms.iter().enumerate() {
             matches[i] = *atom;
         }
@@ -70,7 +70,7 @@ impl Match {
     /// assert_eq!(iter.next(), Some(&5));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter(&self) -> std::slice::Iter<usize> {
+    pub fn iter(&self) -> std::slice::Iter<'_, usize> {
         self.atoms[..self.len()].iter()
     }
 }

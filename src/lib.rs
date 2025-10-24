@@ -28,6 +28,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc, clippy::must_use_candidate)]
+#![allow(clippy::borrow_as_ptr, clippy::new_without_default)]
 // Allow a few more clippy lints in test mode
 #![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
 // deny(warnings) in doc tests
@@ -84,35 +85,10 @@ pub use self::misc::{formats_list, guess_format, FormatMetadata};
 /// # Example
 /// ```
 /// let version = chemfiles::version();
-/// assert!(version.starts_with("0.10"));
+/// assert!(version.starts_with("0.11"));
 /// ```
 pub fn version() -> String {
     unsafe { strings::from_c(ffi::chfl_version()) }
-}
-
-/// Read configuration data from the file at `path`.
-///
-/// By default, chemfiles reads configuration from any file named
-/// `.chemfiles.toml` in the current directory or any parent directory. This
-/// function can be used to add data from another configuration file. Data from
-/// the new configuration file will overwrite any existing data.
-///
-/// # Errors
-///
-/// This function will fail if there is no file at `path`, or if the file is
-/// incorrectly formatted.
-///
-/// # Example
-/// ```no_run
-/// chemfiles::add_configuration("local-config.toml").unwrap();
-/// // from now on, the data from "local-config.toml" will be used
-/// ```
-pub fn add_configuration<S>(path: S) -> Result<(), Error>
-where
-    S: AsRef<str>,
-{
-    let buffer = strings::to_c(path.as_ref());
-    unsafe { errors::check(ffi::chfl_add_configuration(buffer.as_ptr())) }
 }
 
 #[cfg(test)]
@@ -127,6 +103,6 @@ mod tests {
     #[test]
     fn version() {
         assert!(!crate::version().is_empty());
-        assert!(crate::version().starts_with("0.10"));
+        assert!(crate::version().starts_with("0.11"));
     }
 }

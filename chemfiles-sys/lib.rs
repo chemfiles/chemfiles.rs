@@ -10,12 +10,13 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 #![allow(non_camel_case_types)]
-use std::os::raw::{c_char, c_double, c_void};
+
+use core::ffi::{c_double, c_char, c_void};
 
 // Manual definitions. Edit the bindgen code to make sure this matches the
 // chemfiles.h header
 pub type c_bool = u8;
-pub type chfl_warning_callback = extern fn(*const c_char);
+pub type chfl_warning_callback = extern "C" fn(*const c_char);
 pub type chfl_vector3d = [c_double; 3];
 
 #[repr(C)]
@@ -62,7 +63,6 @@ pub enum chfl_status {
     CHFL_FILE_ERROR = 2,
     CHFL_FORMAT_ERROR = 3,
     CHFL_SELECTION_ERROR = 4,
-    CHFL_CONFIGURATION_ERROR = 5,
     CHFL_OUT_OF_BOUNDS = 6,
     CHFL_PROPERTY_ERROR = 7,
     CHFL_GENERIC_ERROR = 254,
@@ -108,7 +108,6 @@ extern "C" {
     pub fn chfl_last_error() -> *const c_char;
     pub fn chfl_clear_errors() -> chfl_status;
     pub fn chfl_set_warning_callback(callback: chfl_warning_callback) -> chfl_status;
-    pub fn chfl_add_configuration(path: *const c_char) -> chfl_status;
     pub fn chfl_formats_list(metadata: *mut *mut chfl_format_metadata, count: *mut u64) -> chfl_status;
     pub fn chfl_guess_format(path: *const c_char, format: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_free(object: *const c_void) -> c_void;
@@ -205,8 +204,8 @@ extern "C" {
     pub fn chfl_frame_has_velocities(frame: *const CHFL_FRAME, has_velocities: *mut c_bool) -> chfl_status;
     pub fn chfl_frame_set_cell(frame: *mut CHFL_FRAME, cell: *const CHFL_CELL) -> chfl_status;
     pub fn chfl_frame_set_topology(frame: *mut CHFL_FRAME, topology: *const CHFL_TOPOLOGY) -> chfl_status;
-    pub fn chfl_frame_step(frame: *const CHFL_FRAME, step: *mut u64) -> chfl_status;
-    pub fn chfl_frame_set_step(frame: *mut CHFL_FRAME, step: u64) -> chfl_status;
+    pub fn chfl_frame_index(frame: *const CHFL_FRAME, index: *mut u64) -> chfl_status;
+    pub fn chfl_frame_set_index(frame: *mut CHFL_FRAME, index: u64) -> chfl_status;
     pub fn chfl_frame_guess_bonds(frame: *mut CHFL_FRAME) -> chfl_status;
     pub fn chfl_frame_distance(frame: *const CHFL_FRAME, i: u64, j: u64, distance: *mut c_double) -> chfl_status;
     pub fn chfl_frame_angle(frame: *const CHFL_FRAME, i: u64, j: u64, k: u64, angle: *mut c_double) -> chfl_status;
@@ -227,12 +226,12 @@ extern "C" {
     pub fn chfl_trajectory_memory_writer(format: *const c_char) -> *mut CHFL_TRAJECTORY;
     pub fn chfl_trajectory_path(trajectory: *const CHFL_TRAJECTORY, path: *mut c_char, buffsize: u64) -> chfl_status;
     pub fn chfl_trajectory_read(trajectory: *mut CHFL_TRAJECTORY, frame: *mut CHFL_FRAME) -> chfl_status;
-    pub fn chfl_trajectory_read_step(trajectory: *mut CHFL_TRAJECTORY, step: u64, frame: *mut CHFL_FRAME) -> chfl_status;
+    pub fn chfl_trajectory_read_at(trajectory: *mut CHFL_TRAJECTORY, step: u64, frame: *mut CHFL_FRAME) -> chfl_status;
     pub fn chfl_trajectory_write(trajectory: *mut CHFL_TRAJECTORY, frame: *const CHFL_FRAME) -> chfl_status;
     pub fn chfl_trajectory_set_topology(trajectory: *mut CHFL_TRAJECTORY, topology: *const CHFL_TOPOLOGY) -> chfl_status;
     pub fn chfl_trajectory_topology_file(trajectory: *mut CHFL_TRAJECTORY, path: *const c_char, format: *const c_char) -> chfl_status;
     pub fn chfl_trajectory_set_cell(trajectory: *mut CHFL_TRAJECTORY, cell: *const CHFL_CELL) -> chfl_status;
-    pub fn chfl_trajectory_nsteps(trajectory: *mut CHFL_TRAJECTORY, nsteps: *mut u64) -> chfl_status;
+    pub fn chfl_trajectory_size(trajectory: *mut CHFL_TRAJECTORY, size: *mut u64) -> chfl_status;
     pub fn chfl_trajectory_memory_buffer(trajectory: *const CHFL_TRAJECTORY, data: *mut *const c_char, size: *mut u64) -> chfl_status;
     pub fn chfl_trajectory_close(trajectory: *const CHFL_TRAJECTORY) -> c_void;
     pub fn chfl_selection(selection: *const c_char) -> *mut CHFL_SELECTION;

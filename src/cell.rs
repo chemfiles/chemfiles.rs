@@ -2,7 +2,6 @@
 // Copyright (C) 2015-2018 Guillaume Fraux -- BSD licensed
 use std::marker::PhantomData;
 
-#[allow(clippy::wildcard_imports)]
 use chemfiles_sys as ffi;
 
 use crate::errors::{check, check_not_null, check_success, Error};
@@ -65,7 +64,7 @@ pub struct UnitCellRef<'a> {
     marker: PhantomData<&'a UnitCell>,
 }
 
-impl<'a> std::ops::Deref for UnitCellRef<'a> {
+impl std::ops::Deref for UnitCellRef<'_> {
     type Target = UnitCell;
     fn deref(&self) -> &UnitCell {
         &self.inner
@@ -79,14 +78,14 @@ pub struct UnitCellMut<'a> {
     marker: PhantomData<&'a mut UnitCell>,
 }
 
-impl<'a> std::ops::Deref for UnitCellMut<'a> {
+impl std::ops::Deref for UnitCellMut<'_> {
     type Target = UnitCell;
     fn deref(&self) -> &UnitCell {
         &self.inner
     }
 }
 
-impl<'a> std::ops::DerefMut for UnitCellMut<'a> {
+impl std::ops::DerefMut for UnitCellMut<'_> {
     fn deref_mut(&mut self) -> &mut UnitCell {
         &mut self.inner
     }
@@ -501,7 +500,12 @@ mod test {
         assert_eq!(cell.shape(), CellShape::Orthorhombic);
         assert_eq!(cell.lengths(), [10.0, 21.0, 32.0]);
 
-        let result_matrix = [[123.0, 4.08386, 71.7295], [0.0, 233.964, 133.571], [0.0, 0.0, 309.901]];
+        #[rustfmt::skip]
+        let result_matrix = [
+            [ 123.00000,   0.000,   0.000],
+            [   4.08386, 233.964,   0.000],
+            [  71.72950, 133.571, 309.901]
+        ];
         let cell = UnitCell::from_matrix(result_matrix);
 
         assert_eq!(cell.shape(), CellShape::Triclinic);
