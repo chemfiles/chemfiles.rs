@@ -23,7 +23,7 @@ pub struct ResidueRef<'a> {
     marker: PhantomData<&'a Residue>,
 }
 
-impl<'a> std::ops::Deref for ResidueRef<'a> {
+impl std::ops::Deref for ResidueRef<'_> {
     type Target = Residue;
     fn deref(&self) -> &Residue {
         &self.inner
@@ -125,7 +125,7 @@ impl Residue {
     pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
-            check_success(ffi::chfl_residue_atoms_count(self.as_ptr(), &mut size));
+            check_success(ffi::chfl_residue_atoms_count(self.as_ptr(), &raw mut size));
         }
         #[allow(clippy::cast_possible_truncation)]
         return size as usize;
@@ -141,7 +141,7 @@ impl Residue {
     /// ```
     pub fn id(&self) -> Option<i64> {
         let mut resid = 0;
-        let status = unsafe { ffi::chfl_residue_id(self.as_ptr(), &mut resid) };
+        let status = unsafe { ffi::chfl_residue_id(self.as_ptr(), &raw mut resid) };
 
         if status == ffi::chfl_status::CHFL_SUCCESS {
             return Some(resid);
@@ -207,7 +207,7 @@ impl Residue {
     pub fn contains(&self, atom: usize) -> bool {
         let mut inside = 0;
         unsafe {
-            check_success(ffi::chfl_residue_contains(self.as_ptr(), atom as u64, &mut inside));
+            check_success(ffi::chfl_residue_contains(self.as_ptr(), atom as u64, &raw mut inside));
         }
         return inside != 0;
     }
@@ -226,7 +226,7 @@ impl Residue {
     pub fn atoms(&self) -> Vec<usize> {
         let size = self.size();
         let count = size as u64;
-        let mut indices = vec![u64::max_value(); size];
+        let mut indices = vec![u64::MAX; size];
         unsafe {
             check_success(ffi::chfl_residue_atoms(self.as_ptr(), indices.as_mut_ptr(), count));
         }
@@ -302,10 +302,10 @@ impl Residue {
     ///     }
     /// }
     /// ```
-    pub fn properties(&self) -> PropertiesIter {
+    pub fn properties(&self) -> PropertiesIter<'_> {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_residue_properties_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_residue_properties_count(self.as_ptr(), &raw mut count));
         }
 
         #[allow(clippy::cast_possible_truncation)]
