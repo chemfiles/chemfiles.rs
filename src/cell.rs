@@ -65,7 +65,7 @@ pub struct UnitCellRef<'a> {
     marker: PhantomData<&'a UnitCell>,
 }
 
-impl<'a> std::ops::Deref for UnitCellRef<'a> {
+impl std::ops::Deref for UnitCellRef<'_> {
     type Target = UnitCell;
     fn deref(&self) -> &UnitCell {
         &self.inner
@@ -79,14 +79,14 @@ pub struct UnitCellMut<'a> {
     marker: PhantomData<&'a mut UnitCell>,
 }
 
-impl<'a> std::ops::Deref for UnitCellMut<'a> {
+impl std::ops::Deref for UnitCellMut<'_> {
     type Target = UnitCell;
     fn deref(&self) -> &UnitCell {
         &self.inner
     }
 }
 
-impl<'a> std::ops::DerefMut for UnitCellMut<'a> {
+impl std::ops::DerefMut for UnitCellMut<'_> {
     fn deref_mut(&mut self) -> &mut UnitCell {
         &mut self.inner
     }
@@ -361,7 +361,7 @@ impl UnitCell {
     pub fn shape(&self) -> CellShape {
         let mut shape = ffi::chfl_cellshape::CHFL_CELL_INFINITE;
         unsafe {
-            check_success(ffi::chfl_cell_shape(self.as_ptr(), &mut shape));
+            check_success(ffi::chfl_cell_shape(self.as_ptr(), &raw mut shape));
         }
         return CellShape::from(shape);
     }
@@ -397,7 +397,7 @@ impl UnitCell {
     pub fn volume(&self) -> f64 {
         let mut volume = 0.0;
         unsafe {
-            check_success(ffi::chfl_cell_volume(self.as_ptr(), &mut volume));
+            check_success(ffi::chfl_cell_volume(self.as_ptr(), &raw mut volume));
         }
         return volume;
     }

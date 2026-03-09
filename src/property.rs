@@ -57,7 +57,7 @@ impl RawProperty {
     fn get_kind(&self) -> ffi::chfl_property_kind {
         let mut kind = ffi::chfl_property_kind::CHFL_PROPERTY_BOOL;
         unsafe {
-            check_success(ffi::chfl_property_get_kind(self.as_ptr(), &mut kind));
+            check_success(ffi::chfl_property_get_kind(self.as_ptr(), &raw mut kind));
         }
         return kind;
     }
@@ -65,7 +65,7 @@ impl RawProperty {
     fn get_bool(&self) -> Result<bool, Error> {
         let mut value = 0;
         unsafe {
-            check(ffi::chfl_property_get_bool(self.as_ptr(), &mut value))?;
+            check(ffi::chfl_property_get_bool(self.as_ptr(), &raw mut value))?;
         }
         return Ok(value != 0);
     }
@@ -73,7 +73,7 @@ impl RawProperty {
     fn get_double(&self) -> Result<f64, Error> {
         let mut value = 0.0;
         unsafe {
-            check(ffi::chfl_property_get_double(self.as_ptr(), &mut value))?;
+            check(ffi::chfl_property_get_double(self.as_ptr(), &raw mut value))?;
         }
         return Ok(value);
     }
@@ -178,7 +178,7 @@ pub struct PropertiesIter<'a> {
     pub(crate) getter: Box<dyn Fn(&str) -> Property + 'a>,
 }
 
-impl<'a> Iterator for PropertiesIter<'a> {
+impl Iterator for PropertiesIter<'_> {
     type Item = (String, Property);
     fn next(&mut self) -> Option<Self::Item> {
         self.names.next().map(|name| {

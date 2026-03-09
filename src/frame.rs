@@ -98,7 +98,7 @@ impl Frame {
     /// let atom = frame.atom(0);
     /// assert_eq!(atom.name(), "Zn");
     /// ```
-    pub fn atom(&self, index: usize) -> AtomRef {
+    pub fn atom(&self, index: usize) -> AtomRef<'_> {
         unsafe {
             let handle = ffi::chfl_atom_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
@@ -122,7 +122,7 @@ impl Frame {
     /// frame.atom_mut(0).set_name("Fe");
     /// assert_eq!(frame.atom(0).name(), "Fe");
     /// ```
-    pub fn atom_mut(&mut self, index: usize) -> AtomMut {
+    pub fn atom_mut(&mut self, index: usize) -> AtomMut<'_> {
         unsafe {
             let handle = ffi::chfl_atom_from_frame(self.as_mut_ptr(), index as u64);
             Atom::ref_mut_from_ptr(handle)
@@ -143,7 +143,7 @@ impl Frame {
     pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
-            check_success(ffi::chfl_frame_atoms_count(self.as_ptr(), &mut size));
+            check_success(ffi::chfl_frame_atoms_count(self.as_ptr(), &raw mut size));
         }
         #[allow(clippy::cast_possible_truncation)]
         return size as usize;
@@ -337,7 +337,7 @@ impl Frame {
                 self.as_ptr(),
                 i as u64,
                 j as u64,
-                &mut distance,
+                &raw mut distance,
             ));
         }
         return distance;
@@ -366,7 +366,7 @@ impl Frame {
                 i as u64,
                 j as u64,
                 k as u64,
-                &mut angle,
+                &raw mut angle,
             ));
         }
         return angle;
@@ -397,7 +397,7 @@ impl Frame {
                 j as u64,
                 k as u64,
                 m as u64,
-                &mut dihedral,
+                &raw mut dihedral,
             ));
         }
         return dihedral;
@@ -430,7 +430,7 @@ impl Frame {
                 j as u64,
                 k as u64,
                 m as u64,
-                &mut distance,
+                &raw mut distance,
             ));
         }
         return distance;
@@ -454,8 +454,8 @@ impl Frame {
         unsafe {
             check_success(ffi::chfl_frame_positions(
                 self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
-                &mut ptr,
-                &mut natoms,
+                &raw mut ptr,
+                &raw mut natoms,
             ));
         }
 
@@ -486,7 +486,11 @@ impl Frame {
         let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            check_success(ffi::chfl_frame_positions(self.as_mut_ptr(), &mut ptr, &mut natoms));
+            check_success(ffi::chfl_frame_positions(
+                self.as_mut_ptr(),
+                &raw mut ptr,
+                &raw mut natoms,
+            ));
         }
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
@@ -518,8 +522,8 @@ impl Frame {
         unsafe {
             check_success(ffi::chfl_frame_velocities(
                 self.as_mut_ptr_MANUALLY_CHECKING_BORROW(),
-                &mut ptr,
-                &mut natoms,
+                &raw mut ptr,
+                &raw mut natoms,
             ));
         }
         #[allow(clippy::cast_possible_truncation)]
@@ -554,7 +558,11 @@ impl Frame {
         let mut ptr = std::ptr::null_mut();
         let mut natoms = 0;
         unsafe {
-            check_success(ffi::chfl_frame_velocities(self.as_mut_ptr(), &mut ptr, &mut natoms));
+            check_success(ffi::chfl_frame_velocities(
+                self.as_mut_ptr(),
+                &raw mut ptr,
+                &raw mut natoms,
+            ));
         }
         #[allow(clippy::cast_possible_truncation)]
         let size = natoms as usize;
@@ -577,7 +585,7 @@ impl Frame {
     pub fn has_velocities(&self) -> bool {
         let mut res = 0;
         unsafe {
-            check_success(ffi::chfl_frame_has_velocities(self.as_ptr(), &mut res));
+            check_success(ffi::chfl_frame_has_velocities(self.as_ptr(), &raw mut res));
         }
         return res != 0;
     }
@@ -610,7 +618,7 @@ impl Frame {
     /// let cell = frame.cell();
     /// assert_eq!(cell.shape(), CellShape::Infinite);
     /// ```
-    pub fn cell(&self) -> UnitCellRef {
+    pub fn cell(&self) -> UnitCellRef<'_> {
         unsafe {
             let handle = ffi::chfl_cell_from_frame(self.as_mut_ptr_MANUALLY_CHECKING_BORROW());
             UnitCell::ref_from_ptr(handle)
@@ -629,7 +637,7 @@ impl Frame {
     /// frame.cell_mut().set_shape(CellShape::Triclinic).unwrap();
     /// assert_eq!(frame.cell().shape(), CellShape::Triclinic);
     /// ```
-    pub fn cell_mut(&mut self) -> UnitCellMut {
+    pub fn cell_mut(&mut self) -> UnitCellMut<'_> {
         unsafe {
             let handle = ffi::chfl_cell_from_frame(self.as_mut_ptr());
             UnitCell::ref_mut_from_ptr(handle)
@@ -666,7 +674,7 @@ impl Frame {
     /// let topology = frame.topology();
     /// assert_eq!(topology.size(), 42);
     /// ```
-    pub fn topology(&self) -> TopologyRef {
+    pub fn topology(&self) -> TopologyRef<'_> {
         unsafe {
             let handle = ffi::chfl_topology_from_frame(self.as_ptr());
             Topology::ref_from_ptr(handle)
@@ -709,7 +717,7 @@ impl Frame {
     pub fn step(&self) -> usize {
         let mut step = 0;
         unsafe {
-            check_success(ffi::chfl_frame_step(self.as_ptr(), &mut step));
+            check_success(ffi::chfl_frame_step(self.as_ptr(), &raw mut step));
         }
         #[allow(clippy::cast_possible_truncation)]
         return step as usize;
@@ -853,10 +861,10 @@ impl Frame {
     ///     }
     /// }
     /// ```
-    pub fn properties(&self) -> PropertiesIter {
+    pub fn properties(&self) -> PropertiesIter<'_> {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_frame_properties_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_frame_properties_count(self.as_ptr(), &raw mut count));
         }
 
         #[allow(clippy::cast_possible_truncation)]

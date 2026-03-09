@@ -15,7 +15,7 @@ use std::os::raw::{c_char, c_double, c_void};
 // Manual definitions. Edit the bindgen code to make sure this matches the
 // chemfiles.h header
 pub type c_bool = u8;
-pub type chfl_warning_callback = extern fn(*const c_char);
+pub type chfl_warning_callback = extern "C" fn(*const c_char);
 pub type chfl_vector3d = [c_double; 3];
 
 #[repr(C)]

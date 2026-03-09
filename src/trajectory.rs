@@ -353,7 +353,7 @@ impl Trajectory {
     pub fn nsteps(&mut self) -> usize {
         let mut res = 0;
         unsafe {
-            check(ffi::chfl_trajectory_nsteps(self.as_mut_ptr(), &mut res))
+            check(ffi::chfl_trajectory_nsteps(self.as_mut_ptr(), &raw mut res))
                 .expect("failed to get the number of steps in this trajectory");
         }
         #[allow(clippy::cast_possible_truncation)]
@@ -387,7 +387,11 @@ impl Trajectory {
         let mut ptr: *const c_char = std::ptr::null();
         let mut count: u64 = 0;
         let buffer = unsafe {
-            check(ffi::chfl_trajectory_memory_buffer(self.as_ptr(), &mut ptr, &mut count))?;
+            check(ffi::chfl_trajectory_memory_buffer(
+                self.as_ptr(),
+                &raw mut ptr,
+                &raw mut count,
+            ))?;
             std::slice::from_raw_parts(ptr.cast(), count.try_into().expect("failed to convert u64 to usize"))
         };
 
@@ -456,7 +460,7 @@ impl<'data> MemoryTrajectoryReader<'data> {
     }
 }
 
-impl<'a> std::ops::Deref for MemoryTrajectoryReader<'a> {
+impl std::ops::Deref for MemoryTrajectoryReader<'_> {
     type Target = Trajectory;
 
     #[inline]
@@ -465,7 +469,7 @@ impl<'a> std::ops::Deref for MemoryTrajectoryReader<'a> {
     }
 }
 
-impl<'a> std::ops::DerefMut for MemoryTrajectoryReader<'a> {
+impl std::ops::DerefMut for MemoryTrajectoryReader<'_> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner

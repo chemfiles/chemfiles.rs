@@ -31,7 +31,7 @@ pub struct AtomRef<'a> {
     marker: PhantomData<&'a Atom>,
 }
 
-impl<'a> std::ops::Deref for AtomRef<'a> {
+impl std::ops::Deref for AtomRef<'_> {
     type Target = Atom;
     fn deref(&self) -> &Atom {
         &self.inner
@@ -45,14 +45,14 @@ pub struct AtomMut<'a> {
     marker: PhantomData<&'a mut Atom>,
 }
 
-impl<'a> std::ops::Deref for AtomMut<'a> {
+impl std::ops::Deref for AtomMut<'_> {
     type Target = Atom;
     fn deref(&self) -> &Atom {
         &self.inner
     }
 }
 
-impl<'a> std::ops::DerefMut for AtomMut<'a> {
+impl std::ops::DerefMut for AtomMut<'_> {
     fn deref_mut(&mut self) -> &mut Atom {
         &mut self.inner
     }
@@ -142,7 +142,7 @@ impl Atom {
     pub fn mass(&self) -> f64 {
         let mut mass = 0.0;
         unsafe {
-            check_success(ffi::chfl_atom_mass(self.as_ptr(), &mut mass));
+            check_success(ffi::chfl_atom_mass(self.as_ptr(), &raw mut mass));
         }
         return mass;
     }
@@ -174,7 +174,7 @@ impl Atom {
     pub fn charge(&self) -> f64 {
         let mut charge = 0.0;
         unsafe {
-            check_success(ffi::chfl_atom_charge(self.as_ptr(), &mut charge));
+            check_success(ffi::chfl_atom_charge(self.as_ptr(), &raw mut charge));
         }
         return charge;
     }
@@ -285,7 +285,7 @@ impl Atom {
     pub fn vdw_radius(&self) -> f64 {
         let mut radius: f64 = 0.0;
         unsafe {
-            check_success(ffi::chfl_atom_vdw_radius(self.as_ptr(), &mut radius));
+            check_success(ffi::chfl_atom_vdw_radius(self.as_ptr(), &raw mut radius));
         }
         return radius;
     }
@@ -302,7 +302,7 @@ impl Atom {
     pub fn covalent_radius(&self) -> f64 {
         let mut radius: f64 = 0.0;
         unsafe {
-            check_success(ffi::chfl_atom_covalent_radius(self.as_ptr(), &mut radius));
+            check_success(ffi::chfl_atom_covalent_radius(self.as_ptr(), &raw mut radius));
         }
         return radius;
     }
@@ -319,7 +319,7 @@ impl Atom {
     pub fn atomic_number(&self) -> u64 {
         let mut number = 0;
         unsafe {
-            check_success(ffi::chfl_atom_atomic_number(self.as_ptr(), &mut number));
+            check_success(ffi::chfl_atom_atomic_number(self.as_ptr(), &raw mut number));
         }
         return number;
     }
@@ -393,10 +393,10 @@ impl Atom {
     ///     }
     /// }
     /// ```
-    pub fn properties(&self) -> PropertiesIter {
+    pub fn properties(&self) -> PropertiesIter<'_> {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_atom_properties_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_atom_properties_count(self.as_ptr(), &raw mut count));
         }
 
         #[allow(clippy::cast_possible_truncation)]

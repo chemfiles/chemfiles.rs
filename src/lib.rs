@@ -28,6 +28,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::needless_return, clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc, clippy::must_use_candidate)]
+#![allow(clippy::new_without_default)]
 // Allow a few more clippy lints in test mode
 #![cfg_attr(test, allow(clippy::float_cmp, clippy::unreadable_literal, clippy::shadow_unrelated))]
 // deny(warnings) in doc tests

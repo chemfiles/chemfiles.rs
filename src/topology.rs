@@ -77,7 +77,7 @@ pub struct TopologyRef<'a> {
     marker: PhantomData<&'a Topology>,
 }
 
-impl<'a> Deref for TopologyRef<'a> {
+impl Deref for TopologyRef<'_> {
     type Target = Topology;
     fn deref(&self) -> &Topology {
         &self.inner
@@ -168,7 +168,7 @@ impl Topology {
     /// let atom = topology.atom(4);
     /// assert_eq!(atom.name(), "");
     /// ```
-    pub fn atom(&self, index: usize) -> AtomRef {
+    pub fn atom(&self, index: usize) -> AtomRef<'_> {
         unsafe {
             let handle = ffi::chfl_atom_from_topology(self.as_mut_ptr_MANUALLY_CHECKING_BORROW(), index as u64);
             Atom::ref_from_ptr(handle)
@@ -192,7 +192,7 @@ impl Topology {
     /// topology.atom_mut(4).set_name("Fe");
     /// assert_eq!(topology.atom(4).name(), "Fe");
     /// ```
-    pub fn atom_mut(&mut self, index: usize) -> AtomMut {
+    pub fn atom_mut(&mut self, index: usize) -> AtomMut<'_> {
         unsafe {
             let handle = ffi::chfl_atom_from_topology(self.as_mut_ptr(), index as u64);
             Atom::ref_mut_from_ptr(handle)
@@ -213,7 +213,7 @@ impl Topology {
     pub fn size(&self) -> usize {
         let mut size = 0;
         unsafe {
-            check_success(ffi::chfl_topology_atoms_count(self.as_ptr(), &mut size));
+            check_success(ffi::chfl_topology_atoms_count(self.as_ptr(), &raw mut size));
         }
         #[allow(clippy::cast_possible_truncation)]
         return size as usize;
@@ -294,7 +294,7 @@ impl Topology {
     pub fn bonds_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_topology_bonds_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_bonds_count(self.as_ptr(), &raw mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -317,7 +317,7 @@ impl Topology {
     pub fn angles_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_topology_angles_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_angles_count(self.as_ptr(), &raw mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -340,7 +340,7 @@ impl Topology {
     pub fn dihedrals_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_topology_dihedrals_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_dihedrals_count(self.as_ptr(), &raw mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -363,7 +363,7 @@ impl Topology {
     pub fn impropers_count(&self) -> usize {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_topology_impropers_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_impropers_count(self.as_ptr(), &raw mut count));
         }
         #[allow(clippy::cast_possible_truncation)]
         return count as usize;
@@ -385,7 +385,7 @@ impl Topology {
     pub fn bonds(&self) -> Vec<[usize; 2]> {
         let size = self.bonds_count();
         let count = size as u64;
-        let mut bonds = vec![[u64::max_value(); 2]; size];
+        let mut bonds = vec![[u64::MAX; 2]; size];
         unsafe {
             check_success(ffi::chfl_topology_bonds(self.as_ptr(), bonds.as_mut_ptr(), count));
         }
@@ -412,7 +412,7 @@ impl Topology {
     pub fn angles(&self) -> Vec<[usize; 3]> {
         let size = self.angles_count();
         let count = size as u64;
-        let mut angles = vec![[u64::max_value(); 3]; size];
+        let mut angles = vec![[u64::MAX; 3]; size];
         unsafe {
             check_success(ffi::chfl_topology_angles(self.as_ptr(), angles.as_mut_ptr(), count));
         }
@@ -440,7 +440,7 @@ impl Topology {
     pub fn dihedrals(&self) -> Vec<[usize; 4]> {
         let size = self.dihedrals_count();
         let count = size as u64;
-        let mut dihedrals = vec![[u64::max_value(); 4]; size];
+        let mut dihedrals = vec![[u64::MAX; 4]; size];
         unsafe {
             check_success(ffi::chfl_topology_dihedrals(
                 self.as_ptr(),
@@ -479,7 +479,7 @@ impl Topology {
     pub fn impropers(&self) -> Vec<[usize; 4]> {
         let size = self.impropers_count();
         let count = size as u64;
-        let mut impropers = vec![[u64::max_value(); 4]; size];
+        let mut impropers = vec![[u64::MAX; 4]; size];
         unsafe {
             check_success(ffi::chfl_topology_impropers(
                 self.as_ptr(),
@@ -592,7 +592,7 @@ impl Topology {
                 self.as_ptr(),
                 i as u64,
                 j as u64,
-                &mut order,
+                &raw mut order,
             ));
         }
         return order.into();
@@ -671,7 +671,7 @@ impl Topology {
     /// let residue = topology.residue(0).unwrap();
     /// assert_eq!(residue.name(), "water");
     /// ```
-    pub fn residue(&self, index: usize) -> Option<ResidueRef> {
+    pub fn residue(&self, index: usize) -> Option<ResidueRef<'_>> {
         unsafe {
             let handle = ffi::chfl_residue_from_topology(self.as_ptr(), index as u64);
             if handle.is_null() {
@@ -702,7 +702,7 @@ impl Topology {
     ///
     /// assert!(topology.residue_for_atom(6).is_none());
     /// ```
-    pub fn residue_for_atom(&self, index: usize) -> Option<ResidueRef> {
+    pub fn residue_for_atom(&self, index: usize) -> Option<ResidueRef<'_>> {
         let handle = unsafe { ffi::chfl_residue_for_atom(self.as_ptr(), index as u64) };
         if handle.is_null() {
             None
@@ -726,7 +726,7 @@ impl Topology {
     pub fn residues_count(&self) -> u64 {
         let mut count = 0;
         unsafe {
-            check_success(ffi::chfl_topology_residues_count(self.as_ptr(), &mut count));
+            check_success(ffi::chfl_topology_residues_count(self.as_ptr(), &raw mut count));
         }
         return count;
     }
@@ -774,7 +774,7 @@ impl Topology {
                 self.as_ptr(),
                 first.as_ptr(),
                 second.as_ptr(),
-                &mut linked,
+                &raw mut linked,
             ));
         }
         return linked != 0;

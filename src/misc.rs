@@ -87,7 +87,7 @@ pub fn formats_list() -> Vec<FormatMetadata> {
     let mut formats = std::ptr::null_mut();
     let mut count: u64 = 0;
     let formats_slice = unsafe {
-        check_success(ffi::chfl_formats_list(&mut formats, &mut count));
+        check_success(ffi::chfl_formats_list(&raw mut formats, &raw mut count));
         std::slice::from_raw_parts(formats, count.try_into().expect("failed to convert u64 to usize"))
     };
     let formats_vec = formats_slice.iter().map(FormatMetadata::from_raw).collect();
